@@ -1,0 +1,4 @@
+Item-type icons go here, expects 64x64 pixel images with filename `[TYPE_ID]_64.png` such as `648_64.png` for type_id 648.
+
+These can be obtained from the EVE Online image-export-collection: https://developers.eveonline.com/resource ("Types.zip")
+If absent, images will fallback to the Image Service provided by CCP, which at time of writing serves some images incorrectly.

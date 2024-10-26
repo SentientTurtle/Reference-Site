@@ -1,0 +1,27 @@
+# Automatically downloaded or generated.
+# Expected files: "sqlite-latest.sqlite" (Downloaded using SDEUtils)
+*.sqlite
+
+# Contains native libraries for sqlite4java
+/native/*.so
+/native/*.dylib
+/native/*.dll
+
+# Config file; Will be auto-generated on first run if missing
+/nee.properties
+
+# Scratch space for EVE Online files; Not included in this repository
+/rsc/EVE/NOT_IN_REPO/
+# Icons themselves are not included in the repo, a readme file elaborating on the format is.
+/rsc/EVE/type_icons/*.png
+
+# Output
+*.zip
+
+# IDE & build output
+/.gradle/
+/.idea/
+/out/
+/gradle/
+/gradlew
+/gradlew.bat

@@ -1,0 +1,112 @@
+package net.sentientturtle.nee.components;
+
+import net.sentientturtle.html.Element;
+import net.sentientturtle.html.HTML;
+import net.sentientturtle.html.context.HtmlContext;
+import net.sentientturtle.html.Component;
+import net.sentientturtle.nee.data.DataSupplier;
+import net.sentientturtle.nee.data.datatypes.Type;
+
+import java.util.Map;
+
+import static net.sentientturtle.html.HTML.*;
+
+/**
+ * Required skills to use a {@link Type}
+ * <br>
+ * Skill level is displayed with a roman numeral and a dot indicator (conforming to in-game UI)
+ */
+public class TypeSkills extends Component {
+    private final Type type;
+    private static final int[] skillAttributes = {182, 183, 184, 1285, 1289, 1290};
+    private static final int[] levelAttributes = {277, 278, 279, 1286, 1287, 1288};
+
+    public TypeSkills(Type type) {
+        super("type_skills colour_theme_minor");
+        this.type = type;
+    }
+
+    @Override
+    protected HTML[] getContent(HtmlContext context) {
+        Element list = DIV("type_skills_list font_text");
+        fetchSkills(type.typeID, context.data, list, 1);
+        return new HTML[]{
+            HEADER("type_skills_title font_header").text("Required skills"),
+            list
+        };
+    }
+
+    @Override
+    protected String getCSS() {
+        return """
+            .type_skills {
+                padding: 0.5rem;
+            }
+            
+            .type_skills_title {
+                margin-bottom: 5px;
+            }
+            
+            .type_skills_list {
+                margin-left: -10px;
+            }
+            
+            .type_skills_row {
+                width: 100%;
+                display: flex;
+            }
+            
+            .type_skills_spacer {
+                margin-left: 10px;
+                padding-left: 5px;
+                border: 1px none #525252;
+                border-left-style: solid;
+            }
+            
+            .type_skills_text {
+                flex-grow: 1;
+            }
+            
+            .type_skills_level {
+                float: right;
+                white-space: pre;
+                display: inline;
+            }
+            
+            .type_skills_indicator {
+                user-select: none;
+            }
+            """;
+    }
+
+    private void fetchSkills(int typeID, DataSupplier dataSupplier, Element parent, int indent) {
+        Map<Integer, Map<Integer, Double>> attributeValues = dataSupplier.getTypeAttributes();
+
+        for (int i = 0; i < skillAttributes.length; i++) {
+            Double skill = attributeValues.get(typeID).get(skillAttributes[i]);
+            if (skill != null) {
+                Element row = DIV("type_skills_row");
+                parent.content(row);
+
+                int level = attributeValues.get(typeID).get(levelAttributes[i]).intValue();
+                if (level < 0 || level > 5) throw new RuntimeException("Invalid skill level: " + level);
+
+                String levelBoxes = "■".repeat(level) + "□".repeat(5 - level);
+
+                row.content(
+                    HTML.repeat(indent, DIV("type_skills_spacer")),
+                    SPAN("type_skills_text").content(
+                        dataSupplier.format_with_unit(skill, 116), // 116 = typeID unit
+                        SPAN("type_skills_level font_roman_numeral").text(" " + level + " ").content(
+                            SPAN("type_skills_indicator").text(levelBoxes)
+                        )
+                    )
+                );
+
+                if (attributeValues.get(skill.intValue()).containsKey(182)) {
+                    fetchSkills(skill.intValue(), dataSupplier, parent, indent + 1);
+                }
+            }
+        }
+    }
+}
