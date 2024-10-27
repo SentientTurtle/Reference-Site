@@ -41,9 +41,9 @@ public abstract class AttributeList extends Component {
                 Element icon;
                 Integer iconID = attributeMap.get(entry.attributeID).iconID;
                 if (iconID != null) {
-                    icon = IMG(ResourceLocation.iconOfIconID(iconID), null, 32);
+                    icon = IMG(ResourceLocation.iconOfIconID(iconID), null, 32).className("attribute_list_icon");
                 } else {
-                    icon = DIV().style("width: 32px");
+                    icon = DIV("attribute_list_icon");
                 }
 
                 double value;
@@ -102,7 +102,13 @@ public abstract class AttributeList extends Component {
             .attribute_list_span {
                 display: flex;
                 align-items: center;
-            }""";
+            }
+            
+            .attribute_list_icon {
+                width: 2rem;
+                height: 2rem;
+            }
+            """;
     }
 
     public static final class Entry {

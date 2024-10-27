@@ -41,7 +41,7 @@ public abstract class Page implements Document, HTML {
     private HTML getHeader(HtmlContext context) {
         return DIV().id(context.ids.tryID("header")).content(
             SPAN("header_span").content(
-                IMG(ResourceLocation.file("bookicon.png"), null, 64),
+                IMG(ResourceLocation.file("bookicon.png"), null, 64).className("header_icon"),
                 TEXT_BOLD().className("font_header").id(context.ids.tryID("header_text")).content(new PageLink(new IndexPage()))
             ),
             SPAN("header_span header_search").content(
@@ -129,7 +129,6 @@ public abstract class Page implements Document, HTML {
 
     private static final String PAGE_CSS = """
         html {
-            font-size: 16px;
             margin: 0;
             padding: 0;
             height: 100%;
@@ -157,7 +156,7 @@ public abstract class Page implements Document, HTML {
             width: 100%;
             display: flex;
             justify-content: space-between;
-            border-bottom: 1px solid var(--colour-theme-minor-border);
+            border-bottom: var(--border-size) solid var(--colour-theme-minor-border);
         }
         
         #header_text {
@@ -167,6 +166,11 @@ public abstract class Page implements Document, HTML {
         .header_span {
             display: flex;
             align-items: center;
+        }
+        
+        .header_icon {
+            width: 4rem;
+            height: 4rem;
         }
         
         .header_search {
@@ -195,7 +199,7 @@ public abstract class Page implements Document, HTML {
         
         .footer_text {
             font-size: 0.7rem;
-            padding: 20px;
+            padding: 1.5rem;
         }
         """;
 
@@ -215,6 +219,20 @@ public abstract class Page implements Document, HTML {
             --colour-theme-highlight-border: #6A7ED1;
         
             image-rendering: auto;
+            font-size: 100%;
+        }
+        
+        @media (min-width: 2560px) {
+            :root {
+                font-size: 125%;
+            }
+        }
+        
+        
+        @media (min-width: 3840px) {
+            :root {
+                font-size: 200%;
+            }
         }
         
         /* Colour classes */

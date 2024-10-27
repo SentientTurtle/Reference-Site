@@ -29,7 +29,7 @@ public class Title extends Component {
     protected HTML[] getContent(HtmlContext context) {
         if (icon != null) {
             return new HTML[]{
-                IMG(this.icon, null, 64),
+                IMG(this.icon, null, 64).className("title_icon"),
                 HTML.TEXT_BOLD(this.text).className("font_header title_text")
             };
         } else {
@@ -46,6 +46,11 @@ public class Title extends Component {
                 min-height: 4rem;
                 display: flex;
                 align-items: center;
+            }
+            
+            .title_icon {
+                width: 4rem;
+                height: 4rem;
             }
             
             .title_text {

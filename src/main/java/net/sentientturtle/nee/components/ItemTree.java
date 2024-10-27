@@ -54,7 +54,7 @@ public class ItemTree extends Component {
                     ResourceLocation icon = page.getIcon();
                     if (icon != null) {
                         shipContainer.content(DIV("item_tree_entry colour_theme").content(
-                            IMG(icon, null, 32),
+                            IMG(icon, null, 32).className("item_tree_icon"),
                             new PageLink(page)
                         ));
                     } else {
@@ -134,6 +134,11 @@ public class ItemTree extends Component {
                 align-items: center;
                 gap: 0.5rem;
                 padding: 0.5rem;
+            }
+            
+            .item_tree_icon {
+                width: 2rem;
+                height: 2rem;
             }
             """;
     }

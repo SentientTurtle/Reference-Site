@@ -112,6 +112,11 @@ public class ShipTreePage extends Page {
                 gap: 0.5rem;
                 padding: 0.5rem;
             }
+            
+            .ship_tree_icon {
+                width: 4rem;
+                height: 4rem;
+            }
             """;
     }
 
@@ -224,7 +229,7 @@ public class ShipTreePage extends Page {
                                 groupRow.content(shipContainer);
                             }
                             shipContainer.content(DIV("ship_tree_entry colour_" + themeName).content(
-                                IMG(ResourceLocation.iconOfTypeID(typeArray[k].typeID), null, 64),
+                                IMG(ResourceLocation.iconOfTypeID(typeArray[k].typeID), null, 64).className("ship_tree_icon"),
                                 new PageLink(new TypePage(typeArray[k]))
                             ));
                         }
@@ -252,75 +257,75 @@ public class ShipTreePage extends Page {
 
         var content = new TabBox(List.of(
             new TabBox.Tab(
-                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/amarr.png"), "Amarr Empire", 64).title("Amarr Empire"),
+                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/amarr.png"), "Amarr Empire", 64).title("Amarr Empire").className("ship_tree_icon"),
                 getTree(context.data, shipTypeIDs, "Amarr Empire", "amarr", AMARR_SHIPS)
             ),
             new TabBox.Tab(
-                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/caldari.png"), "Caldari State", 64).title("Caldari State"),
+                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/caldari.png"), "Caldari State", 64).title("Caldari State").className("ship_tree_icon"),
                 getTree(context.data, shipTypeIDs, "Caldari State", "caldari", CALDARI_SHIPS)
             ),
             new TabBox.Tab(
-                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/gallente.png"), "Gallente Federation", 64).title("Gallente Federation"),
+                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/gallente.png"), "Gallente Federation", 64).title("Gallente Federation").className("ship_tree_icon"),
                 getTree(context.data, shipTypeIDs, "Gallente Federatopn", "gallente", GALLENTE_SHIPS)
             ),
             new TabBox.Tab(
-                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/minmatar.png"), "Minmatar Republic", 64).title("Minmatar Republic"),
+                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/minmatar.png"), "Minmatar Republic", 64).title("Minmatar Republic").className("ship_tree_icon"),
                 getTree(context.data, shipTypeIDs, "Minmatar Republic", "minmatar", MINMATAR_SHIPS)
             ),
             new TabBox.Tab(
-                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/ore.png"), "Outer Ring Excavations", 64).title("Outer Ring Excavations"),
+                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/ore.png"), "Outer Ring Excavations", 64).title("Outer Ring Excavations").className("ship_tree_icon"),
                 getTree(context.data, shipTypeIDs, "Outer Ring Excavations", "ore", ORE_SHIPS)
             ),
             new TabBox.Tab(
-                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/guristas.png"), "Guristas Pirates", 64).title("Guristas Pirates"),
+                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/guristas.png"), "Guristas Pirates", 64).title("Guristas Pirates").className("ship_tree_icon"),
                 getTree(context.data, shipTypeIDs, "Guristas Pirates", "guristas", GURISTAS_SHIPS)
             ),
             new TabBox.Tab(
-                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/sansha.png"), "Sansha's Nation", 64).title("Sansha's Nation"),
+                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/sansha.png"), "Sansha's Nation", 64).title("Sansha's Nation").className("ship_tree_icon"),
                 getTree(context.data, shipTypeIDs, "Sansha's Nation", "sansha", SANSHA_SHIPS)
             ),
             new TabBox.Tab(
-                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/bloodraiders.png"), "Blood Raider Covenant", 64).title("Blood Raider Covenant"),
+                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/bloodraiders.png"), "Blood Raider Covenant", 64).title("Blood Raider Covenant").className("ship_tree_icon"),
                 getTree(context.data, shipTypeIDs, "Blood Raider Covenant", "bloodraiders", BLOODRAIDER_SHIPS)
             ),
             new TabBox.Tab(
-                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/angel.png"), "Angel Cartel", 64).title("Angel Cartel"),
+                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/angel.png"), "Angel Cartel", 64).title("Angel Cartel").className("ship_tree_icon"),
                 getTree(context.data, shipTypeIDs, "Angel Cartel", "angelcartel", ANGELCARTEL_SHIPS)
             ),
             new TabBox.Tab(
-                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/serpentis.png"), "Serpentis", 64).title("Serpentis"),
+                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/serpentis.png"), "Serpentis", 64).title("Serpentis").className("ship_tree_icon"),
                 getTree(context.data, shipTypeIDs, "Serpentis", "serpentis", SERPENTIS_SHIPS)
             ),
             new TabBox.Tab(
-                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/soe.png"), "Servant Sisters of EVE", 64).title("Sisters of EVE"),
+                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/soe.png"), "Servant Sisters of EVE", 64).title("Sisters of EVE").className("ship_tree_icon"),
                 getTree(context.data, shipTypeIDs, "Servant Sisters of EVE", "soe", SOE_SHIPS)
             ),
             new TabBox.Tab(
-                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/mordus.png"), "Mordu's Legion", 64).title("Mordu's Legion"),
+                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/mordus.png"), "Mordu's Legion", 64).title("Mordu's Legion").className("ship_tree_icon"),
                 getTree(context.data, shipTypeIDs, "Mordu's Legion", "mordus", MORDUS_SHIPS)
             ),
             new TabBox.Tab(
-                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/triglaviancollective.png"), "Triglavian Collective", 64).title("Triglavian Collective"),
+                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/triglaviancollective.png"), "Triglavian Collective", 64).title("Triglavian Collective").className("ship_tree_icon"),
                 getTree(context.data, shipTypeIDs, "Triglavian Collective", "triglavian", TRIGLAVIAN_SHIPS)
             ),
             new TabBox.Tab(
-                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/edencom.png"), "EDENCOM", 64).title("EDENCOM"),
+                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/edencom.png"), "EDENCOM", 64).title("EDENCOM").className("ship_tree_icon"),
                 getTree(context.data, shipTypeIDs, "EDENCOM", "edencom", EDENCOM_SHIPS)
             ),
             new TabBox.Tab(
-                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/concord.png"), "CONCORD Assembly", 64).title("CONCORD Assembly"),
+                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/concord.png"), "CONCORD Assembly", 64).title("CONCORD Assembly").className("ship_tree_icon"),
                 getTree(context.data, shipTypeIDs, "CONCORD Assembly", "concord", CONCORD_SHIPS)
             ),
             new TabBox.Tab(
-                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/soct.png"), "Society of Conscious Thought", 64).title("Society of Conscious Thought"),
+                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/soct.png"), "Society of Conscious Thought", 64).title("Society of Conscious Thought").className("ship_tree_icon"),
                 getTree(context.data, shipTypeIDs, "Society of Conscious Thought", "sotc", SOCT_SHIPS)
             ),
             new TabBox.Tab(
-                IMG(ResourceLocation.iconOfIconID(21065), "Alliance Tournament Prizes", 64).title("Alliance Tournament"),
+                IMG(ResourceLocation.iconOfIconID(21065), "Alliance Tournament Prizes", 64).title("Alliance Tournament").className("ship_tree_icon"),
                 getTree(context.data, shipTypeIDs, "Alliance Tournament Prizes", "theme", TOURNAMENT_SHIPS)
             ),
             new TabBox.Tab(
-                IMG(ResourceLocation.iconOfIconID(1443), "Special Ships", 64).title("Special Ships"),
+                IMG(ResourceLocation.iconOfIconID(1443), "Special Ships", 64).title("Special Ships").className("ship_tree_icon"),
                 getTree(context.data, shipTypeIDs, "Special Ships", "theme", SPECIAL_SHIPS)
             )
         ));

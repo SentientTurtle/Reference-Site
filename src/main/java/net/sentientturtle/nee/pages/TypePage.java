@@ -51,7 +51,7 @@ public class TypePage extends Page {
     protected @Nullable String getCSS(HtmlContext context) {
         return """
             .type_page_column {
-                width: calc(32rem + 2px); /* 512px width + 2px for borders */
+                width: calc(32rem + (2 * var(--border-size))));
                 display: flex;
                 flex-direction: column;
                 gap: 0.5rem;

@@ -30,7 +30,7 @@ public class MapList extends Component {
             DIV("map_list_list font_text").content(   // TODO: Test what text copied out of browser does formatting-wise; Replace with table if copied text is not tabular
                 mappable.getConstituents(context.data).map(entry ->
                     DIV("map_list_entry").content(
-                        (entry.getIcon() != null) ? IMG(entry.getIcon(), null, 64) : DIV(),
+                        (entry.getIcon() != null) ? IMG(entry.getIcon(), null, 64).className("map_list_icon") : DIV("map_list_icon"),
                         SPAN("map_list_link").content(new PageLink(new MapPage(entry)))
                     )
                 )
@@ -56,6 +56,11 @@ public class MapList extends Component {
             
             .map_list_entry {
               padding-top: 0.5rem;
+            }
+            
+            .map_list_icon {
+                width: 4rem;
+                height: 4rem;
             }
             
             .map_list_link {

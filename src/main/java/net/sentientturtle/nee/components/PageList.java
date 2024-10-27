@@ -28,7 +28,7 @@ public class PageList extends Component {
             DIV("page_list_list font_text").content(
                 Arrays.stream(targetPages).map(page ->
                     DIV("page_list_entry").content(
-                        (page.getIcon() != null) ? IMG(page.getIcon(), null, 32) : DIV().attribute("style", "width: 32px;"),
+                        (page.getIcon() != null) ? IMG(page.getIcon(), null, 32).className("page_list_icon") : DIV("page_list_icon"),
                         new PageLink(page).className("page_list_type")
                     )
                 )
@@ -48,12 +48,13 @@ public class PageList extends Component {
                 margin-left: 1rem;
             }
             
-            .page_list_list {
-            
-            }
-            
             .page_list_entry {
                 display: flex;
+                height: 2rem;
+            }
+            
+            .page_list_icon {
+                width: 2rem;
                 height: 2rem;
             }
             

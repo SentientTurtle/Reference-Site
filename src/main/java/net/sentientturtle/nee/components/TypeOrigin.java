@@ -34,7 +34,7 @@ public class TypeOrigin extends Component {
                 .stream()
                 .flatMap(activity -> Stream.of(
                     DIV("type_origin_blueprint font_header").content(
-                        IMG(ResourceLocation.iconOfTypeID(activity.bpTypeID), null, 64),
+                        IMG(ResourceLocation.iconOfTypeID(activity.bpTypeID), null, 64).className("type_origin_icon"),
                         new PageLink(new TypePage(context.data.getTypes().get(activity.bpTypeID))).className("type_origin_link"),
                         TEXT(" ("), TEXT(context.data.getIndustryActivityTypes().get(activity.activityID).activityName), TEXT(")")
                     )
@@ -56,6 +56,11 @@ public class TypeOrigin extends Component {
                 display: flex;
                 align-items: center;
                 margin-top: 0.5rem;
+            }
+            
+            .type_origin_icon {
+                width: 4rem;
+                height: 4rem;
             }
             
             .type_origin_link {

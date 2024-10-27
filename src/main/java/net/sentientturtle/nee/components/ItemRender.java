@@ -35,9 +35,10 @@ public class ItemRender extends Component {
     protected String getCSS() {
         return """            
             .item_render img {
-              display: block;
-              margin: 0 auto;
-              width: 32rem;
+                display: block;
+                margin: 0 auto;
+                width: 32rem;
+                height: 32rem;
             }""";
     }
 }

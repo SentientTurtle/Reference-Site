@@ -97,11 +97,12 @@ public abstract class ShipHealth extends Component {
             }
             .ship_health_table {
                 width: 100%;
+                margin-top: 0.5rem;
             }
             
-            .ship_health_icon {
+            .ship_health_icon > img {
                 width: 2rem;
-                margin-top: 0.5rem;
+                height: 2rem;
             }
             
             .ship_health_text_td {

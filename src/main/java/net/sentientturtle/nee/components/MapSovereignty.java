@@ -33,7 +33,7 @@ public class MapSovereignty extends Component {
             return new HTML[]{
                 DIV("font_header").text("Sovereignty"),
                 DIV("map_sovereignty_faction").content(
-                    IMG(ResourceLocation.iconOfCorpID(corporationID), null, 64),
+                    IMG(ResourceLocation.iconOfCorpID(corporationID), null, 64).className("map_sovereignty_icon"),
                     TEXT_BOLD(faction.factionName).className("font_header map_sovereignty_text")
                 )
             };
@@ -58,6 +58,11 @@ public class MapSovereignty extends Component {
                 .map_sovereignty_faction {
                   display: flex;
                   align-items: center;
+                }
+                
+                .map_sovereignty_icon {
+                    width: 4rem;
+                    height: 4rem;
                 }
                 
                 .map_sovereignty_text {

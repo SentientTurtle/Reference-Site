@@ -107,13 +107,13 @@ public class ShipFitting extends Component {
             stat_table.content(TR().content(
                 TD().content(
                     SPAN("ship_fitting_span").content(
-                        IMG(ResourceLocation.iconOfIconID(1405), null, 32),
+                        IMG(ResourceLocation.iconOfIconID(1405), null, 32).className("ship_fitting_icon"),
                         TEXT("CPU Output: "), context.data.format_with_unit(cpuOutput, context.data.getAttributes().get(48).unitID)
                     )
                 ),
                 TD().content(
                     SPAN("ship_fitting_span").content(
-                        IMG(ResourceLocation.iconOfIconID(1400), null, 32),
+                        IMG(ResourceLocation.iconOfIconID(1400), null, 32).className("ship_fitting_icon"),
                         TEXT("Powergrid output: "), context.data.format_with_unit(powerGrid, context.data.getAttributes().get(11).unitID)
                     )
                 )
@@ -124,13 +124,13 @@ public class ShipFitting extends Component {
             stat_table.content(TR().content(
                 TD().content(
                     SPAN("ship_fitting_span").content(
-                        IMG(ResourceLocation.iconOfIconID(1668), null, 32),
+                        IMG(ResourceLocation.iconOfIconID(1668), null, 32).className("ship_fitting_icon"),
                         TEXT("Capacitor capacity: "), context.data.format_with_unit(capacitorCapacity, context.data.getAttributes().get(482).unitID)
                     )
                 ),
                 TD().content(
                     SPAN("ship_fitting_span").content(
-                        IMG(ResourceLocation.iconOfIconID(1392), null, 32),
+                        IMG(ResourceLocation.iconOfIconID(1392), null, 32).className("ship_fitting_icon"),
                         TEXT("Capacitor recharge: "), context.data.format_with_unit(capacitorRecharge, context.data.getAttributes().get(55).unitID)
                     )
                 )
@@ -140,7 +140,7 @@ public class ShipFitting extends Component {
             stat_table.content(TR().content(
                 TD().content(
                     SPAN("ship_fitting_span").content(
-                        IMG(ResourceLocation.iconOfIconID(1390), null, 32),
+                        IMG(ResourceLocation.iconOfIconID(1390), null, 32).className("ship_fitting_icon"),
                         TEXT("Signature radius: "), context.data.format_with_unit(signatureRadius, context.data.getAttributes().get(552).unitID)
                     )
                 )
@@ -196,6 +196,8 @@ public class ShipFitting extends Component {
             
             .ship_fitting_icon {
                 display: inline;
+                width: 2rem;
+                height: 2rem;
             }""";
     }
 }

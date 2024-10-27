@@ -80,6 +80,11 @@ public class TypeAttributes extends Component {
             
             .type_attributes_icon {
                 width: 2rem;
+            }
+            
+            .type_attributes_icon > img {
+                width: 2rem;
+                height: 2rem;
             }""";
     }
 }
