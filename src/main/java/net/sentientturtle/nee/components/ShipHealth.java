@@ -95,30 +95,25 @@ public abstract class ShipHealth extends Component {
             .ship_health {
                 padding: 0.5rem;
             }
-            
-            .ship_health_title {
-                font-size: 1.5em;
-                padding: 5px;
-            }
-            
             .ship_health_table {
                 width: 100%;
             }
             
             .ship_health_icon {
-                width: 32px;
+                width: 2rem;
+                margin-top: 0.5rem;
             }
             
             .ship_health_text_td {
-                padding-left: 10px;
-                padding-right: 10px;
+                padding-left: 1rem;
+                padding-right: 1rem;
                 white-space: nowrap;
             }
             
             .ship_health_bar {
-                height: 24px;
+                height: 1.5rem;
                 width: 100%;
-                padding: 5px;
+                padding: 0.25rem;
             }
             
             .ship_health_resist_bg {

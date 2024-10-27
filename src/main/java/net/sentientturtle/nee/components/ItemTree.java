@@ -95,7 +95,7 @@ public class ItemTree extends Component {
             }
             
             .item_tree_header_border {
-                padding: 1px;
+                padding: var(--border-size);
                 font-size: 1.5rem;
                 margin-top: 1rem;
             }

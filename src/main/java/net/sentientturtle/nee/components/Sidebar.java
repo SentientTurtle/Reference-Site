@@ -44,12 +44,11 @@ public class Sidebar extends Component {
                 width: 11rem;
                 height: 2rem;
                 background: var(--colour-theme-border);
-                padding: 1px;
+                padding: var(--border-size);
             }
             
             .sidebar_button_border:hover {
                 background: var(--colour-theme-highlight-border);
-                box-shadow: 10px 0 0;
             }
             
             .sidebar_button_border:hover > .sidebar_button {

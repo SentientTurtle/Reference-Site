@@ -33,15 +33,11 @@ public class ItemRender extends Component {
 
     @Override
     protected String getCSS() {
-        return """
-            .item_render {
-                border: none;
-            }
-            
+        return """            
             .item_render img {
               display: block;
               margin: 0 auto;
-              max-width: 100%;
+              width: 32rem;
             }""";
     }
 }

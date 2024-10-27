@@ -52,7 +52,7 @@ public class MapSovereignty extends Component {
         return
             """
                 .map_sovereignty {
-                  padding: 1em;
+                  padding: 1rem;
                 }
                 
                 .map_sovereignty_faction {
@@ -61,8 +61,8 @@ public class MapSovereignty extends Component {
                 }
                 
                 .map_sovereignty_text {
-                  font-size: 1.5em;
-                  margin-left: 10px;
+                  font-size: 1.5rem;
+                  margin-left: 1rem;
                 }""";
     }
 }

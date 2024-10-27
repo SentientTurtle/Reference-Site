@@ -52,7 +52,7 @@ public class ShipFitting extends Component {
         boolean showCapacitor = capacitorCapacity != 0.0;
         boolean showSignature = signatureRadius != 0.0;
 
-        var slot_table = TABLE("ship_fitting_table");
+        var slot_table = TABLE("ship_fitting_table ship_fitting_table_slots");
         var stat_table = TABLE("ship_fitting_table");
 
         if (showTurrets) {
@@ -180,8 +180,13 @@ public class ShipFitting extends Component {
                 border-collapse: collapse;
             }
             
+            .ship_fitting_table_slots {
+                margin-top: 0.5rem;
+                border-bottom: var(--border-size) solid var(--colour-theme-minor-border);
+            }
+            
             .ship_fitting_table tr:not(:first-child) {
-                border-top: 1px solid var(--colour-theme-minor-border);
+                border-top: var(--border-size) solid var(--colour-theme-minor-border);
             }
             
             .ship_fitting_span {

@@ -92,10 +92,11 @@ public abstract class AttributeList extends Component {
             .attribute_list_table {
                 width: 100%;
                 border-collapse: collapse;
+                margin-top: 0.5rem;
             }
             
             .attribute_list_table tr:not(:first-child) {
-                border-top: 1px solid var(--colour-theme-minor-border);
+                border-top: var(--border-size) solid var(--colour-theme-minor-border);
             }
             
             .attribute_list_span {

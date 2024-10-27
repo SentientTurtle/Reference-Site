@@ -61,13 +61,17 @@ public class TypeVariants extends Component {
                 padding: 0.5rem;
             }
             
+            .type_variants_table {
+                margin-top: 0.5rem;
+            }
+            
             .type_variants_type {
-                font-size: 1.25em;
-                margin: 5px;
+                font-size: 1.25rem;
+                margin: 0.5rem;
             }
             
             .type_variants_td {
-                padding-top: 5px;
+                padding-top: 0.5rem;
             }""";
     }
 }

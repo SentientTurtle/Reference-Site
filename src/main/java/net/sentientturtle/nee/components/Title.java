@@ -43,14 +43,14 @@ public class Title extends Component {
     protected String getCSS() {
         return """
             .title {
-                min-height: 64px;
+                min-height: 4rem;
                 display: flex;
                 align-items: center;
             }
             
             .title_text {
-                font-size: 1.5em;
-                margin-inline: 10px;
+                font-size: 1.5rem;
+                margin-inline: 0.5rem;
             }""";
     }
 }

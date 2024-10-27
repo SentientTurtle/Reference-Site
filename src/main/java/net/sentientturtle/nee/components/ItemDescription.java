@@ -36,7 +36,7 @@ public class ItemDescription extends Component {
             .item_description_text {
               padding: 0.5rem;
               font-style: italic;
-              font-size: 0.9em;
+              font-size: 0.9rem;
             }""";
     }
 }

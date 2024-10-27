@@ -44,11 +44,7 @@ public class TypeSkills extends Component {
             }
             
             .type_skills_title {
-                margin-bottom: 5px;
-            }
-            
-            .type_skills_list {
-                margin-left: -10px;
+                margin-bottom: 0.5rem;
             }
             
             .type_skills_row {
@@ -57,8 +53,7 @@ public class TypeSkills extends Component {
             }
             
             .type_skills_spacer {
-                margin-left: 10px;
-                padding-left: 5px;
+                padding-left: 0.5rem;
                 border: 1px none #525252;
                 border-left-style: solid;
             }

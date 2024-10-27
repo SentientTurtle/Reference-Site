@@ -153,7 +153,7 @@ public abstract class Page implements Document, HTML {
         
         #header {
             grid-area: 1 / 1 / 2 / 3;
-            height: 64px;
+            height: 4rem;
             width: 100%;
             display: flex;
             justify-content: space-between;
@@ -161,7 +161,7 @@ public abstract class Page implements Document, HTML {
         }
         
         #header_text {
-            font-size: 2.25em;
+            font-size: 2.25rem;
         }
         
         .header_span {
@@ -170,7 +170,7 @@ public abstract class Page implements Document, HTML {
         }
         
         .header_search {
-            margin-right: 1em;
+            margin-right: 1rem;
         }
         
         #sidebar {
@@ -194,13 +194,15 @@ public abstract class Page implements Document, HTML {
         }
         
         .footer_text {
-            font-size: 0.7em;
+            font-size: 0.7rem;
             padding: 20px;
         }
         """;
 
     private static final String GLOBAL_CSS = """        
         :root {
+            --border-size: 1px;
+        
             --colour-text: #bbbbbb;
         
             --colour-theme-bg: #191D2E;
@@ -211,6 +213,8 @@ public abstract class Page implements Document, HTML {
             --colour-theme-major-border: #5C70C3;
             --colour-theme-highlight-bg: #48537A;
             --colour-theme-highlight-border: #6A7ED1;
+        
+            image-rendering: auto;
         }
         
         /* Colour classes */

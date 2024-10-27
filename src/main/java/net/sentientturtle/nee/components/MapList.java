@@ -46,8 +46,8 @@ public class MapList extends Component {
             }
             
             .map_list_title {
-              font-size: 1.75em;
-              margin-left: 10px;
+              font-size: 1.75rem;
+              margin-left: 1rem;
             }
             
             .map_list_list {
@@ -55,12 +55,12 @@ public class MapList extends Component {
             }
             
             .map_list_entry {
-              padding-top: 5px;
+              padding-top: 0.5rem;
             }
             
             .map_list_link {
-              font-size: 1.25em;
-              margin: 5px;
+              font-size: 1.25rem;
+              margin: 0.5rem;
             }""";
     }
 }

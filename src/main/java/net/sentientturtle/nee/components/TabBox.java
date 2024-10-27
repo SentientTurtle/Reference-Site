@@ -71,25 +71,25 @@ public class TabBox extends Component {
             .tab_box_button {
                 font-size: 1rem; /* Button has lower font size */
                 background: var(--colour-theme-bg-primary);
-                border: 1px solid var(--colour-theme-border);
-                padding: 1px;
+                border: var(--border-size) solid var(--colour-theme-border);
+                padding: 0;
             }
             
             .tab_box_button:hover {
                 background: var(--colour-theme-highlight-bg);
-                border: 1px solid var(--colour-theme-highlight-border);
+                border: var(--border-size) solid var(--colour-theme-highlight-border);
                 cursor: pointer;
             }
             
             .tab_box_button_selected, .tab_box_button_selected:hover, .tab_box_button_selected:active {
                 background: var(--colour-theme-major-bg) !important;
-                border: 1px solid var(--colour-theme-major-border) !important;
+                border: var(--border-size) solid var(--colour-theme-major-border) !important;
                 cursor: default;
             }
             
             .tab_box_button:active {
                 background: var(--colour-theme-minor-bg);
-                border: 1px solid var(--colour-theme-minor-border);
+                border: var(--border-size) solid var(--colour-theme-minor-border);
             }
             
             .tab_box_container {

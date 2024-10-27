@@ -44,23 +44,22 @@ public class TypeGroup extends Component {
     protected String getCSS() {
         return """
             .type_group, .type_group_span {
-              min-height: 48px;
+              min-height: 3rem;
               display: flex;
               align-items: center;
             }
             
             .type_group_span {
-              margin-left: 1em;
-              margin-right: 1em;
+              margin-inline: 0.5rem;
             }
             
             .type_group_text, .type_category_text {
-              font-size: 1.5em;
+              font-size: 1.5rem;
             }
             
             .type_group_separator {
-              font-size: 2em;
-              width: 1.5em;
+              font-size: 2rem;
+              width: 1.5rem;
               text-align: center;
             }""";
     }

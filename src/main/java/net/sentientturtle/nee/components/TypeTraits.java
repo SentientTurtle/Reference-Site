@@ -116,11 +116,11 @@ public class TypeTraits extends Component {
             }
             
             .type_traits_blank {
-                height: 1em;
+                height: 1rem;
             }
             
             .type_traits_data {
-                font-size: 0.9em;
+                font-size: 0.9rem;
             }""";
     }
 

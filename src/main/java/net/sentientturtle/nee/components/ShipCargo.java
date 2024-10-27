@@ -74,6 +74,7 @@ public class ShipCargo extends Component {
             
             .ship_cargo_table {
                 width: 100%;
+                padding: 0.5rem;
             }""";
     }
 }

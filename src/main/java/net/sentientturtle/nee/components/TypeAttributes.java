@@ -73,13 +73,13 @@ public class TypeAttributes extends Component {
             }
             
             .type_attributes_td {
-                height: 32px;
-                font-size: 1em;
-                padding-right: 10px;
+                height: 2rem;
+                font-size: 1rem;
+                padding-right: 1rem;
             }
             
             .type_attributes_icon {
-                width: 32px;
+                width: 2rem;
             }""";
     }
 }

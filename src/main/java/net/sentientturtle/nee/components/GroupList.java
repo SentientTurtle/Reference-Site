@@ -100,16 +100,16 @@ public class GroupList extends Component {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 2em;
+                font-size: 2rem;
             }
             
             .group_list_icon {
-                height: 64px;
-                width: 64px;
+                height: 4rem;
+                width: 4rem;
             }
             
             .group_list_entry {
-                font-size: 1.5em;
+                font-size: 1.5rem;
                 display: flex;
                 align-items: center;
             }""";

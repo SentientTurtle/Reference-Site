@@ -113,10 +113,11 @@ public class ShipSensors extends Component {    // TODO: Maybe rename TypeSensor
             .ship_sensors_table {
                 width: 100%;
                 border-collapse: collapse;
+                margin-top: 0.5rem;
             }
             
             .ship_sensors_table tr:not(:first-child) {
-                border-top: 1px solid var(--colour-theme-minor-border);
+                border-top: var(--border-size) solid var(--colour-theme-minor-border);
             }
             
             .ship_sensors_span {

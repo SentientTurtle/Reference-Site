@@ -50,15 +50,16 @@ public class TypeOrigin extends Component {
             }
             
             .type_origin_blueprint {
-                height: 64px;
+                height: 4rem;
                 width: 100%;
-                font-size: 1.25em;
+                font-size: 1.25rem;
                 display: flex;
                 align-items: center;
+                margin-top: 0.5rem;
             }
             
             .type_origin_link {
-                margin: 5px;
+                margin: 0.5rem;
             }""";
     }
 }

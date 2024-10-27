@@ -44,8 +44,8 @@ public class PageList extends Component {
             }
             
             .page_list_title {
-                font-size: 1.75em;
-                margin-left: 10px;
+                font-size: 1.75rem;
+                margin-left: 1rem;
             }
             
             .page_list_list {
@@ -54,12 +54,12 @@ public class PageList extends Component {
             
             .page_list_entry {
                 display: flex;
-                height: 32px;
+                height: 2rem;
             }
             
             .page_list_type {
-                font-size: 1.25em;
-                margin: 5px;
+                font-size: 1.25rem;
+                margin: 0.5rem;
             }""";
     }
 }

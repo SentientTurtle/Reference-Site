@@ -37,17 +37,17 @@ public class MapSecurity extends Component {
     protected String getCSS() {
         return """
             .map_security {
-              padding: 1em;
+              padding: 1rem;
               display: flex;
               align-items: center;
-              font-size: 1.5em;
+              font-size: 1.5rem;
             }
             
             .map_security_square {
                 width: 1em;
                 height: 1em;
-                border-radius: 3px 3px 3px 3px;
-                margin-left: 5px;
+                border-radius: 0.25rem;
+                margin-left: 0.5rem;
             }""";
     }
 }
