@@ -194,8 +194,8 @@ public interface HTML {
     static Element IMG(ResourceLocation src, @Nullable String alt, int width, int height) {
         return new Element("img", true)
                 .attribute("src", src::getURI)
-                .attribute("width", width + "px")
-                .attribute("height", height + "px")
+                .attribute("width", String.valueOf(width))
+                .attribute("height", String.valueOf(height))
                 .attribute("alt", alt != null ? alt : "");
     }
 
