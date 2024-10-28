@@ -51,7 +51,7 @@ public class TypePage extends Page {
     protected @Nullable String getCSS(HtmlContext context) {
         return """
             .type_page_column {
-                width: calc(32rem + (2 * var(--border-size))));
+                width: calc(32rem + (2 * var(--border-size)));
                 display: flex;
                 flex-direction: column;
                 gap: 0.5rem;
@@ -149,6 +149,9 @@ public class TypePage extends Page {
 
         if (typeAttributes.getOrDefault(1271, 0.0) > 0) // Drone bandwidth > 0
             mid.content(new ShipDrones(type));
+
+        if (group.categoryID == 7)
+            mid.content(new ModuleFitting(type));
 
         // TODO: Mass/Volume
 

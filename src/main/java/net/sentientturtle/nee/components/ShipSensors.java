@@ -60,22 +60,40 @@ public class ShipSensors extends Component {    // TODO: Maybe rename TypeSensor
             );
         }
 
-        String sensorType = null;
+        String sensorType;
         int sensorAttribute = 0;
         double sensorStrength;
 
-        if ((sensorStrength = typeAttributes.getOrDefault(208, 0.0)) != 0.0) {
+        double radar = typeAttributes.getOrDefault(208, 0.0);
+        double magnet = typeAttributes.getOrDefault(210, 0.0);
+        double gravi = typeAttributes.getOrDefault(211, 0.0);
+        double ladar = typeAttributes.getOrDefault(209, 0.0);
+
+        if (radar == 0.0 && magnet == 0.0 && gravi == 0.0 && ladar == 0.0) {
+            sensorType = null;
+            sensorStrength = 0.0;
+        } else if (radar > magnet && radar > gravi && radar > ladar) {
             sensorType = "Radar";
             sensorAttribute = 208;
-        } else if ((sensorStrength = typeAttributes.getOrDefault(210, 0.0)) != 0.0) {
+            sensorStrength = radar;
+        } else if (magnet > radar && magnet > gravi && magnet > ladar) {
             sensorType = "Magnetometric";
             sensorAttribute = 210;
-        } else if ((sensorStrength = typeAttributes.getOrDefault(211, 0.0)) != 0.0) {
+            sensorStrength = magnet;
+        } else if (gravi > radar && gravi > magnet && gravi > ladar) {
             sensorType = "Gravimetric";
             sensorAttribute = 211;
-        } else if ((sensorStrength = typeAttributes.getOrDefault(209, 0.0)) != 0.0) {
+            sensorStrength = gravi;
+        } else if (ladar > radar && ladar > magnet && ladar > gravi) {
             sensorType = "LADAR";
             sensorAttribute = 209;
+            sensorStrength = ladar;
+        } else if (radar == magnet && magnet == gravi && gravi == ladar) {
+            sensorType = "Multi-spectrum";
+            sensorAttribute = 210;
+            sensorStrength = radar;
+        } else {
+            throw new IllegalStateException("Unknown sensor hybrid type: " + radar + "," + magnet + "," + gravi + "," + ladar);
         }
 
         if (sensorType != null) {

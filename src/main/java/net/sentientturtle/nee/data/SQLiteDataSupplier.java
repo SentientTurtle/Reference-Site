@@ -16,10 +16,14 @@ import java.util.*;
 public class SQLiteDataSupplier extends DataSupplier {
     private final Map<Integer, Category> categories;
     private final Map<Integer, Group> groups;
-    private final Map<Integer, Type> types;
+
     private final Map<Integer, Attribute> attributes;
-    private final Map<Integer, Map<Integer, List<TypeTraitBonus>>> typeTraits;
+    private final Map<Integer, Effect> effects;
+
+    private final Map<Integer, Type> types;
     private final Map<Integer, Map<Integer, Double>> typeAttributes;
+    private final Map<Integer, Set<Integer>> typeEffects;
+    private final Map<Integer, Map<Integer, List<TypeTraitBonus>>> typeTraits;
 
     private final Map<Integer, String> eveIcons;
     private final Map<Integer, IndustryActivityType> industryActivityTypes;
@@ -158,6 +162,13 @@ public class SQLiteDataSupplier extends DataSupplier {
         }
         st.dispose();
 
+        typeEffects = produceMap();
+        st = connection.prepare("SELECT typeID, effectID FROM dgmTypeEffects");
+        while (st.step()) {
+            assert !st.columnNull(0) && !st.columnNull(1);
+            typeEffects.computeIfAbsent(st.columnInt(0), this::produceSet).add(st.columnInt(1));
+        }
+
         attributes = produceMap();
         st = connection.prepare("SELECT attributeID, categoryID, attributeName, displayName, unitID, iconID, published FROM dgmAttributeTypes ORDER BY attributeID");
         while (st.step()) {
@@ -175,6 +186,15 @@ public class SQLiteDataSupplier extends DataSupplier {
                             st.columnInt(6) == 1
                     )
             );
+        }
+        st.dispose();
+
+        effects = produceMap();
+        st = connection.prepare("SELECT effectID, effectName FROM dgmEffects ORDER BY effectID");
+        while (st.step()) {
+            assert !st.columnNull(0) && !st.columnNull(1);
+            int effectID = st.columnInt(0);
+            effects.put(effectID, new Effect(effectID, st.columnString(1)));
         }
         st.dispose();
 
@@ -479,13 +499,23 @@ public class SQLiteDataSupplier extends DataSupplier {
     }
 
     @Override
-    public Map<Integer, Map<Integer, List<TypeTraitBonus>>> getTypeTraits() {
-        return typeTraits;
+    public Map<Integer, Effect> getEffects() {
+        return effects;
     }
 
     @Override
     public Map<Integer, Map<Integer, Double>> getTypeAttributes() {
         return typeAttributes;
+    }
+
+    @Override
+    public Map<Integer, Set<Integer>> getTypeEffects() {
+        return typeEffects;
+    }
+
+    @Override
+    public Map<Integer, Map<Integer, List<TypeTraitBonus>>> getTypeTraits() {
+        return typeTraits;
     }
 
     @Override

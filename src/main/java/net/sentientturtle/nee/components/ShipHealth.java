@@ -54,29 +54,37 @@ public abstract class ShipHealth extends Component {
             table.content(
                 TR().title("Electromagnetic Damage Resistance").content(
                     TD("ship_health_icon").content(IMG(ResourceLocation.iconOfIconID(1388), null, 32)),
-                    TD("ship_health_bar").content(DIV("ship_health_resist_bg").content(
-                        DIV("ship_health_em_resist").style("width: " + (1 - resists.EM) * 100 + "%;")
+                    TD("ship_health_bar").content(DIV("ship_health_resist_bg").attribute("aria-label", "EM resis").content(
+                        DIV("ship_health_em_resist")
+                            .attribute("aria-label", "Electromagnetic Damage Resistance")
+                            .style("width: " + (1 - resists.EM) * 100 + "%;")
                     )),
                     TD("ship_health_text").content(context.data.format_with_unit(resists.EM, context.data.getAttributes().get(267).unitID))
                 ),
                 TR().title("Thermal Damage Resistance").content(
                     TD("ship_health_icon").content(IMG(ResourceLocation.iconOfIconID(1386), null, 32)),
                     TD("ship_health_bar").content(DIV("ship_health_resist_bg").content(
-                        DIV("ship_health_th_resist").style("width: " + (1 - resists.TH) * 100 + "%;")
+                        DIV("ship_health_th_resist")
+                            .attribute("aria-label", "Thermal Damage Resistance")
+                            .style("width: " + (1 - resists.TH) * 100 + "%;")
                     )),
                     TD("ship_health_text").content(context.data.format_with_unit(resists.TH, context.data.getAttributes().get(270).unitID))
                 ),
                 TR().title("Kinetic Damage Resistance").content(
                     TD("ship_health_icon").content(IMG(ResourceLocation.iconOfIconID(1385), null, 32)),
                     TD("ship_health_bar").content(DIV("ship_health_resist_bg").content(
-                        DIV("ship_health_ki_resist").style("width: " + (1 - resists.KI) * 100 + "%;")
+                        DIV("ship_health_ki_resist")
+                            .attribute("aria-label", "Kinetic Damage Resistance")
+                            .style("width: " + (1 - resists.KI) * 100 + "%;")
                     )),
                     TD("ship_health_text").content(context.data.format_with_unit(resists.KI, context.data.getAttributes().get(269).unitID))
                 ),
                 TR().title("Explosive Damage Resistance").content(
                     TD("ship_health_icon").content(IMG(ResourceLocation.iconOfIconID(1387), null, 32)),
                     TD("ship_health_bar").content(DIV("ship_health_resist_bg").content(
-                        DIV("ship_health_ex_resist").style("width: " + (1 - resists.EX) * 100 + "%;")
+                        DIV("ship_health_ex_resist")
+                            .attribute("aria-label", "Explosive Damage Resistance")
+                            .style("width: " + (1 - resists.EX) * 100 + "%;")
                     )),
                     TD("ship_health_text").content(context.data.format_with_unit(resists.EX, context.data.getAttributes().get(268).unitID))
                 )
@@ -191,10 +199,10 @@ public abstract class ShipHealth extends Component {
     @SuppressWarnings("WeakerAccess")
     protected Resists getResists(DataSupplier dataSupplier, int emAttribute, int thAttribute, int kiAttribute, int exAttribute) {
         return new Resists(
-            dataSupplier.getTypeAttributes().get(type.typeID).getOrDefault(emAttribute, 0.0),
-            dataSupplier.getTypeAttributes().get(type.typeID).getOrDefault(thAttribute, 0.0),
-            dataSupplier.getTypeAttributes().get(type.typeID).getOrDefault(kiAttribute, 0.0),
-            dataSupplier.getTypeAttributes().get(type.typeID).getOrDefault(exAttribute, 0.0)
+            dataSupplier.getTypeAttributes().get(type.typeID).getOrDefault(emAttribute, 1.0),   // Default to 1.0, which is 0% resistance
+            dataSupplier.getTypeAttributes().get(type.typeID).getOrDefault(thAttribute, 1.0),
+            dataSupplier.getTypeAttributes().get(type.typeID).getOrDefault(kiAttribute, 1.0),
+            dataSupplier.getTypeAttributes().get(type.typeID).getOrDefault(exAttribute, 1.0)
         );
     }
 

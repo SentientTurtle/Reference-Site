@@ -27,7 +27,7 @@ public abstract class DataSupplier {
         symbols.setDecimalSeparator('.');   // English style number formatting to match that of the game
         symbols.setGroupingSeparator(',');
         symbols.setNaN("???");              // NaN treated as "Unknown"
-        threadLocalDecimalFormat = ThreadLocal.withInitial(() -> new DecimalFormat("###,##0.##########", symbols));
+        threadLocalDecimalFormat = ThreadLocal.withInitial(() -> new DecimalFormat("###,##0.##", symbols));
     }
 
     // Data
@@ -47,8 +47,14 @@ public abstract class DataSupplier {
     // Map<AttributeID, Attribute>
     public abstract Map<Integer, Attribute> getAttributes();
 
-    // Map<TypeID, Set<AttributeID>>
+    // Map<TypeID, Map<AttributeID, AttributeValue>>
     public abstract Map<Integer, Map<Integer, Double>> getTypeAttributes();
+
+    // Map<EffectID, Effect>
+    public abstract Map<Integer, Effect> getEffects();
+
+    // Map<TypeID, Set<EffectID>>
+    public abstract Map<Integer, Set<Integer>> getTypeEffects();
 
     // Map<IconID, IconFile>
     public abstract Map<Integer, String> getEveIcons();
