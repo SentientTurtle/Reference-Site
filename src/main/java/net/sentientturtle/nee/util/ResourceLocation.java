@@ -88,7 +88,7 @@ public class ResourceLocation {
         return new ResourceLocation("searchindex.js", ResourceType.SEARCH_INDEX);
     }
 
-    private @Nullable Tuple2<Object, OriginType> getOrigin(HtmlContext context) {
+    private Tuple2<Object, OriginType> getOrigin(HtmlContext context) {
         return switch (resourceType) {
             case FILE -> new Tuple2<>(RES_FOLDER + value, OriginType.FILE);
             case TYPE_ICON_64 -> {
@@ -114,7 +114,7 @@ public class ResourceLocation {
                 if (context.sharedCache.containsResource(icon)) {
                     yield new Tuple2<>(icon, OriginType.SHARED_CACHE);
                 } else {
-                    yield null;
+                    throw new IllegalStateException("Missing shared cache entry: " + icon);
                 }
             }
             case CORP_ICON -> new Tuple2<>("https://imageserver.eveonline.com/corporations/" + value + "/logo?size=64", OriginType.REMOTE);
@@ -124,7 +124,7 @@ public class ResourceLocation {
                 if (context.sharedCache.containsResource((String) value)) {
                     yield new Tuple2<>(value, OriginType.SHARED_CACHE);
                 } else {
-                    yield null;
+                    throw new IllegalStateException("Missing shared cache entry: " + value);
                 }
             }
         };
@@ -138,7 +138,6 @@ public class ResourceLocation {
     /// Returns a URI to this resource, relative to specified context if {@code isAbsolute} is false, absolute from website root otherwise
     public String getURI(HtmlContext context, boolean isAbsolute) {
         Tuple2<Object, OriginType> origin = getOrigin(context);
-        if (origin == null) return "";
 
         switch (REFERENCE_FORMAT) {
             case EXTERNAL:

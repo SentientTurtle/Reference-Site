@@ -11,6 +11,7 @@ import net.sentientturtle.nee.data.datatypes.Type;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 
@@ -152,6 +153,27 @@ public class TypePage extends Page {
 
         if (group.categoryID == 7)
             mid.content(new ModuleFitting(type));
+
+        HashSet<Integer> canBeFittedToGroups = new HashSet<>();
+        HashSet<Integer> canBeFittedToTypes = new HashSet<>();
+        for (int attributeID : new int[]{1298, 1299, 1300, 1301, 1872, 1879, 1880, 1881, 2065, 2396, 2476, 2477, 2478, 2479, 2480, 2481, 2482, 2483, 2484, 2485}) {
+            Double groupID = typeAttributes.get(attributeID);
+            if (groupID != null) {
+                canBeFittedToGroups.add((int) (double) groupID);
+            }
+        }
+
+        for (int attributeID : new int[]{1302, 1303, 1304, 1305, 1944, 2103, 2463, 2486, 2487, 2488, 2758}) {
+            Double typeID = typeAttributes.get(attributeID);
+            if (typeID != null) {
+                canBeFittedToTypes.add((int) (double) typeID);
+            }
+        }
+
+        if (canBeFittedToGroups.size() > 0 || canBeFittedToTypes.size() > 0) {
+            mid.content(new CanBeFittedTo(canBeFittedToGroups, canBeFittedToTypes));
+        }
+
 
         // TODO: Mass/Volume
 
