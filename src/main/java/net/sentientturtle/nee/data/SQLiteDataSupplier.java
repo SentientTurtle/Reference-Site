@@ -146,10 +146,10 @@ public class SQLiteDataSupplier extends DataSupplier {
             FROM invTraits
             """);
         while (st.step()) {
-            assert !st.columnNull(0) && !st.columnNull(1) && !st.columnNull(2) && !st.columnNull(3);
+            assert !st.columnNull(0) && !st.columnNull(1) && !st.columnNull(3);
             typeTraits.computeIfAbsent(st.columnInt(0), this::produceMap)
                     .computeIfAbsent(st.columnInt(1), this::produceList)
-                    .add(new TypeTraitBonus(st.columnDouble(2), st.columnString(3), st.columnNull(4) ? null : st.columnInt(4)));
+                    .add(new TypeTraitBonus(st.columnNull(2) ? null : st.columnDouble(2), st.columnString(3), st.columnNull(4) ? null : st.columnInt(4)));
         }
         st.dispose();
 

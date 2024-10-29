@@ -558,7 +558,7 @@ public abstract class DataSupplier {
         // Remove unpublished types
         this.getTypeTraits().keySet().removeIf(typeID -> !types.containsKey(typeID));
         for (Map<Integer, List<TypeTraitBonus>> trait : this.getTypeTraits().values()) {
-            trait.keySet().removeIf(typeID -> !types.containsKey(typeID));
+            trait.keySet().removeIf(typeID -> !(typeID < 0 || types.containsKey(typeID)));
         }
 
         this.getTypeAttributes().keySet().removeIf(typeID -> !types.containsKey(typeID));
