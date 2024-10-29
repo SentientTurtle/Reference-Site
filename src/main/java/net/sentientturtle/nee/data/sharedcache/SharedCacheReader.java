@@ -50,12 +50,12 @@ public class SharedCacheReader {
     }
 
     public boolean containsResource(String resource) {
-        Path resourcePath = cacheIndex.get(resource);
+        Path resourcePath = cacheIndex.get(resource.toLowerCase());
         return resourcePath != null && Files.exists(resFiles.resolve(resourcePath));
     }
 
     public @Nullable String resourceHash(String resource) {
-        return this.resourceHashes.get(resource);
+        return this.resourceHashes.get(resource.toLowerCase());
     }
 
     public byte[] getBytes(String resource) throws IOException {
@@ -63,7 +63,7 @@ public class SharedCacheReader {
         if (resourcePath == null) throw new IllegalArgumentException("File not in shared cache: " + resource);
 
         return dataCache.computeIfAbsent(
-            resource,
+            resource.toLowerCase(),
             _ -> {
                 try {
                     return Files.readAllBytes(resFiles.resolve(resourcePath));
