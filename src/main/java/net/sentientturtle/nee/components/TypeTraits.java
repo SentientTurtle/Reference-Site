@@ -49,7 +49,7 @@ public class TypeTraits extends Component {
             if (skillID == -1) {
                 table.content(
                     TR("font_header").content(
-                        TH("type_traits_head").attribute("colspan", "2").text("Role Bonus")
+                        TH().attribute("colspan", "2").content(HEADER().text("Role Bonus"))
                     )
                 );
             } else if (skillID == -2) {
@@ -61,10 +61,10 @@ public class TypeTraits extends Component {
             } else {
                 table.content(
                     TR("font_header").content(
-                        TH("type_traits_head").attribute("colspan", "2").content(
+                        TH().attribute("colspan", "2").content(HEADER().content(
                             new PageLink(new TypePage(context.data.getTypes().get(skillID))),
                             TEXT(" bonuses (per skill level)")
-                        )
+                        ))
                     )
                 );
             }
@@ -76,10 +76,9 @@ public class TypeTraits extends Component {
                     .filter(t -> !(t.bonusText.contains("Defense Mode") || t.bonusText.contains("Propulsion Mode") || t.bonusText.contains("Sharpshooter Mode")))
                     .forEach(trait -> appendTrait(table, trait, context.data));
 
-                appendTrait(table, traits.get(0), context.data);
+                // Trait 0 is the "Additional bonuses available" message, we skip it
                 for (int i = 1; i < 4; i++) {
                     TypeTraitBonus mode = traits.get(i);
-                    appendTrait(table, mode, context.data);
                     String modeString;
                     if (mode.bonusText.contains("Defense")) {
                         modeString = "Defense Mode";
@@ -90,6 +89,13 @@ public class TypeTraits extends Component {
                     } else {
                         throw new RuntimeException("Unknown T3D Mode!");
                     }
+
+                    table.content(
+                        TR("font_header").content(
+                            TH().attribute("colspan", "2").content(HEADER().text(modeString))
+                        )
+                    );
+
                     modeTraits.stream()
                         .filter(trait -> trait.bonusText.contains(modeString))
                         .forEach(trait -> appendTrait(table, trait, context.data));
@@ -127,7 +133,7 @@ public class TypeTraits extends Component {
     private void appendTrait(Element table, TypeTraitBonus traitTuple, DataSupplier dataSupplier) {
         table.content(
             TR().content(
-                TD("type_traits_data").content(traitTuple.unitID != null ? dataSupplier.format_with_unit(traitTuple.bonusAmount, traitTuple.unitID) : TEXT("")),
+                TD("type_traits_data").content(traitTuple.bonusAmount != null ? dataSupplier.format_with_unit(traitTuple.bonusAmount, traitTuple.unitID) : TEXT("")),
                 TD("type_traits_data").content(EVEText.escape(traitTuple.bonusText, dataSupplier))
             )
         );

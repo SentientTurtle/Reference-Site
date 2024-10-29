@@ -22,7 +22,7 @@ public class TypeGroup extends Component {
     private final Type type;
 
     public TypeGroup(@NonNull Type type) {
-        super("type_group colour_theme_minor");
+        super("type_group colour_theme_minor font_header");
         this.type = Objects.requireNonNull(type);
     }
 
@@ -32,35 +32,33 @@ public class TypeGroup extends Component {
         Category category = context.data.getCategories().get(group.categoryID);
 
         return new HTML[]{
-            SPAN("type_group_span font_header").content(
-                TEXT_BOLD().className("head_text type_group_text").content(new PageLink(new GroupPage(group))),
-                SPAN("type_group_separator").text("|"),
-                TEXT_BOLD().className("head_text type_group_text").content(new PageLink(new CategoryPage(category)))
-            )
+            TEXT_BOLD().className("type_group_text").content(new PageLink(new GroupPage(group))),
+            SPAN("type_group_separator").text("|"),
+            TEXT_BOLD().className("type_group_text").content(new PageLink(new CategoryPage(category)))
         };
     }
 
     @Override
     protected String getCSS() {
         return """
-            .type_group, .type_group_span {
-              min-height: 3rem;
-              display: flex;
-              align-items: center;
+            .type_group {
+                min-height: 3rem;
+                display: flex;
+                align-items: center;
+                padding-inline: 0.5rem;
             }
             
-            .type_group_span {
-              margin-inline: 0.5rem;
-            }
-            
-            .type_group_text, .type_category_text {
-              font-size: 1.5rem;
+            .type_group_text {
+                font-size: 1.5rem;
+                flex-grow: 1;
+                flex-basis: 0;
+                text-align: center;
             }
             
             .type_group_separator {
-              font-size: 2rem;
-              width: 1.5rem;
-              text-align: center;
+                font-size: 2rem;
+                width: 1.5rem;
+                text-align: center;
             }""";
     }
 }

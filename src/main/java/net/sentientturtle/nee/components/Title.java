@@ -48,6 +48,10 @@ public class Title extends Component {
                 align-items: center;
             }
             
+            .title:has(:only-child) {
+                justify-content: center;
+            }
+            
             .title_icon {
                 width: 4rem;
                 height: 4rem;

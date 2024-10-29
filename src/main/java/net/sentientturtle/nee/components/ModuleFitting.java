@@ -27,7 +27,6 @@ public class ModuleFitting extends Component {
         Map<Integer, Double> typeAttributes = context.data.getTypeAttributes().getOrDefault(type.typeID, Map.of());
         Set<Integer> typeEffects = context.data.getTypeEffects().getOrDefault(type.typeID, Set.of());
 
-
         var table = TABLE("module_fitting_table");
         if (typeEffects.contains(11)) {
             table.content(TR().content(TD().content(
@@ -116,7 +115,7 @@ public class ModuleFitting extends Component {
             var row = TR().content(
                 TD().content(
                     SPAN("module_fitting_span").content(
-                        IMG(ResourceLocation.iconOfIconID(1400), null, 32).className("module_fitting_icon"),
+                        IMG(ResourceLocation.iconOfIconID(1668), null, 32).className("module_fitting_icon"),
                         TEXT("Activation cost: "), context.data.format_with_unit(activationCost, context.data.getAttributes().get(6).unitID)
                     )
                 )

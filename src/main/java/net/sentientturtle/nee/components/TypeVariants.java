@@ -42,8 +42,8 @@ public class TypeVariants extends Component {
                 table.content(TR().content(TH("font_header").attribute("colspan", "2").text(metaGroups.get(entry.getKey()).metaGroupName)));
                 for (Integer variantID : (Iterable<? extends Integer>) entry.getValue().stream().sorted()::iterator) {
                     table.content(TR().content(
-                        TD("type_variants_td").content(IMG(ResourceLocation.iconOfTypeID(variantID), null, 64).className("type_variants_icon")),
-                        TD("type_variants_td font_header").content(SPAN("type_variants_type").content(new PageLink(new TypePage(context.data.getTypes().get(variantID)))))
+                        TD().content(IMG(ResourceLocation.iconOfTypeID(variantID), null, 64).className("type_variants_icon")),
+                        TD("font_header").content(SPAN("type_variants_type").content(new PageLink(new TypePage(context.data.getTypes().get(variantID)))))
                     ));
                 }
             });
@@ -66,17 +66,13 @@ public class TypeVariants extends Component {
             }
             
             .type_variants_icon {
-                width: 4rem;
-                height: 4rem;
+                width: 2rem;
+                height: 2rem;
             }
             
             .type_variants_type {
                 font-size: 1.25rem;
                 margin: 0.5rem;
-            }
-            
-            .type_variants_td {
-                padding-top: 0.5rem;
             }""";
     }
 }
