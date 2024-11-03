@@ -529,6 +529,10 @@ public abstract class Page implements Document, HTML {
             white-space: pre-wrap;
         }
         
+        .no_break {
+            white-space: nowrap;
+        }
+        
         header {
             font-size: 1.25em;
         }

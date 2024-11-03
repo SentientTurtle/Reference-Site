@@ -141,6 +141,7 @@ public class ShipSensors extends Component {    // TODO: Maybe rename TypeSensor
             .ship_sensors_span {
                 display: flex;
                 align-items: center;
+                gap: 0.25rem;
             }
             
             .ship_sensors_icon {

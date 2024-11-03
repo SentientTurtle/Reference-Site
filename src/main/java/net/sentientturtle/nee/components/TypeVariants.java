@@ -35,18 +35,29 @@ public class TypeVariants extends Component {
 
         var table = TABLE("type_variants_table font_text");
 
-        metaVariants.entrySet()
-            .stream()
-            .sorted(MetaGroup.orderedByMetaGroup(Map.Entry::getKey))
-            .forEach(entry -> {
-                table.content(TR().content(TH("font_header").attribute("colspan", "2").text(metaGroups.get(entry.getKey()).metaGroupName)));
-                for (Integer variantID : (Iterable<? extends Integer>) entry.getValue().stream().sorted()::iterator) {
+        if (metaVariants.size() > 1) {
+            metaVariants.entrySet()
+                .stream()
+                .sorted(MetaGroup.orderedByMetaGroup(Map.Entry::getKey))
+                .forEach(entry -> {
+                    table.content(TR().content(TH("font_header").attribute("colspan", "2").text(metaGroups.get(entry.getKey()).metaGroupName)));
+                    for (Integer variantID : (Iterable<? extends Integer>) entry.getValue().stream().sorted()::iterator) {
+                        table.content(TR().content(
+                            TD().content(IMG(ResourceLocation.iconOfTypeID(variantID), null, 64).className("type_variants_icon")),
+                            TD("font_header").content(SPAN("type_variants_type").content(new PageLink(new TypePage(context.data.getTypes().get(variantID)))))
+                        ));
+                    }
+                });
+        } else {
+            for (Set<Integer> value : metaVariants.values()) {
+                for (Integer variantID : (Iterable<? extends Integer>) value.stream().sorted()::iterator) {
                     table.content(TR().content(
                         TD().content(IMG(ResourceLocation.iconOfTypeID(variantID), null, 64).className("type_variants_icon")),
                         TD("font_header").content(SPAN("type_variants_type").content(new PageLink(new TypePage(context.data.getTypes().get(variantID)))))
                     ));
                 }
-            });
+            }
+        }
 
         return new HTML[]{
             HEADER("font_header").text("Variants"),

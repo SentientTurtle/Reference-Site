@@ -102,6 +102,7 @@ public abstract class AttributeList extends Component {
             .attribute_list_span {
                 display: flex;
                 align-items: center;
+                gap: 0.25rem;
             }
             
             .attribute_list_icon {

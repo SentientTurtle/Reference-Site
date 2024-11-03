@@ -192,6 +192,7 @@ public class ShipFitting extends Component {
             .ship_fitting_span {
                 display: flex;
                 align-items: center;
+                gap: 0.25rem;
             }
             
             .ship_fitting_icon {

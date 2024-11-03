@@ -83,7 +83,7 @@ public class MarketGroupPage extends Page {
                 context.data.getMarketGroupChildMap()
                     .getOrDefault(marketGroup.marketGroupID, Set.of())
                     .stream()
-                    .sorted(Comparator.comparingInt(m -> m.marketGroupID))
+                    .sorted(Comparator.comparing(m -> m.name))
                     .map(group -> entryForGroup(group, context.data, hasItems)),
                 Stream.ofNullable(groupForItems(context.data.getMarketGroupTypeMap().get(marketGroup.marketGroupID), context.data))
                     .map(treeGroup -> new ItemTree.Entry("Items", new ItemTree.Group(HTML.empty(), treeGroup.pages())))
@@ -152,7 +152,7 @@ public class MarketGroupPage extends Page {
                 data.getMarketGroupChildMap()
                     .getOrDefault(group.marketGroupID, Set.of())
                     .stream()
-                    .sorted(Comparator.comparingInt(m -> m.marketGroupID))
+                    .sorted(Comparator.comparing(m -> m.name))
                     .map(marketGroup -> {
                         Set<MarketGroup> childGroups = data.getMarketGroupChildMap()
                             .getOrDefault(marketGroup.marketGroupID, Set.of());
@@ -165,7 +165,7 @@ public class MarketGroupPage extends Page {
                             HasPage[] pages = Stream.concat(
                                 childGroups
                                     .stream()
-                                    .sorted(Comparator.comparingInt(m -> m.marketGroupID)),
+                                    .sorted(Comparator.comparing(m -> m.name)),
                                 items.stream()
                                     .sorted(MetaGroup.orderedByMetaGroup(type -> data.getMetaTypes().getOrDefault(type.typeID, 1)))
                             ).toArray(HasPage[]::new);

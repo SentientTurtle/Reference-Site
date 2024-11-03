@@ -13,6 +13,7 @@ public final class Attribute {
     public @Nullable Integer unitID;
     public @Nullable Integer iconID;
     public boolean published;
+    public boolean highIsGood;
 
     public Attribute(
         int attributeID,
@@ -21,7 +22,8 @@ public final class Attribute {
         @Nullable String displayName,
         @Nullable Integer unitID,
         @Nullable Integer iconID,
-        boolean published
+        boolean published,
+        boolean highIsGood
     ) {
         this.attributeID = attributeID;
         this.categoryID = categoryID;
@@ -30,6 +32,16 @@ public final class Attribute {
         this.unitID = unitID;
         this.iconID = iconID;
         this.published = published;
+        this.highIsGood = highIsGood;
+    }
+
+    public double defaultValue() {
+        return switch (this.unitID == null ? 0 : this.unitID) {
+            case 104, 109 -> 1.0;       // Multiplier
+            case 108, 111 -> 1.0;       // Inverse percentage, 1.0 = 0%
+            case 142 -> 2;              // Clothing sex -> default to unisex
+            default -> 0.0;
+        };
     }
 
     @Override

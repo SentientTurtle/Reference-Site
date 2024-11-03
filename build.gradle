@@ -15,9 +15,8 @@ dependencies {
     implementation 'com.almworks.sqlite4java:sqlite4java:1.0.392'
     // Used by SDEUtils; Bzip2 decompression
     implementation group: 'org.apache.commons', name: 'commons-compress', version: '1.26.0'
-    // Used for building JSON files
-    implementation group: 'org.json', name: 'json', version: '20231013'
-    // Used by YAML SDE reader
+    // Used by FSD data (json) & search index
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.2'
+    // Used by YAML SDE reader
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.17.2'
 }

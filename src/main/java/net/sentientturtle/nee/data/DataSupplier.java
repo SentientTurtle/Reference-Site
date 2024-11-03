@@ -191,27 +191,27 @@ public abstract class DataSupplier {
     /*
      * Utility methods to allow usage as method reference, and setting the type of collection used in one place
      */
-    protected <K, V> Map<K, V> produceMap() {
+    public <K, V> Map<K, V> produceMap() {
         return new LinkedHashMap<>();
     }
 
-    protected <K, V> Map<K, V> produceMap(Object ignored) {  // For use as a method reference
+    public <K, V> Map<K, V> produceMap(Object ignored) {  // For use as a method reference
         return produceMap();
     }
 
-    protected <E> Set<E> produceSet() {
+    public <E> Set<E> produceSet() {
         return new LinkedHashSet<>();
     }
 
-    protected <E> Set<E> produceSet(Object ignored) {
+    public <E> Set<E> produceSet(Object ignored) {
         return produceSet();
     }
 
-    protected <E> List<E> produceList() {
+    public <E> List<E> produceList() {
         return new ArrayList<>();
     }
 
-    protected <E> List<E> produceList(Object ignored) {
+    public <E> List<E> produceList(Object ignored) {
         return produceList();
     }
 
@@ -287,10 +287,14 @@ public abstract class DataSupplier {
             case -1:    // No unit
                 return HTML.TEXT(decimalFormat.format(value));
             case 1:     // Metre
-                return HTML.TEXT(decimalFormat.format(value) + " m");
+                if (value > 1000.0) {
+                    return HTML.TEXT(decimalFormat.format(value / 1000.0) + " km");
+                } else {
+                    return HTML.TEXT(decimalFormat.format(value) + " m");
+                }
             case 2:     // Kilogram
                 return HTML.TEXT(decimalFormat.format(value) + " kg");
-            case 3:     // Seconds
+            case 3:     // Seconds  // TODO: Handle NaN on date/time formats!
                 if (value < 60) {
                     return HTML.TEXT(String.format("%2ds", (int) value));
                 } else if (value < 60 * 60) {
@@ -412,19 +416,19 @@ public abstract class DataSupplier {
             case 120:   // "attributePoints"
                 return HTML.TEXT(decimalFormat.format(value) + (value == 1.0 ? " point" : " points"));
             case 121:   // Real percentage "Used for real percentages, i.e. the number 5 is 5%"
-                return HTML.TEXT(Math.round(value) + "%");
+                return HTML.TEXT(decimalFormat.format(value) + "%");
             case 122:   // Fitting slots
                 return HTML.TEXT(decimalFormat.format(value) + (value == 1.0 ? " slot" : " slots"));
             case 123:   // Seconds (No time formatting)
                 return HTML.TEXT(decimalFormat.format(value) + "s");
             case 124:   // Modifier Relative Percent "Used for relative percentages displayed as %"
-                return HTML.TEXT(Math.round(value) + "%");
+                return HTML.TEXT(decimalFormat.format(value) + "%");
             case 125:   // Newton
                 return HTML.TEXT(decimalFormat.format(value) + " N");
             case 126:   // Light-year
                 return HTML.TEXT(decimalFormat.format(value) + " ly");
             case 127:   // Absolute Percent	"0.0 = 0% 1.0 = 100%"
-                return HTML.TEXT(Math.round(value * 100) + "%");
+                return HTML.TEXT(decimalFormat.format(value * 100) + "%");
             case 128:   // Drone bandwidth
                 return HTML.TEXT(decimalFormat.format(value) + " Mbit/s");
             case 129:   // Hours

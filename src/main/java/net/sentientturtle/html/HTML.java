@@ -224,6 +224,11 @@ public interface HTML {
     }
 
     /// {@code <span></span> }
+    static Element SPAN() {
+        return new Element("span");
+    }
+
+    /// {@code <span class='[className]'></span> }
     static Element SPAN(String className) {
         return new Element("span")
                 .className(className);

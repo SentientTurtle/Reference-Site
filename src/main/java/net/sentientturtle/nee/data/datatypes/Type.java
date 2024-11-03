@@ -1,10 +1,13 @@
 package net.sentientturtle.nee.data.datatypes;
 
+import net.sentientturtle.nee.data.DataSupplier;
 import net.sentientturtle.nee.pages.HasPage;
 import net.sentientturtle.nee.pages.Page;
 import net.sentientturtle.nee.pages.TypePage;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+
+import java.util.Map;
 
 /**
  * Data object representing EVE Online items
@@ -36,6 +39,25 @@ public class Type implements HasPage {
         this.marketGroupID = marketGroupID;
     }
 
+
+    public static final int[] ACTIVATION_TIME_ATTRIBUTES = new int[] { 51, 73, 2397, 2398, 2399, 2400, 3115 };
+    /// There are several attributes that can specify a module activation time, this utility method checks them
+    ///
+    /// @return Module activation time if present, else 0.0
+    public double getModuleActivationTime(DataSupplier data) {
+        Map<Integer, Double> typeAttributes = data.getTypeAttributes().getOrDefault(this.typeID, Map.of());
+        double activationTime = 0.0;
+        for (int activationTimeAttribute : ACTIVATION_TIME_ATTRIBUTES) {
+            Double time = typeAttributes.get(activationTimeAttribute);
+            if (time != null) {
+                activationTime = time;
+                break;
+            }
+        }
+
+        return activationTime;
+    }
+
     @Override
     public String toString() {
         return "Type{" +
@@ -43,19 +65,6 @@ public class Type implements HasPage {
                 ", groupID=" + groupID +
                 ", name='" + name +
                 '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Type type = (Type) o;
-        return typeID == type.typeID;
-    }
-
-    @Override
-    public int hashCode() {
-        return typeID;
     }
 
     @Override

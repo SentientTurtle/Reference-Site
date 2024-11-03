@@ -1,5 +1,7 @@
 package net.sentientturtle.nee.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sentientturtle.html.HTMLUtil;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.datatypes.Group;
@@ -8,9 +10,6 @@ import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.pages.PageKind;
 import net.sentientturtle.util.ExceptionUtil;
 import net.sentientturtle.util.tuple.Tuple2;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -258,23 +258,32 @@ public class ResourceLocation {
         },
         /// Search index
         SEARCH_INDEX {
+            private record IndexEntry(String index, String name, String path, String icon) {}
+
             @Override
             public byte[] getData(Object value, HtmlContext context) {
                 assert value.equals("search_index.js");
-                String json = "const searchindex = " + PageKind.pageStream(context.data)
-                    .map(page -> new JSONObject()   // TODO: Migrate to jackson, which we use for the YAML parsing?
-                        .put("index", page.name())
-                        .put("name", page.name().toLowerCase())
-                        .put("path", HTMLUtil.escapeAttributeValue(page.getPath()))
-                        .put("icon", page.getIcon() != null ? HTMLUtil.escapeAttributeValue(page.getIcon().getURI(context)) : null)
-                    )
-                    .collect(JSONArray::new, JSONArray::put, (array1, array2) -> {
-                        for (Object value1 : array2) {
-                            array1.put(value1);
-                        }
-                    })
-                              + ";\nexport default searchindex;";
-                return json.getBytes(StandardCharsets.UTF_8);
+
+                ObjectMapper objectMapper = new ObjectMapper();
+
+                List<IndexEntry> indexEntries = PageKind.pageStream(context.data)
+                    .map(page -> new IndexEntry(
+                        page.name().toLowerCase(),
+                        page.name(),
+                        HTMLUtil.escapeAttributeValue(page.getPath()),
+                        page.getIcon() != null ? HTMLUtil.escapeAttributeValue(page.getIcon().getURI(context)) : null
+                    ))
+                    .collect(Collectors.toList());
+
+                String json = null;
+                try {
+                    json = objectMapper.writeValueAsString(indexEntries);
+                } catch (JsonProcessingException e) {
+                    ExceptionUtil.sneakyThrow(e);
+                }
+
+                String js = "const searchindex = " + json + ";\nexport default searchindex;";
+                return js.getBytes(StandardCharsets.UTF_8);
             }
         },
         /// Shared cache

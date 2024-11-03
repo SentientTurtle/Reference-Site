@@ -170,9 +170,9 @@ public class SQLiteDataSupplier extends DataSupplier {
         }
 
         attributes = produceMap();
-        st = connection.prepare("SELECT attributeID, categoryID, attributeName, displayName, unitID, iconID, published FROM dgmAttributeTypes ORDER BY attributeID");
+        st = connection.prepare("SELECT attributeID, categoryID, attributeName, displayName, unitID, iconID, published, highIsGood FROM dgmAttributeTypes ORDER BY attributeID");
         while (st.step()) {
-            assert !st.columnNull(0) && !st.columnNull(6);
+            assert !st.columnNull(0) && !st.columnNull(6) && !st.columnNull(7);
             int attributeID = st.columnInt(0);
             attributes.put(
                     attributeID,
@@ -183,7 +183,8 @@ public class SQLiteDataSupplier extends DataSupplier {
                             st.columnNull(3) ? null : st.columnString(3),
                             st.columnNull(4) ? null : st.columnInt(4),
                             st.columnNull(5) ? null : st.columnInt(5),
-                            st.columnInt(6) == 1
+                            st.columnInt(6) == 1,
+                            st.columnInt(7) == 1
                     )
             );
         }

@@ -13,7 +13,7 @@ public class ShipPropulsion extends AttributeList {
             true,
             new Entry[][]{{
                 new Entry("Maximum Velocity", 37),
-                new Entry("Warp Speed", 600)
+                new Entry("Warp Speed", 600)    // TODO: Inertia, derive align time
             }}
         );
     }
