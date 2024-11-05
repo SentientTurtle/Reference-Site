@@ -15,12 +15,12 @@ import static net.sentientturtle.html.HTML.*;
 
 /// List of {@link Type} attribute-values, specialized in subclasses
 public abstract class AttributeList extends Component {
-    private final String title;
+    private final @Nullable String title;
     private final Type type;
     private final boolean skipMissing;
     private final Entry[][] data;
 
-    protected AttributeList(String title, Type type, boolean skipMissing, Entry[][] data) {
+    protected AttributeList(@Nullable String title, Type type, boolean skipMissing, Entry[][] data) {
         super("attribute_list colour_theme_minor");
         this.title = title;
         this.type = type;
@@ -62,22 +62,33 @@ public abstract class AttributeList extends Component {
                     value = valueNullable;
                 }
 
-                row.content(
-                    TD().content(
-                        SPAN("attribute_list_span").title(entry.name).content(
-                            icon,
-                            TEXT(entry.name + ": "),
-                            context.data.format_with_unit(value, attributeMap.get(entry.attributeID).unitID)
+                if (entry.name != null) {
+                    row.content(
+                        TD().content(
+                            SPAN("attribute_list_span").title(entry.name).content(
+                                icon,
+                                TEXT(entry.name + ": "),
+                                context.data.format_with_unit(value, attributeMap.get(entry.attributeID).unitID)
+                            )
                         )
-                    )
-                );
+                    );
+                } else {
+                    row.content(
+                        TD().content(
+                            SPAN("attribute_list_span").content(
+                                icon,
+                                context.data.format_with_unit(value, attributeMap.get(entry.attributeID).unitID)
+                            )
+                        )
+                    );
+                }
             }
             table.content(row);
         }
 
 
         return new HTML[]{
-            HEADER("font_header").text(title),
+            this.title != null ? HEADER("font_header").text(title) : HTML.empty(),
             table
         };
     }
@@ -113,17 +124,17 @@ public abstract class AttributeList extends Component {
     }
 
     public static final class Entry {
-        public final String name;
+        public final @Nullable String name;
         public final int attributeID;
         public final Double defaultValue;
 
-        public Entry(String name, int attributeID) {
+        public Entry(@Nullable String name, int attributeID) {
             this.name = name;
             this.attributeID = attributeID;
             this.defaultValue = null;
         }
 
-        public Entry(String name, int attributeID, @Nullable Double defaultValue) {
+        public Entry(@Nullable String name, int attributeID, @Nullable Double defaultValue) {
             this.name = name;
             this.attributeID = attributeID;
             this.defaultValue = defaultValue;

@@ -10,10 +10,8 @@ import net.sentientturtle.nee.components.*;
 import net.sentientturtle.nee.data.datatypes.Type;
 import org.jspecify.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static net.sentientturtle.html.HTML.DIV;
 
@@ -21,6 +19,9 @@ import static net.sentientturtle.html.HTML.DIV;
  * Page for a {@link Type}
  */
 public class TypePage extends Page {
+    public static final int[] CAN_BE_FITTED_TO_GROUP_ATTRIBUTES = {1298, 1299, 1300, 1301, 1872, 1879, 1880, 1881, 2065, 2396, 2476, 2477, 2478, 2479, 2480, 2481, 2482, 2483, 2484, 2485};
+    public static final int[] CAN_BE_FITTED_TO_TYPE_ATTRIBUTES = {1302, 1303, 1304, 1305, 1380, 1944, 2103, 2463, 2486, 2487, 2488, 2758};
+    public static final int[] USED_WITH_GROUP_ATTRIBUTES = {137, 602, 603, 604, 605, 606, 609, 610, 2076, 2077, 2078};
     public final Type type;
 
     public TypePage(Type type) {
@@ -90,6 +91,11 @@ public class TypePage extends Page {
                 new TypeGroup(type)
             );
         }
+
+        if (type.volume > 0.0 || type.mass > 0.0) {
+            left.content(new TypeVolume(type));
+        }
+
         if (type.description != null && type.description.length() > 0)
             left.content(new ItemDescription(EVEText.escape(type.description, context.data)));
 
@@ -157,11 +163,11 @@ public class TypePage extends Page {
         if (group.categoryID == 7)
             mid.content(new ModuleFitting(type));
 
-        if (type.groupID == 1964) {
+        if (type.groupID == 1964) { // If item type is a Mutaplasmid
             mid.content(new ItemStats(type));
-        } else if (categoryID == 7 || categoryID == 8) {
+        } else if (categoryID == 7 || categoryID == 8) {    // If module or charge
             for (int listedAttribute : ItemStats.INCLUDED_ATTRIBUTES) {
-                if (typeAttributes.containsKey(listedAttribute)) {
+                if (typeAttributes.containsKey(listedAttribute) && listedAttribute != 9) {
                     mid.content(new ItemStats(type));
                     break;
                 }
@@ -170,14 +176,14 @@ public class TypePage extends Page {
 
         HashSet<Integer> canBeFittedToGroups = new HashSet<>();
         HashSet<Integer> canBeFittedToTypes = new HashSet<>();
-        for (int attributeID : new int[]{1298, 1299, 1300, 1301, 1872, 1879, 1880, 1881, 2065, 2396, 2476, 2477, 2478, 2479, 2480, 2481, 2482, 2483, 2484, 2485}) {
+        for (int attributeID : CAN_BE_FITTED_TO_GROUP_ATTRIBUTES) {
             Double groupID = typeAttributes.get(attributeID);
             if (groupID != null) {
                 canBeFittedToGroups.add((int) (double) groupID);
             }
         }
 
-        for (int attributeID : new int[]{1302, 1303, 1304, 1305, 1380, 1944, 2103, 2463, 2486, 2487, 2488, 2758}) {
+        for (int attributeID : CAN_BE_FITTED_TO_TYPE_ATTRIBUTES) {
             Double typeID = typeAttributes.get(attributeID);
             if (typeID != null) {
                 canBeFittedToTypes.add((int) (double) typeID);
@@ -185,11 +191,48 @@ public class TypePage extends Page {
         }
 
         if (canBeFittedToGroups.size() > 0 || canBeFittedToTypes.size() > 0) {
-            mid.content(new CanBeFittedTo(canBeFittedToGroups, canBeFittedToTypes));
+            mid.content(new UsedWith("Can be fitted to", canBeFittedToGroups, canBeFittedToTypes));
         }
 
+        HashSet<Integer> usedWithGroups = new HashSet<>();
+        for (int attributeID : USED_WITH_GROUP_ATTRIBUTES) {
+            Double groupID = typeAttributes.get(attributeID);
+            if (groupID != null) {
+                usedWithGroups.add((int) (double) groupID);
+            }
+        }
 
-        // TODO: Mass/Volume
+        Double targetChargeSize = typeAttributes.get(128);
+
+        Set<Integer> usedWithTypes = usedWithGroups.stream()
+            .flatMap(g -> dataSupplier.getGroupTypes().getOrDefault(g, Set.of()).stream())
+            .filter(t -> {
+                HashSet<Integer> targetUsedWithGroups = new HashSet<>();
+                for (int attributeID : USED_WITH_GROUP_ATTRIBUTES) {
+                    Double groupID = dataSupplier.getTypeAttributes().getOrDefault(t.typeID, Map.of()).get(attributeID);
+                    if (groupID != null) {
+                        targetUsedWithGroups.add((int) (double) groupID);
+                    }
+                }
+
+                if (targetUsedWithGroups.contains(type.groupID)) {
+                    Double chargeSize = dataSupplier.getTypeAttributes().get(t.typeID).get(128);
+                    if (chargeSize != null && targetChargeSize != null) {
+                        return (double) chargeSize == (double) targetChargeSize;
+                    } else {
+                        return true;
+                    }
+                } else {
+                    return false;
+                }
+            })
+            .map(t -> t.typeID)
+            .collect(Collectors.toSet());
+
+        if (usedWithTypes.size() > 0) {
+            mid.content(new UsedWith("Used with", Set.of(), usedWithTypes));
+        }
+
 
         if (typeAttributes.containsKey(182))  // Has a skill-required-1 attribute
             right.content(new TypeSkills(type));

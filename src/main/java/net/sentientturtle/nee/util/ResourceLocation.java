@@ -31,6 +31,7 @@ import java.util.stream.Stream;
  */
 @SuppressWarnings("WeakerAccess")
 public class ResourceLocation {
+    // TODO: Move these to Main
     public static final ReferenceFormat REFERENCE_FORMAT = ReferenceFormat.EXTERNAL;
     public static final String OUTPUT_RES_FOLDER = "rsc/";              // Destination resource folder relative to output
     public static final String RES_FOLDER = "rsc/";                     // Input resource folder relative to working dir

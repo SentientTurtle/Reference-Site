@@ -51,7 +51,7 @@ public class StructureTreePage extends Page {
 
     private static ItemTree.Group groupFor(Group group, DataSupplier data) {
         Type[] types = data.getGroupTypes().get(group.groupID)
-            .stream().sorted(Comparator.comparingInt(type -> type.typeID))
+            .stream().sorted(Type.comparator(data))
             .toArray(Type[]::new);
         return new ItemTree.Group(group.name, types);
     }

@@ -7,6 +7,7 @@ import net.sentientturtle.nee.pages.TypePage;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Comparator;
 import java.util.Map;
 
 /**
@@ -37,6 +38,46 @@ public class Type implements HasPage {
         this.iconID = iconID;
         this.graphicID = graphicID;
         this.marketGroupID = marketGroupID;
+    }
+
+    public static Comparator<Type> comparator(DataSupplier data) {
+        Map<Integer, Integer> metaTypes = data.getMetaTypes();
+        Map<Integer, Map<Integer, Double>> typeAttributes = data.getTypeAttributes();
+
+        return (t1, t2) -> {
+            int m1 = metaTypes.getOrDefault(t1.typeID, 1);
+            m1 = switch (m1) {
+                case 52 -> 54;
+                case 53 -> 53;
+                case 54 -> 52;
+                default -> m1;
+            };
+
+            int m2 = metaTypes.getOrDefault(t2.typeID, 1);
+            m2 = switch (m2) {
+                case 52 -> 54;
+                case 53 -> 53;
+                case 54 -> 52;
+                default -> m2;
+            };
+
+            // Compare by meta group
+            int i = Integer.compare(m1, m2);
+            if (i == 0) {
+                // Compare by meta level
+                int l1 = (int) (double) typeAttributes.getOrDefault(t1.typeID, Map.of()).getOrDefault(633, 0.0);
+                int l2 = (int) (double) typeAttributes.getOrDefault(t2.typeID, Map.of()).getOrDefault(633, 0.0);
+                i = Integer.compare(l1, l2);
+                if (i == 0) {
+                    // If no other ordering, order by typeID
+                    return Integer.compare(t1.typeID, t2.typeID);
+                } else {
+                    return i;
+                }
+            } else {
+                return i;
+            }
+        };
     }
 
 

@@ -4,22 +4,24 @@ import net.sentientturtle.html.Component;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.context.HtmlContext;
+import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.pages.Page;
 
-import java.util.Arrays;
+import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static net.sentientturtle.html.HTML.*;
 
 /// List of multiple pages
-public class CanBeFittedTo extends Component {
+public class UsedWith extends Component {
+    private final String title;
     private final Set<Integer> groups;
     private final Set<Integer> types;
 
-    public CanBeFittedTo(Set<Integer> groups, Set<Integer> types) {
-        super("cbft colour_theme_minor");
+    public UsedWith(String title, Set<Integer> groups, Set<Integer> types) {
+        super("used_width colour_theme_minor");
+        this.title = title;
         this.groups = groups;
         this.types = types;
     }
@@ -27,16 +29,18 @@ public class CanBeFittedTo extends Component {
     @Override
     protected HTML[] getContent(HtmlContext context) {
         return Stream.concat(
-            Stream.of(HEADER("font_header").text("Can be fitted to")),
+            Stream.of(HEADER("font_header").text(this.title)),
             Stream.concat(
-                    groups.stream().map(context.data.getGroups()::get),
+                    groups.stream().map(context.data.getGroups()::get)
+                        .filter(Objects::nonNull),// Can be fitted to / Used with attributes may specify invalid groups
                     types.stream().map(context.data.getTypes()::get)
+                        .sorted(Type.comparator(context.data))
                 )
                 .map(entry -> {
                         Page page = entry.getPage();
-                        return DIV("cbft_entry").content(
-                            (page.getIcon() != null) ? IMG(page.getIcon(), null, 32).className("cbft_icon") : DIV("cbft_icon"),
-                            new PageLink(page).className("cbft_type font_header")
+                        return DIV("used_width_entry").content(
+                            (page.getIcon() != null) ? IMG(page.getIcon(), null, 32).className("used_width_icon") : DIV("used_width_icon"),
+                            new PageLink(page).className("used_width_type font_header")
                         );
                     }
                 )
@@ -46,29 +50,29 @@ public class CanBeFittedTo extends Component {
     @Override
     protected String getCSS() {
         return """
-            .cbft {
+            .used_width {
                 display: flex;
                 flex-direction: column;
                 padding: 0.5rem;
             }
             
-            .cbft > header {
+            .used_width > header {
                 margin-bottom: 0.5rem;
             }
             
-            .cbft_entry {
+            .used_width_entry {
                 width: 100%;
                 font-size: 1.25rem;
                 display: flex;
                 align-items: center;
             }
             
-            .cbft_icon {
+            .used_width_icon {
                 width: 2rem;
                 height: 2rem;
             }
             
-            .cbft_type {
+            .used_width_type {
                 margin-inline-start: 0.5rem;
             }""";
     }

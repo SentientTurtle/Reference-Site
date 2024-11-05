@@ -37,25 +37,4 @@ public class MetaGroup {
                 ", metaGroupName='" + metaGroupName + '\'' +
                 '}';
     }
-
-    /// Comparator for metagroups; Structure metaGroup order is reversed
-    /// <br>
-    /// 52	Structure Faction -> 54
-    /// <br>
-    /// 53	Structure Tech II -> 53
-    /// <br>
-    /// 54	Structure Tech I -> 52
-    public static <T> Comparator<T> orderedByMetaGroup(ToIntFunction<T> toMetaGroupID) {
-        return Comparator.comparingInt(
-            v -> {
-                int metaGroupID = toMetaGroupID.applyAsInt(v);
-                return switch (metaGroupID) {
-                    case 52 -> 54;
-                    case 53 -> 53;
-                    case 54 -> 52;
-                    default -> metaGroupID;
-                };
-            }
-        );
-    }
 }

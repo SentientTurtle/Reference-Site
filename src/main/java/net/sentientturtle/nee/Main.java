@@ -32,6 +32,7 @@ public class Main {
     public static Path SHARED_CACHE_PATH;
     public static String SDE_FILE;
     public static boolean UPDATE_SDE;
+    public static File TEMP_DIR = new File("./rsc/temp");
     public static int COMPRESSION;  // No compression is moderately faster
 
     // Website title as configurable variable in case a rename is needed; I don't feel like buying a domain name yet

@@ -8,6 +8,7 @@ import org.jspecify.annotations.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 /// Top level class for HTML elements
@@ -42,6 +43,7 @@ public class Element implements HTML {
      * @throws IllegalStateException If {@code name} was "class" or an already set attribute
      */
     public Element attribute(@NonNull String name, @Nullable String value) throws IllegalStateException {
+        Objects.requireNonNull(name);
         name = name.toLowerCase();
         if ("class".equals(name)) throw new IllegalStateException("Element className may not be set using #attribute(), use #className()");
         if (this.attributes.containsKey(name)) throw new IllegalStateException("duplicate attribute declaration: " + name);

@@ -65,7 +65,7 @@ public class GroupList extends Component {
                 .getOrDefault(group.groupID, (Set<Type>) EMPTY_SET)
                 .stream()
                 .filter(t -> t.published)
-                .sorted(Comparator.comparingInt(t -> t.typeID))
+                .sorted(Type.comparator(context.data))
                 .map(type ->
                     DIV("group_list_entry")
                         .content(

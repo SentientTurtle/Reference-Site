@@ -219,7 +219,7 @@ public class ShipTreePage extends Page {
                         groupContainer.content(groupRow);
 
                         Type[] typeArray = types.stream()
-                            .sorted(MetaGroup.orderedByMetaGroup(type -> data.getMetaTypes().getOrDefault(type.typeID, 1)))
+                            .sorted(Type.comparator(data))
                             .toArray(Type[]::new);
 
                         Element shipContainer = null;

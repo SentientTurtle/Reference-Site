@@ -10,6 +10,7 @@ import net.sentientturtle.nee.util.ResourceLocation;
 import net.sentientturtle.nee.data.datatypes.Type;
 
 import java.util.*;
+import java.util.function.ToIntFunction;
 
 import static net.sentientturtle.html.HTML.*;
 
@@ -38,7 +39,17 @@ public class TypeVariants extends Component {
         if (metaVariants.size() > 1) {
             metaVariants.entrySet()
                 .stream()
-                .sorted(MetaGroup.orderedByMetaGroup(Map.Entry::getKey))
+                .sorted(Comparator.comparingInt(
+                    v -> {
+                        int metaGroupID = v.getKey();
+                        return switch (metaGroupID) {
+                            case 52 -> 54;
+                            case 53 -> 53;
+                            case 54 -> 52;
+                            default -> metaGroupID;
+                        };
+                    }
+                ))
                 .forEach(entry -> {
                     table.content(TR().content(TH("font_header").attribute("colspan", "2").text(metaGroups.get(entry.getKey()).metaGroupName)));
                     for (Integer variantID : (Iterable<? extends Integer>) entry.getValue().stream().sorted()::iterator) {

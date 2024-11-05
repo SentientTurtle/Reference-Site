@@ -19,6 +19,9 @@ import static net.sentientturtle.html.HTML.*;
  * Displays item stats for a {@link Type}
  */
 public class ItemStats extends Component {
+    public static final int[] WARFARE_BUFF_ATTRIBUTES = {2468, 2470, 2472, 2536};
+    public static final int[] WARFARE_BUFF_MULTIPLIER_ATTRIBUTES = {2596, 2597, 2598, 2599};
+    public static final int[] WARFARE_BUFF_VALUE_ATTRIBUTES = {2469, 2471, 2473, 2537};
     private final Type type;
 
     public ItemStats(Type type) {
@@ -28,7 +31,7 @@ public class ItemStats extends Component {
 
     /// Attributes that are directly listed
     private static final int[] LISTED_ATTRIBUTES = new int[]{
-        9,      // Structure HP
+        9,      // Structure HP     Special-cased to only be shown on modules with hull resistance
         11,     // Powergrid Output
         20,     // Maximum Velocity Bonus (Used by prop-mods, drone upgrades, and stasis webs)
         37,     // Maximum Velocity
@@ -40,6 +43,7 @@ public class ItemStats extends Component {
         66,     // Duration bonus
         67,     // Capacitor capacity bonus
         68,     // Shield (boost) Bonus
+        70,     // Inertia modifier
         72,     // Shield HP bonus
         76,     // Maximum Targeting Range
         77,     // Mining amount
@@ -51,6 +55,7 @@ public class ItemStats extends Component {
         99,     // AOE Radius
         103,    // Warp Disruption Range
         105,    // Warp Scramble Strength
+        120,    // Range bonus
         125,    // Ship scanning range
         126,    // Cargo scan range
         134,    // Shield recharge rate bonus
@@ -78,6 +83,7 @@ public class ItemStats extends Component {
         244,    // Tracking Speed Multiplier
         263,    // Shield Capacity  // TODO: Patch to "Bonus" if only used by subsystems and ShipHealth
         265,    // Armor HP
+        281,    // Maximum flight time
         283,    // Drone Capacity
         292,    // Damage Multiplier Bonus
         293,    // Rate of Fire Bonus
@@ -106,6 +112,7 @@ public class ItemStats extends Component {
         459,    // Drone Control Range Bonus
         482,    // Capacitor Capacity
         510,    // Ship scan falloff
+        517,    // Falloff Modifier
         547,    // Missile Velocity Bonus
         548,    // Shield boost bonus
         549,    // Powergrid bonus
@@ -118,6 +125,9 @@ public class ItemStats extends Component {
         565,    // Scan Resolution Bonus
         591,    // Drone Velocity Bonus
         596,    // Flight Time Bonus (Missiles)
+        600,    // Warp Speed Multiplier (scanner probes)
+        612,    // Base Shield Damage   TODO: Maybe remove, if irrelevant
+        613,    // Base Armor Damage
         614,    // Cargo Capacity Bonus
         619,    // Cloaking Targeting Delay Bonus
         624,    // Warp Speed Bonus
@@ -125,6 +135,8 @@ public class ItemStats extends Component {
         654,    // Explosion Radius
         767,    // Tracking Speed Bonus
         780,    // Cycle time bonus
+        782,    // Asteroid Specialization Yield Modifier
+        785,    // Unfitting Capacitor Cost
         796,    // Mass Addition
         806,    // Repair bonus (Armor?)
         828,    // EW Strength Modifier
@@ -148,13 +160,24 @@ public class ItemStats extends Component {
         1160,   // Access Difficulty Bonus Modifier
         1164,   // AB/MWD Max Velocity Bonus
         1190,   // EW Capacitor Need Bonus
+        1227,   // Modification of Signature Radius Bonus
         1245,   // Disallow Activation In Warp
         1255,   // Drone Damage Bonus
         1270,   // Afterburner and Microwarpdrive Thrust Bonus
         1271,   // Drone Bandwidth
         1296,   // Consumption quantity bonus   TODO: Rename "consumption" attributes to Fuel
+        1313,   // Modification of Maximum Targeting Range Bonus
+        1314,   // Modification of Scan Resolution Bonus
+        1315,   // Modification of Optimal Range Bonus
+        1316,   // Modification of Tracking Speed Bonus
+        1327,   // Warp Scrambler Range Bonus
+        1332,   // Modification of Falloff Bonus
         1368,   // Turret Hardpoint modifier
         1369,   // Launcher Hardpoint Modifier
+        1370,   // Base Scan Range
+        1371,   // Base Sensor Strength
+        1372,   // Base Maximum Deviation
+        1373,   // Scan Range Increment Factor
         1374,   // High Slot Modifier
         1375,   // Medium Slot Modifier
         1376,   // Low Slot Modifier
@@ -175,9 +198,17 @@ public class ItemStats extends Component {
         1920,   // Virus Strength
         1950,   // Warp speed increase TODO: Set AU/s unit
         1978,   // Global resistance reduction  TODO: Patch name to "Damage resistance reduction"
+        2023,   // Modification of Explosion Radius Bonus
+        2024,   // Modification of Explosion Velocity Bonus
+        2025,   // Modification of Missile Velocity Bonus
+        2026,   // Modification of Flight Time Bonus
         2044,   // Effectiveness falloff
         2066,   // Jump Distance
         2067,   // Area Effect Radius
+        2072,   // Modification of Gravimetric Strength Bonus
+        2073,   // Modification of Ladar Strength Bonus
+        2074,   // Modification of Magnetometric Strength Bonus
+        2075,   // Modification of Radar Strength Bonus
         2253,   // ECM Resistance
         2259,   // Warm-up Neutralization Radius
         2260,   // Warm-up Neutralization Amount
@@ -190,6 +221,7 @@ public class ItemStats extends Component {
         2279,   // AOE Range
         2280,   // AOE Duration
         2281,   // AOE Signature Radius
+        2282,   // Modification of Sensor Strength Bonus
         2304,   // Torpedo Velocity Bonus
         2305,   // XL Launcher ROF Bonus
         2306,   // Siege Missile Damage Bonus
@@ -207,6 +239,10 @@ public class ItemStats extends Component {
         2351,   // Sensor Dampener Resistance Bonus
         2352,   // Remote Assistance Impedance Bonus
         2353,   // Weapon Disruption Resistance Bonus
+        2402,   // Modification of EM Damage Resistance Bonus
+        2403,   // Modification of Explosive Damage Resistance Bonus
+        2404,   // Modification of Kinetic Damage Resistance Bonus
+        2405,   // Modification of Thermal Damage Resistance Bonus
         2427,   // Jump/Dock/Tether/Cloak restriction duration
         2428,   // Immobility Duration
         2451,   // Neutralizer signature res TODO: Patch a more user-friendly name
@@ -238,6 +274,8 @@ public class ItemStats extends Component {
         2693,   // Remote shield rep falloff bonus
         2694,   // Remote armor repair falloff bonus
         2695,   // Remote armor repair range bonus
+        2697,   // Maximum Scan Range
+        2700,   // Maximum Auto-Targeting Range
         2701,   // Survey probe scan time reduction
         2733,   // Damage Multiplier Bonus Per Cycle
         2734,   // Maximum Damage Multiplier Bonus
@@ -253,8 +291,12 @@ public class ItemStats extends Component {
         3113,   // Signature radius bonus
         3114,   // Active signature radius bonus
         3124,   // Drone bandwidth penalty
+        3148,   // Valid target types
         3153,   // Residue volume
         3154,   // Residue Probability
+        3159,   // Residue Volume Multiplier Bonus
+        3160,   // Residue Probability Bonus
+        3161,   // Asteroid Specialization Duration Multiplier
         5412,   // Applied Debuff Duration
         5425,   // Disallow Cloaking While Fit
         5426,   // Requires Active Siege Module
@@ -286,16 +328,22 @@ public class ItemStats extends Component {
             267, 270, 269, 268,
             // Hull damage resistance
             974, 977, 976, 975,
+            // Hull damage resistance
+            113, 110, 109, 111,
             // Damage resistance
             984, 987, 986, 985, // TODO: I don't like how these are "damage resistance bonuses" with negative numbers. Maybe change their name or units?
             // "ECCM" Sensor bonus
             1030, 1029, 1027, 1028,
+            // Warfare buffs
+            2468, 2470, 2472, 2536,
+            // Crystal volatility
+            783, 784, 786
         };
 
         INCLUDED_ATTRIBUTES = Stream.concat(Arrays.stream(LISTED_ATTRIBUTES).boxed(), Arrays.stream(additionalAttributes).boxed()).collect(Collectors.toSet());
     }
 
-    private void tryRow(HtmlContext context, Element table, String title, int... attributes) {
+    private boolean tryRow(HtmlContext context, Element table, String title, int... attributes) {
         Map<Integer, Double> typeAttributes = context.data.getTypeAttributes().getOrDefault(type.typeID, Map.of());
         for (int attributeID : attributes) {
             Attribute a = context.data.getAttributes().get(attributeID);
@@ -321,9 +369,10 @@ public class ItemStats extends Component {
                     )
                 )));
 
-                break;
+                return true;
             }
         }
+        return false;
     }
 
     @Override
@@ -333,18 +382,55 @@ public class ItemStats extends Component {
 
         var table = TABLE("item_stats_table");
 
+        boolean showHullHP = false;
         tryRow(context, table, "Damage", 114, 118, 117, 116);
         tryRow(context, table, "Damage Resistance Bonus", 984, 987, 986, 985);
-        tryRow(context, table, "Shield Damage Resistance Bonus", 271, 274, 273, 272);
-        tryRow(context, table, "Armor Damage Resistance Bonus", 267, 270, 269, 268);
-        tryRow(context, table, "Hull Damage Resistance Bonus", 974, 977, 976, 975);
+        tryRow(context, table, "Shield Damage Resistance", 271, 274, 273, 272); // TODO: Use a health window?
+        showHullHP |= tryRow(context, table, "Armor Damage Resistance", 267, 270, 269, 268);
+        showHullHP |= tryRow(context, table, "Hull Damage Resistance", 974, 977, 976, 975);
+        showHullHP |= tryRow(context, table, "Hull Damage Resistance", 113, 110, 109, 111);
         tryRow(context, table, "ECM Jammer Strength", 241, 240, 238, 239);
         tryRow(context, table, "Sensor Strength Bonus", 1030, 1029, 1027, 1028);
+
+        // Laser/Mining crystals
+        {
+            Double crystalsTakeDamage = typeAttributes.get(786);
+            Double volatilityDamage = typeAttributes.get(784);
+            if (crystalsTakeDamage != null && (crystalsTakeDamage != 1.0 || volatilityDamage != null)) {
+                String name;
+                HTML cycles;
+                if (crystalsTakeDamage == 1.0) {
+                    double crystalHP = typeAttributes.get(9);
+                    double crystalVolatility = typeAttributes.get(783);
+
+                    if (crystalVolatility == 1.0) {
+                        name = "Crystal Lifespan";
+                    } else {
+                        name = "Average Crystal Lifespan";
+                    }
+
+                    double totalCycles = (crystalHP / volatilityDamage) / crystalVolatility;
+                    cycles = context.data.format_with_unit(totalCycles, -1);
+                } else {
+                    name = "Crystal Lifespan";
+                    cycles = TEXT("∞");
+                }
+                table.content(TR().content(
+                    TD().content(SPAN("item_stats_span").title(name).content(
+                            DIV("item_stats_icon"),
+                            TEXT(name + ":")
+                        )
+                    ),
+                    TD().content(cycles, TEXT(" cycles"))
+                ));
+            }
+        }
 
         double activationTime = type.getModuleActivationTime(context.data);
 
         // Slightly inefficient, but we want the ordering of LISTED_ATTRIBUTES
         for (int attributeID : LISTED_ATTRIBUTES) {
+            if (attributeID == 9 && !showHullHP) continue;
             Attribute attribute = attributes.get(attributeID);
             Double attributeValue = typeAttributes.get(attributeID);
             if (attributeValue != null && attributeValue != attribute.defaultValue()) {
@@ -443,12 +529,49 @@ public class ItemStats extends Component {
             }
         }
 
+        Element warfareBuffTable = TABLE("item_stats_table");
+        for (int i = 0; i < WARFARE_BUFF_ATTRIBUTES.length; i++) {
+            int warfareBuffID = (int) (double) typeAttributes.getOrDefault(WARFARE_BUFF_ATTRIBUTES[i], 0.0);
+            if (warfareBuffID > 0) {
+                double buffAmount;
+                Double buffMultiplier = typeAttributes.get(WARFARE_BUFF_MULTIPLIER_ATTRIBUTES[i]);
+                Double buffValue = typeAttributes.get(WARFARE_BUFF_VALUE_ATTRIBUTES[i]);
+
+                if (buffMultiplier != null) {
+                    buffAmount = buffMultiplier;
+                } else {
+                    buffAmount = buffValue;
+                }
+
+                FSDData.WarfareBuff warfareBuff = context.fsdData.warfareBuffs.get(warfareBuffID);
+                Element valueTD = TD();
+                switch (warfareBuff.showOutputValueInUI()) {
+                    case "ShowNormal" -> valueTD.content(context.data.format_with_unit(buffAmount, 124));
+                    case "ShowInverted" -> valueTD.content(context.data.format_with_unit(-buffAmount, 124));
+                    default -> throw new RuntimeException("Unknown warfare buff display : " + warfareBuff.showOutputValueInUI() + " for buff: " + warfareBuffID);
+                };
+
+                String name = context.fsdData.localizationStrings.get(warfareBuff.displayNameID());
+
+                warfareBuffTable.content(TR().content(
+                    TD().content(SPAN("item_stats_span").title(name).content(
+                            DIV("item_stats_icon"),
+                            TEXT(name + ":")
+                        )
+                    ),
+                    valueTD
+                ));
+
+            }
+
+        }
 
         String itemKind = context.data.getCategories().get(context.data.getGroups().get(type.groupID).categoryID).name;
         return new HTML[]{
             HEADER("font_header").text(itemKind + " stats"),
             table.isEmpty() ? HTML.empty() : table,
             mutationsTable.isEmpty() ? HTML.empty() : mutationsTable,
+            warfareBuffTable.isEmpty() ? HTML.empty() : warfareBuffTable
         };
     }
 
@@ -462,11 +585,18 @@ public class ItemStats extends Component {
             .item_stats_table {
                 width: 100%;
                 border-collapse: collapse;
-                margin-top: 0.5rem;
             }
             
             .item_stats_table tr:not(:first-child) {
                 border-top: var(--border-size) solid var(--colour-theme-minor-border);
+            }
+            
+            .item_stats > header {
+                margin-bottom: 0.5rem;
+            }
+            
+            .item_stats_table:not(:last-child) {
+                border-bottom: var(--border-size) solid var(--colour-theme-minor-border);
             }
             
             .item_stats_multirow_content {

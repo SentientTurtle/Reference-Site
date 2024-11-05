@@ -142,7 +142,7 @@ public class MarketGroupPage extends Page {
     private static ItemTree.@Nullable Group groupForItems(@Nullable Set<Type> types, DataSupplier data) {
         if (types == null || types.isEmpty()) return null;
         HasPage[] pages = types.stream()
-            .sorted(MetaGroup.orderedByMetaGroup(type -> data.getMetaTypes().getOrDefault(type.typeID, 1)))
+            .sorted(Type.comparator(data))
             .toArray(HasPage[]::new);
         return new ItemTree.Group((HTML) null, pages);
     }
@@ -167,7 +167,7 @@ public class MarketGroupPage extends Page {
                                     .stream()
                                     .sorted(Comparator.comparing(m -> m.name)),
                                 items.stream()
-                                    .sorted(MetaGroup.orderedByMetaGroup(type -> data.getMetaTypes().getOrDefault(type.typeID, 1)))
+                                    .sorted(Type.comparator(data))
                             ).toArray(HasPage[]::new);
 
                             if (marketGroup.name.equals(group.name)) {
