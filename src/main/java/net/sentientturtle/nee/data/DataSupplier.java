@@ -9,6 +9,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -20,14 +21,19 @@ import java.util.stream.Collectors;
  * @see SQLiteDataSupplier
  */
 public abstract class DataSupplier {
-    private static final ThreadLocal<DecimalFormat> threadLocalDecimalFormat;
+    private static final DecimalFormat decimalFormat;
+    private static final SimpleDateFormat dateFormat;
 
     static {
         DecimalFormatSymbols symbols = new DecimalFormatSymbols();
         symbols.setDecimalSeparator('.');   // English style number formatting to match that of the game
         symbols.setGroupingSeparator(',');
         symbols.setNaN("???");              // NaN treated as "Unknown"
-        threadLocalDecimalFormat = ThreadLocal.withInitial(() -> new DecimalFormat("###,##0.##", symbols));
+        decimalFormat = new DecimalFormat("###,##0.##", symbols);
+
+        // This should be replaced with more robust date formatting
+        dateFormat = new SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.ENGLISH);
+        dateFormat.setTimeZone(TimeZone.getTimeZone("Etc/UTC"));
     }
 
     // Data
@@ -279,8 +285,6 @@ public abstract class DataSupplier {
      * @return Value formatted as a String with the specified unit
      */
     public HTML format_with_unit(double value, @Nullable Integer unitID) {
-        DecimalFormat decimalFormat = DataSupplier.threadLocalDecimalFormat.get();
-
         if (unitID == null) unitID = -1;
 
         switch (unitID) {
@@ -487,7 +491,7 @@ public abstract class DataSupplier {
                 }
             case 143:   // Datetime	"Date and time"
                 long unix_timestamp = (long) (value * 86400.0);
-                return HTML.TEXT(new Date(unix_timestamp * 1000).toString());  // TODO: This needs better date formatting
+                return HTML.TEXT(dateFormat.format(new Date(unix_timestamp * 1000)) + " (EVE)");  // TODO:
             case 144:   // Astronomical Unit per second
                 return HTML.TEXT(decimalFormat.format(value) + " AU/s");
             // No unit 145-204

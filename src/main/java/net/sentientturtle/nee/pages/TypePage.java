@@ -165,7 +165,7 @@ public class TypePage extends Page {
 
         if (type.groupID == 1964) { // If item type is a Mutaplasmid
             mid.content(new ItemStats(type));
-        } else if (categoryID == 7 || categoryID == 8) {    // If module or charge
+        } else if (categoryID == 7 || categoryID == 8 || categoryID == 20) {    // If module, charge, or implant
             for (int listedAttribute : ItemStats.INCLUDED_ATTRIBUTES) {
                 if (typeAttributes.containsKey(listedAttribute) && listedAttribute != 9) {
                     mid.content(new ItemStats(type));

@@ -72,6 +72,11 @@ public class ItemStats extends Component {
         158,    // Accuracy falloff
         160,    // Turret tracking
         169,    // Inertia modifier
+        175,    // Charisma Modifier
+        176,    // Intelligence Modifier
+        177,    // Memory Modifier
+        178,    // Perception Modifier
+        179,    // Willpower Modifier
         188,    // Cargo Scan Resistance
         197,    // Survey Scan Range
         202,    // CPU Output bonus
@@ -101,15 +106,24 @@ public class ItemStats extends Component {
         319,    // Warp Capacitor Need Bonus
         323,    // Power Need Bonus
         327,    // HP bonus
+        330,    // Booster Duration
+        331,    // Implant Slot
         335,    // Armor HP bonus
         337,    // Shield Capacity Bonus
         338,    // Recharge Rate Bonus  TODO: Patch to specify shield if only used by shield modules
         349,    // Falloff Bonus
         351,    // Optimal Range Bonus
+        379,    // Refining Yield Mutator
         424,    // CPU Output Bonus
         434,    // Mining amount bonus
         435,    // Maximum Active Command Relays
+        440,    // Manufacturing Time Bonus
+        441,    // Rate of Fire Bonus
+        447,    // Smuggling Chance Bonus
+        452,    // Copy Speed Bonus
+        453,    // Blueprint Manufacture Time Bonus
         459,    // Drone Control Range Bonus
+        468,    // Mineral Need Research Bonus
         482,    // Capacitor Capacity
         510,    // Ship scan falloff
         517,    // Falloff Modifier
@@ -129,6 +143,7 @@ public class ItemStats extends Component {
         612,    // Base Shield Damage   TODO: Maybe remove, if irrelevant
         613,    // Base Armor Damage
         614,    // Cargo Capacity Bonus
+        616,    // Shield Booster Penalty
         619,    // Cloaking Targeting Delay Bonus
         624,    // Warp Speed Bonus
         653,    // Explosion Velocity
@@ -138,14 +153,22 @@ public class ItemStats extends Component {
         782,    // Asteroid Specialization Yield Modifier
         785,    // Unfitting Capacitor Cost
         796,    // Mass Addition
+        799,    // Talisman Set Bonus
+        802,    // Snake Set Bonus
+        803,    // Asklepian Set Bonus
         806,    // Repair bonus (Armor?)
         828,    // EW Strength Modifier
+        838,    // Crystal Set Bonus
         846,    // Scan strength bonus
         847,    // Explosion Velocity Bonus
         848,    // Explosion Radius Bonus
         851,    // Capacitor Need Bonus
+        863,    // Halo Set Bonus
+        864,    // Amulet Set Bonus
+        884,    // Mindlink Bonus
         895,    // Armor Repair Bonus
         902,    // Access difficulty bonus
+        927,    // CPU Penalty Reduction
         973,    // Signature radius bonus
         983,    // Signature radius modifier
         1034,   // Cloak Reactivation Delay
@@ -153,9 +176,27 @@ public class ItemStats extends Component {
         1076,   // Velocity modifier
         1079,   // Capacitor modifier
         1082,   // CPU Penalty
+        1083,   // Armor Hitpoint Bonus
+        1084,   // Velocity Modifier
+        1087,   // Booster Slot
+        1089,   // Chance of Side Effect
+        1125,   // Negative Side Effect Chance Bonus
+        1126,   // Side effect Modifier
         1130,   // ECM Strength Bonus
         1131,   // Mass Modifier
         1138,   // Rig drawback
+        1141,   // Armor Hitpoint Penalty
+        1142,   // Armor Repair Amount Penalty
+        1143,   // Shield Capacity Penalty
+        1144,   // Turret Optimal Range Penalty
+        1145,   // Turret Tracking Penalty
+        1146,   // Turret Falloff Penalty
+        1147,   // Explosion Velocity Penalty
+        1148,   // Missile Velocity Penalty
+        1149,   // Missile Explosion Radius Penalty
+        1150,   // Capacitor Capacity Penalty
+        1151,   // Velocity Penalty
+        1156,   // Maximum Scan Deviation Modifier
         1159,   // Armor HP bonus
         1160,   // Access Difficulty Bonus Modifier
         1164,   // AB/MWD Max Velocity Bonus
@@ -165,6 +206,11 @@ public class ItemStats extends Component {
         1255,   // Drone Damage Bonus
         1270,   // Afterburner and Microwarpdrive Thrust Bonus
         1271,   // Drone Bandwidth
+        1282,   // Nomad Set Bonus
+        1284,   // Virtue Set Bonus
+        1291,   // Edge Set Bonus
+        1292,   // Harvest Set Bonus
+        1293,   // Centurion Set Bonus
         1296,   // Consumption quantity bonus   TODO: Rename "consumption" attributes to Fuel
         1313,   // Modification of Maximum Targeting Range Bonus
         1314,   // Modification of Scan Resolution Bonus
@@ -185,7 +231,9 @@ public class ItemStats extends Component {
         1536,   // ECM Range Bonus
         1544,   // Max modules in group allowed
         1619,   // Drone Stasis Web Bonus
+        1647,   // Maximum Pilot Age
         1795,   // Reload time TODO: Move to charge section
+        1799,   // Genolution Set Bonus
         1839,   // Damage Delay
         1886,   // Boosted repair multiplier (?)
         1905,   // Scan deviation bonus
@@ -196,6 +244,7 @@ public class ItemStats extends Component {
         1915,   // Virus Coherence Bonus
         1918,   // Analyzer Virus Strength Bonus
         1920,   // Virus Strength
+        1932,   // Ascendancy Set bonus
         1950,   // Warp speed increase TODO: Set AU/s unit
         1978,   // Global resistance reduction  TODO: Patch name to "Damage resistance reduction"
         2023,   // Modification of Explosion Radius Bonus
@@ -243,9 +292,12 @@ public class ItemStats extends Component {
         2403,   // Modification of Explosive Damage Resistance Bonus
         2404,   // Modification of Kinetic Damage Resistance Bonus
         2405,   // Modification of Thermal Damage Resistance Bonus
+        2422,   // Expiry Date
         2427,   // Jump/Dock/Tether/Cloak restriction duration
         2428,   // Immobility Duration
+        2747,   // Stasis Webifier Maximum Range Bonus
         2451,   // Neutralizer signature res TODO: Patch a more user-friendly name
+        2457,   // Armor Repair Bonus
         2535,   // Modifier duration
         2574,   // Command Burst Range Bonus
         2583,   // Drone Damage and Hitpoints Bonus
@@ -283,20 +335,36 @@ public class ItemStats extends Component {
         2796,   // Repair multiplier bonus per cycle
         2797,   // Maximum repair multiplier
         2821,   // Rapid Torpedo Launcher Bonus
+        2823,   // Maximum Damage Bonus Multiplier Modifier
+        2824,   // Damage Multiplier Bonus Per Cycle Modifier
+        2825,   // Implant Set Bonus
         2832,   // Max jump ships
+        3015,   // Shield Hitpoint Bonus
+        3017,   // Nirvana Set Bonus
+        3023,   // Savior Set Bonus
+        3024,   // Remote Rep Cycle Time Bonus
+        3027,   // Hydra Set Bonus
+        3028,   // Drone Tracking Speed Bonus
+        3029,   // Drone Optimal and Falloff Range Bonus
+        3030,   // Missile Flight Time Bonus
+        3031,   // Missile Explosion Velocity Bonus
         3036,   // Vorton Arc Range
         3037,   // Arc Chain Targets
+        3107,   // Rapture Set Bonus
         3108,   // Missile Rate of Fire Bonus
         3109,   // Turret Rate of Fire Bonus
         3113,   // Signature radius bonus
         3114,   // Active signature radius bonus
         3124,   // Drone bandwidth penalty
+        3134,   // Stabilized Cloak Duration Bonus
         3148,   // Valid target types
         3153,   // Residue volume
         3154,   // Residue Probability
         3159,   // Residue Volume Multiplier Bonus
         3160,   // Residue Probability Bonus
         3161,   // Asteroid Specialization Duration Multiplier
+        3206,   // Stasis Webifier Maximum Range Bonus
+        3353,   // Drone Tracking Speed Bonus
         5412,   // Applied Debuff Duration
         5425,   // Disallow Cloaking While Fit
         5426,   // Requires Active Siege Module
@@ -330,10 +398,14 @@ public class ItemStats extends Component {
             974, 977, 976, 975,
             // Hull damage resistance
             113, 110, 109, 111,
+            // Passive Damage Resistance Bonus
+            994, 997, 996, 995,
             // Damage resistance
             984, 987, 986, 985, // TODO: I don't like how these are "damage resistance bonuses" with negative numbers. Maybe change their name or units?
             // "ECCM" Sensor bonus
             1030, 1029, 1027, 1028,
+            // Implant "ECCM" Sensor bonus
+            1565, 1568, 1567, 1566,
             // Warfare buffs
             2468, 2470, 2472, 2536,
             // Crystal volatility
@@ -385,12 +457,14 @@ public class ItemStats extends Component {
         boolean showHullHP = false;
         tryRow(context, table, "Damage", 114, 118, 117, 116);
         tryRow(context, table, "Damage Resistance Bonus", 984, 987, 986, 985);
+        tryRow(context, table, "Damage Resistance Bonus", 994, 997, 996, 995);  // TODO: Ingame this is named "Passive Resistance Bonus", maybe change?
         tryRow(context, table, "Shield Damage Resistance", 271, 274, 273, 272); // TODO: Use a health window?
         showHullHP |= tryRow(context, table, "Armor Damage Resistance", 267, 270, 269, 268);
         showHullHP |= tryRow(context, table, "Hull Damage Resistance", 974, 977, 976, 975);
         showHullHP |= tryRow(context, table, "Hull Damage Resistance", 113, 110, 109, 111);
         tryRow(context, table, "ECM Jammer Strength", 241, 240, 238, 239);
         tryRow(context, table, "Sensor Strength Bonus", 1030, 1029, 1027, 1028);
+        tryRow(context, table, "Sensor Strength Bonus", 1565, 1568, 1567, 1566);
 
         // Laser/Mining crystals
         {
