@@ -33,7 +33,7 @@ public class CategoryPage extends Page {
     @Override
     protected HTML getContent(HtmlContext context) {
         return DIV("category_page_grid").content(
-            new Title(category.name, getIcon()),
+            new Title(category.name, getIcon(context)),
             new GroupList(category)
         );
     }
@@ -45,8 +45,8 @@ public class CategoryPage extends Page {
 
     @Nullable
     @Override
-    public ResourceLocation getIcon() {
-        return category.iconID != null ? ResourceLocation.iconOfIconID(category.iconID) : null;
+    public ResourceLocation getIcon(HtmlContext context) {
+        return category.iconID != null ? ResourceLocation.iconOfIconID(category.iconID, context) : null;
     }
 
 }

@@ -47,7 +47,7 @@ public class MarketGroupPage extends Page {
     }
 
     @Override
-    public @Nullable ResourceLocation getIcon() {
+    public @Nullable ResourceLocation getIcon(HtmlContext context) {
         return null;
     }
 

@@ -1,5 +1,6 @@
 package net.sentientturtle.nee.data.datatypes;
 
+import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.util.ResourceLocation;
 import net.sentientturtle.nee.data.DataSupplier;
 import org.jspecify.annotations.Nullable;
@@ -109,7 +110,7 @@ public class Region implements Mappable{
     }
 
     @Override
-    public ResourceLocation getIcon() {
-        return ResourceLocation.iconOfIconID(2355);
+    public ResourceLocation getIcon(HtmlContext context) {
+        return ResourceLocation.iconOfIconID(2355, context);
     }
 }

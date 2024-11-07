@@ -33,7 +33,7 @@ public class GroupPage extends Page {
     @Override
     protected HTML getContent(HtmlContext context) {
         return DIV("group_page_grid").content(
-            new Title(group.name, getIcon()),
+            new Title(group.name, getIcon(context)),
             new GroupList(group)
         );
     }
@@ -45,8 +45,8 @@ public class GroupPage extends Page {
 
     @Nullable
     @Override
-    public ResourceLocation getIcon() { // TODO: Replace with icon of first type in group
-        return group.iconID != null ? ResourceLocation.iconOfIconID(group.iconID) : null;
+    public ResourceLocation getIcon(HtmlContext context) { // TODO: Replace with icon of first type in group
+        return group.iconID != null ? ResourceLocation.iconOfIconID(group.iconID, context) : null;
     }
 
 }

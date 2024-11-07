@@ -34,7 +34,7 @@ public class MapPage extends Page {
     @Override
     protected HTML getContent(HtmlContext context) {
         var grid = DIV("map_page_grid").content(
-            new Title(mappable.getName(), getIcon())
+            new Title(mappable.getName(), getIcon(context))
         );
 
         if (mappable.hasRender()) {
@@ -61,7 +61,7 @@ public class MapPage extends Page {
 
     @Nullable
     @Override
-    public ResourceLocation getIcon() {
-        return mappable.getIcon();
+    public ResourceLocation getIcon(HtmlContext context) {
+        return mappable.getIcon(context);
     }
 }

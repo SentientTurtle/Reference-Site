@@ -54,7 +54,7 @@ public class GroupList extends Component {
                     DIV("group_list_entry")
                     .content(
                         group.iconID != null
-                            ? IMG(ResourceLocation.iconOfIconID(group.iconID), null, 64).className("group_list_icon")
+                            ? IMG(ResourceLocation.iconOfIconID(group.iconID, context), null, 64).className("group_list_icon")
                             : DIV("group_list_icon"),
                         SPAN("font_header")
                             .content(new PageLink(new GroupPage(group)))
@@ -69,7 +69,7 @@ public class GroupList extends Component {
                 .map(type ->
                     DIV("group_list_entry")
                         .content(
-                            IMG(ResourceLocation.iconOfTypeID(type.typeID), null, 64).className("group_list_icon"),
+                            IMG(ResourceLocation.typeIcon(type.typeID, context), null, 64).className("group_list_icon"),
                             SPAN("font_header")
                                 .content(new PageLink(new TypePage(type)))
                         )

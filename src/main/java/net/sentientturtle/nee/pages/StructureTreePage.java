@@ -31,7 +31,7 @@ public class StructureTreePage extends Page {
     }
 
     @Override
-    public @Nullable ResourceLocation getIcon() {
+    public @Nullable ResourceLocation getIcon(HtmlContext context) {
         return null;
     }
 

@@ -1,5 +1,6 @@
 package net.sentientturtle.nee.data.datatypes.singleton;
 
+import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.datatypes.Jump;
 import net.sentientturtle.nee.util.ResourceLocation;
 import net.sentientturtle.nee.data.DataSupplier;
@@ -80,8 +81,8 @@ public interface Cluster extends Mappable {
         }
 
         @Override
-        public ResourceLocation getIcon() {
-            return ResourceLocation.iconOfIconID(2355);
+        public ResourceLocation getIcon(HtmlContext context) {
+            return ResourceLocation.iconOfIconID(2355, context);
         }
     };
 
@@ -150,8 +151,8 @@ public interface Cluster extends Mappable {
         }
 
         @Override
-        public ResourceLocation getIcon() {
-            return ResourceLocation.iconOfIconID(2355);
+        public ResourceLocation getIcon(HtmlContext context) {
+            return ResourceLocation.iconOfIconID(2355, context);
         }
     };
 }

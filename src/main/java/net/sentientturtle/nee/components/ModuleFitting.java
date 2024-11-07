@@ -41,7 +41,7 @@ public class ModuleFitting extends Component {
         if (typeEffects.contains(11)) {
             table.content(TR().content(TD().content(
                 SPAN("module_fitting_span").content(
-                    IMG(ResourceLocation.iconOfIconID(295), null, 32).className("module_fitting_icon"),
+                    IMG(ResourceLocation.iconOfIconID(295, context), null, 32).className("module_fitting_icon"),
                     TEXT("Low power slot")
                 )
             )));
@@ -50,7 +50,7 @@ public class ModuleFitting extends Component {
 
             row.content(TD().content(
                 SPAN("module_fitting_span").content(
-                    IMG(ResourceLocation.iconOfIconID(293), null, 32).className("module_fitting_icon"),
+                    IMG(ResourceLocation.iconOfIconID(293, context), null, 32).className("module_fitting_icon"),
                     TEXT("High power slot")
                 )
             ));
@@ -58,14 +58,14 @@ public class ModuleFitting extends Component {
             if (typeEffects.contains(42)) {
                 row.content(TD().content(
                     SPAN("module_fitting_span").content(
-                        IMG(ResourceLocation.iconOfIconID(387), null, 32).className("module_fitting_icon"),
+                        IMG(ResourceLocation.iconOfIconID(387, context), null, 32).className("module_fitting_icon"),
                         TEXT("Turret Hardpoint")
                     )
                 ));
             } else if (typeEffects.contains(40)) {
                 row.content(TD().content(
                     SPAN("module_fitting_span").content(
-                        IMG(ResourceLocation.iconOfIconID(168), null, 32).className("module_fitting_icon"),
+                        IMG(ResourceLocation.iconOfIconID(168, context), null, 32).className("module_fitting_icon"),
                         TEXT("Launcher Hardpoint")
                     )
                 ));
@@ -75,7 +75,7 @@ public class ModuleFitting extends Component {
         } else if (typeEffects.contains(13)) {
             table.content(TR().content(TD().content(
                 SPAN("module_fitting_span").content(
-                    IMG(ResourceLocation.iconOfIconID(294), null, 32).className("module_fitting_icon"),
+                    IMG(ResourceLocation.iconOfIconID(294, context), null, 32).className("module_fitting_icon"),
                     TEXT("Medium power slot")
                 )
             )));
@@ -85,7 +85,7 @@ public class ModuleFitting extends Component {
 
             rigRow.content(TD().content(
                 SPAN("module_fitting_span").content(
-                    IMG(ResourceLocation.iconOfIconID(3266), null, 32).className("module_fitting_icon"),
+                    IMG(ResourceLocation.iconOfIconID(3266, context), null, 32).className("module_fitting_icon"),
                     context.data.format_with_unit(rigSize, context.data.getAttributes().get(1547).unitID),
                     TEXT(" rigging slot")
                 )
@@ -96,7 +96,7 @@ public class ModuleFitting extends Component {
                 rigRow.content(
                     TD().content(
                         SPAN("module_fitting_span").content(
-                            IMG(ResourceLocation.iconOfIconID(3266), null, 32).className("module_fitting_icon"),
+                            IMG(ResourceLocation.iconOfIconID(3266, context), null, 32).className("module_fitting_icon"),
                             TEXT("Calibration: "), context.data.format_with_unit(calibrationUsage, context.data.getAttributes().get(1153).unitID)
                         )
                     )
@@ -115,7 +115,7 @@ public class ModuleFitting extends Component {
 
             table.content(TR().content(TD().content(
                 SPAN("module_fitting_span").content(
-                    IMG(ResourceLocation.iconOfIconID(3266), null, 32).className("module_fitting_icon"),
+                    IMG(ResourceLocation.iconOfIconID(3266, context), null, 32).className("module_fitting_icon"),
                     TEXT("Subsystem slot (" + subsystemType + ")")
                 )
             )));
@@ -129,13 +129,13 @@ public class ModuleFitting extends Component {
             table.content(TR().content(
                 TD().content(
                     SPAN("module_fitting_span").content(
-                        IMG(ResourceLocation.iconOfIconID(1405), null, 32).className("module_fitting_icon"),
+                        IMG(ResourceLocation.iconOfIconID(1405, context), null, 32).className("module_fitting_icon"),
                         TEXT("CPU usage: "), context.data.format_with_unit(cpuUsage, context.data.getAttributes().get(50).unitID)
                     )
                 ),
                 TD().content(
                     SPAN("module_fitting_span").content(
-                        IMG(ResourceLocation.iconOfIconID(1400), null, 32).className("module_fitting_icon"),
+                        IMG(ResourceLocation.iconOfIconID(1400, context), null, 32).className("module_fitting_icon"),
                         TEXT("Powergrid usage: "), context.data.format_with_unit(pgUsage, context.data.getAttributes().get(30).unitID)
                     )
                 )
@@ -150,7 +150,7 @@ public class ModuleFitting extends Component {
             var row = TR().content(
                 TD().content(
                     SPAN("module_fitting_span").content(
-                        IMG(ResourceLocation.iconOfIconID(1668), null, 32).className("module_fitting_icon"),
+                        IMG(ResourceLocation.iconOfIconID(1668, context), null, 32).className("module_fitting_icon"),
                         TEXT("Activation cost: "), context.data.format_with_unit(activationCost, context.data.getAttributes().get(6).unitID)
                     )
                 )
@@ -161,7 +161,7 @@ public class ModuleFitting extends Component {
                 row.content(
                     TD().content(
                         SPAN("module_fitting_span").content(
-                            IMG(ResourceLocation.iconOfIconID(1668), null, 32).className("module_fitting_icon"),
+                            IMG(ResourceLocation.iconOfIconID(1668, context), null, 32).className("module_fitting_icon"),
                             TEXT("Capacitor usage: "), context.data.format_with_unit(capacitorUsage, context.data.getAttributes().get(6).unitID), TEXT("/s")
                         )
                     )
@@ -173,7 +173,7 @@ public class ModuleFitting extends Component {
             var row = TR().content(
                 TD().content(
                     SPAN("module_fitting_span").content(
-                        IMG(ResourceLocation.iconOfIconID(1392), null, 32).className("module_fitting_icon"),
+                        IMG(ResourceLocation.iconOfIconID(1392, context), null, 32).className("module_fitting_icon"),
                         TEXT("Activation time: "), context.data.format_with_unit(activationTime, context.data.getAttributes().get(73).unitID)
                     )
                 )
@@ -183,7 +183,7 @@ public class ModuleFitting extends Component {
                 row.content(
                     TD().content(
                         SPAN("module_fitting_span").content(
-                            IMG(ResourceLocation.iconOfIconID(1392), null, 32).className("module_fitting_icon"),
+                            IMG(ResourceLocation.iconOfIconID(1392, context), null, 32).className("module_fitting_icon"),
                             TEXT("Reactivation delay: "), context.data.format_with_unit(reactivationDelay, context.data.getAttributes().get(669).unitID)
                         )
                     )

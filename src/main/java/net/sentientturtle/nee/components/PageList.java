@@ -5,6 +5,7 @@ import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.Component;
 import net.sentientturtle.nee.pages.Page;
 import net.sentientturtle.html.PageLink;
+import net.sentientturtle.nee.util.ResourceLocation;
 
 import java.util.Arrays;
 
@@ -26,12 +27,13 @@ public class PageList extends Component {
         return new HTML[]{
             SPAN("page_list_title font_header").text(groupName),
             DIV("page_list_list font_text").content(
-                Arrays.stream(targetPages).map(page ->
-                    DIV("page_list_entry").content(
-                        (page.getIcon() != null) ? IMG(page.getIcon(), null, 32).className("page_list_icon") : DIV("page_list_icon"),
+                Arrays.stream(targetPages).map(page -> {
+                    ResourceLocation icon = page.getIcon(context);
+                    return DIV("page_list_entry").content(
+                        (icon != null) ? IMG(icon, null, 32).className("page_list_icon") : DIV("page_list_icon"),
                         new PageLink(page).className("page_list_type")
-                    )
-                )
+                    );
+                })
             )
         };
     }

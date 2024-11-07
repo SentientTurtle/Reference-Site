@@ -51,7 +51,7 @@ public class ItemTree extends Component {
                 Element shipContainer = DIV("item_tree_row");
                 for (HasPage hasPage : group.pages) {
                     Page page = hasPage.getPage();
-                    ResourceLocation icon = page.getIcon();
+                    ResourceLocation icon = page.getIcon(context);
                     if (icon != null) {
                         shipContainer.content(DIV("item_tree_entry colour_theme").content(
                             IMG(icon, null, 32).className("item_tree_icon"),

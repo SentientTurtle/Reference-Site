@@ -1,5 +1,6 @@
 package net.sentientturtle.nee.data.datatypes;
 
+import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.util.ResourceLocation;
 import net.sentientturtle.nee.data.DataSupplier;
 import org.jspecify.annotations.Nullable;
@@ -99,11 +100,11 @@ public final class SolarSystem implements Mappable {
     }
 
     @Override
-    public @Nullable ResourceLocation getIcon() {
+    public @Nullable ResourceLocation getIcon(HtmlContext context) {
         if (sunTypeID == null) {
             return null;
         } else {
-            return ResourceLocation.iconOfTypeID(sunTypeID);
+            return ResourceLocation.typeIcon(sunTypeID, context);
         }
     }
 

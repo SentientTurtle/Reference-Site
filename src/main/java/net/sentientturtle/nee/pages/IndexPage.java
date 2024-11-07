@@ -78,7 +78,7 @@ public class IndexPage extends Page {
 
     @Nullable
     @Override
-    public ResourceLocation getIcon() {
+    public ResourceLocation getIcon(HtmlContext context) {
         return ResourceLocation.file("bookicon.png");
     }
 

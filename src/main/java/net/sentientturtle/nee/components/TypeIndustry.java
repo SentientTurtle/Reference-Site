@@ -15,11 +15,11 @@ import static net.sentientturtle.html.HTML.*;
 /**
  * Industry origin of a {@link Type}; "This type is produced from this blueprint"
  */
-public class TypeOrigin extends Component {
+public class TypeIndustry extends Component {
     private final Type type;
 
-    public TypeOrigin(Type type) {
-        super("type_origin colour_theme_minor");
+    public TypeIndustry(Type type) {
+        super("type_industry colour_theme_minor");
         this.type = type;
     }
 
@@ -33,9 +33,9 @@ public class TypeOrigin extends Component {
                 .get(type.typeID)
                 .stream()
                 .flatMap(activity -> Stream.of(
-                    DIV("type_origin_blueprint font_header").content(
-                        IMG(ResourceLocation.iconOfTypeID(activity.bpTypeID), null, 64).className("type_origin_icon"),
-                        new PageLink(new TypePage(context.data.getTypes().get(activity.bpTypeID))).className("type_origin_link"),
+                    DIV("type_industry_blueprint font_header").content(
+                        IMG(ResourceLocation.typeIcon(activity.bpTypeID, context), null, 64).className("type_industry_icon"),
+                        new PageLink(new TypePage(context.data.getTypes().get(activity.bpTypeID))).className("type_industry_link"),
                         TEXT(" ("), TEXT(context.data.getIndustryActivityTypes().get(activity.activityID).activityName), TEXT(")")
                     )
                 ))
@@ -45,11 +45,11 @@ public class TypeOrigin extends Component {
     @Override
     protected String getCSS() {
         return """
-            .type_origin {
+            .type_industry {
                 padding: 0.5rem;
             }
             
-            .type_origin_blueprint {
+            .type_industry_blueprint {
                 width: 100%;
                 font-size: 1.25rem;
                 display: flex;
@@ -57,12 +57,12 @@ public class TypeOrigin extends Component {
                 margin-top: 0.5rem;
             }
             
-            .type_origin_icon {
+            .type_industry_icon {
                 width: 2rem;
                 height: 2rem;
             }
             
-            .type_origin_link {
+            .type_industry_link {
                 margin: 0.5rem;
             }""";
     }

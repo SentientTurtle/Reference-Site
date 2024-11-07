@@ -1,5 +1,6 @@
 package net.sentientturtle.nee.data.datatypes;
 
+import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.datatypes.singleton.Cluster;
 import net.sentientturtle.nee.pages.HasPage;
 import net.sentientturtle.nee.pages.MapPage;
@@ -21,7 +22,7 @@ public interface Mappable extends HasPage {
     String getName();
 
     @Nullable
-    ResourceLocation getIcon();
+    ResourceLocation getIcon(HtmlContext context);
 
     double x();
     double y();

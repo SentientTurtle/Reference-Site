@@ -10,7 +10,6 @@ import net.sentientturtle.nee.util.ResourceLocation;
 import net.sentientturtle.nee.data.datatypes.Type;
 
 import java.util.*;
-import java.util.function.ToIntFunction;
 
 import static net.sentientturtle.html.HTML.*;
 
@@ -54,7 +53,7 @@ public class TypeVariants extends Component {
                     table.content(TR().content(TH("font_header").attribute("colspan", "2").text(metaGroups.get(entry.getKey()).metaGroupName)));
                     for (Integer variantID : (Iterable<? extends Integer>) entry.getValue().stream().sorted()::iterator) {
                         table.content(TR().content(
-                            TD().content(IMG(ResourceLocation.iconOfTypeID(variantID), null, 64).className("type_variants_icon")),
+                            TD().content(IMG(ResourceLocation.typeIcon(variantID, context), null, 64).className("type_variants_icon")),
                             TD("font_header").content(SPAN("type_variants_type").content(new PageLink(new TypePage(context.data.getTypes().get(variantID)))))
                         ));
                     }
@@ -63,7 +62,7 @@ public class TypeVariants extends Component {
             for (Set<Integer> value : metaVariants.values()) {
                 for (Integer variantID : (Iterable<? extends Integer>) value.stream().sorted()::iterator) {
                     table.content(TR().content(
-                        TD().content(IMG(ResourceLocation.iconOfTypeID(variantID), null, 64).className("type_variants_icon")),
+                        TD().content(IMG(ResourceLocation.typeIcon(variantID, context), null, 64).className("type_variants_icon")),
                         TD("font_header").content(SPAN("type_variants_type").content(new PageLink(new TypePage(context.data.getTypes().get(variantID)))))
                     ));
                 }

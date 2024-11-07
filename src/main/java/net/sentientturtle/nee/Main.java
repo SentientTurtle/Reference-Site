@@ -2,6 +2,9 @@ package net.sentientturtle.nee;
 
 import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import net.sentientturtle.html.HTMLUtil;
 import net.sentientturtle.html.RenderingException;
 import net.sentientturtle.html.context.OutputStreamHtmlContext;
 import net.sentientturtle.html.id.IDContext;
@@ -11,8 +14,10 @@ import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.data.sharedcache.FSDData;
 import net.sentientturtle.nee.pages.PageKind;
 import net.sentientturtle.nee.data.sharedcache.SharedCacheReader;
+import net.sentientturtle.nee.util.ResourceLocation;
 import net.sentientturtle.nee.util.ResourceSupplier;
 import net.sentientturtle.nee.util.SDEUtils;
+import net.sentientturtle.util.ExceptionUtil;
 import org.jspecify.annotations.Nullable;
 
 import java.io.*;
@@ -23,16 +28,20 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 /// Entrypoint for generating website contents
 public class Main {
+    public static final ResourceLocation.ReferenceFormat REFERENCE_FORMAT = ResourceLocation.ReferenceFormat.EXTERNAL;
+    public static Path RES_FOLDER;
+    public static Path TEMP_DIR;
+
     public static Path SHARED_CACHE_PATH;
-    public static String SDE_FILE;
+    public static Path SDE_FILE;
     public static boolean UPDATE_SDE;
-    public static File TEMP_DIR = new File("./rsc/temp");
     public static int COMPRESSION;  // No compression is moderately faster
 
     // Website title as configurable variable in case a rename is needed; I don't feel like buying a domain name yet
@@ -62,7 +71,9 @@ public class Main {
                 System.exit(1);
             }
 
-            SDE_FILE = properties.getProperty("SDE_FILE", "./rsc/sqlite-latest.sqlite");
+            RES_FOLDER = Path.of(properties.getProperty("RESOURCE_FOLDER", "./rsc/"));
+            TEMP_DIR = RES_FOLDER.resolve("temp");
+            SDE_FILE = RES_FOLDER.resolve("sqlite-latest.sqlite");
 
             UPDATE_SDE = properties.getProperty("UPDATE_SDE").equalsIgnoreCase("TRUE");
 
@@ -74,7 +85,7 @@ public class Main {
 
         } else {
             properties.setProperty("SHARED_CACHE_PATH", "???");
-            properties.setProperty("SDE_FILE", "./rsc/sqlite-latest.sqlite");
+            properties.setProperty("RESOURCE_FOLDER", "./rsc/");
             properties.setProperty("UPDATE_SDE", "FALSE");
             properties.setProperty("COMPRESSION", "FALSE");
             properties.setProperty("DELETE_THIS_KEY", "");
@@ -87,9 +98,10 @@ public class Main {
 
         long startTime = System.nanoTime();
 
-        if (UPDATE_SDE) SDEUtils.updateSDE(new File(SDE_FILE));
+        if (UPDATE_SDE) SDEUtils.updateSDE(SDE_FILE.toFile());
 
-        DataSupplier dataSupplier = new SQLiteDataSupplier(new SQLiteConnection(new File(SDE_FILE)));
+        System.out.println("Loading SDE...");
+        DataSupplier dataSupplier = new SQLiteDataSupplier(new SQLiteConnection(SDE_FILE.toFile()));
         // The OS does not like creating thousands of small files, saving to an archive is significantly faster.
         ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(Path.of("website.zip").toFile()));
         zipOutputStream.setLevel(COMPRESSION);
@@ -163,6 +175,31 @@ public class Main {
             zipOutputStream.write(segment.getBytes(StandardCharsets.UTF_8));
             zipOutputStream.write("\n\n".getBytes(StandardCharsets.UTF_8));
         }
+
+        zipOutputStream.putNextEntry(new ZipEntry("searchindex.js"));
+        OutputStreamHtmlContext searchContext = new OutputStreamHtmlContext(0, new IDContext("searchindex"), dataSupplier, sharedCache, fsdData, zipOutputStream);
+        ObjectMapper objectMapper = new ObjectMapper();
+        record IndexEntry(String index, String name, String path, String icon) {}
+
+        List<IndexEntry> indexEntries = PageKind.pageStream(dataSupplier)
+            .map(page -> {
+                ResourceLocation pageIcon = page.getIcon(searchContext);
+                return new IndexEntry(
+                    page.name().toLowerCase(),
+                    page.name(),
+                    HTMLUtil.escapeAttributeValue(page.getPath()),
+                    pageIcon != null ? HTMLUtil.escapeAttributeValue(pageIcon.getURI(searchContext, true)) : null
+                );
+            })
+            .collect(Collectors.toList());
+
+        String searchJson = null;
+        try {
+            searchJson = objectMapper.writeValueAsString(indexEntries);
+        } catch (JsonProcessingException e) {
+            ExceptionUtil.sneakyThrow(e);
+        }
+        searchContext.write("const searchindex = " + searchJson + ";\nexport default searchindex;");
 
         zipOutputStream.close();
 

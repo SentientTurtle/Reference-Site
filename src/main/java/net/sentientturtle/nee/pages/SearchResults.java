@@ -112,7 +112,7 @@ public class SearchResults extends Page {
 
     @Nullable
     @Override
-    public ResourceLocation getIcon() {
+    public ResourceLocation getIcon(HtmlContext context) {
         return null;
     }
 }

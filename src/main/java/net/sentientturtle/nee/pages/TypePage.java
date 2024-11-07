@@ -40,8 +40,8 @@ public class TypePage extends Page {
 
     @Nullable
     @Override
-    public ResourceLocation getIcon() {
-        return ResourceLocation.iconOfTypeID(type.typeID);
+    public ResourceLocation getIcon(HtmlContext context) {
+        return ResourceLocation.typeIcon(type.typeID, context);
     }
 
     @Override
@@ -87,7 +87,7 @@ public class TypePage extends Page {
             );
         } else {
             left.content(
-                new Title(type.name, getIcon()),
+                new Title(type.name, getIcon(context)),
                 new TypeGroup(type)
             );
         }
@@ -241,7 +241,7 @@ public class TypePage extends Page {
             right.content(new TypeVariants(type));
 
         if (dataSupplier.getProductActivityMap().containsKey(type.typeID))
-            right.content(new TypeOrigin(type));
+            right.content(new TypeIndustry(type));
 
         var columns = new ArrayList<HTML>();
         if (!left.isEmpty()) columns.add(left);

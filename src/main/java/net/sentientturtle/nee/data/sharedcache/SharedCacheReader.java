@@ -15,17 +15,11 @@ public class SharedCacheReader {
     private final HashMap<String, Path> cacheIndex;
     private final HashMap<String, String> resourceHashes;
     private final HashMap<String, byte[]> dataCache;
+    private final Path cacheFolder;
     private final Path resFiles;
 
-    /// Initialize a no-op SharedCacheReader; Contains no resources
-    public SharedCacheReader() {
-        cacheIndex = new HashMap<>();
-        resourceHashes = new HashMap<>();
-        dataCache = new HashMap<>();
-        resFiles = null;
-    }
-
     public SharedCacheReader(Path cacheFolder) throws IOException {
+        this.cacheFolder = cacheFolder;
         this.resFiles = cacheFolder.resolve("ResFiles");
 
         Path indexFile = cacheFolder.resolve("tq/resfileindex.txt");
@@ -49,6 +43,10 @@ public class SharedCacheReader {
         this.dataCache = new HashMap<>();
     }
 
+    Path getCacheFolder() {
+        return cacheFolder;
+    }
+
     public boolean containsResource(String resource) {
         Path resourcePath = cacheIndex.get(resource.toLowerCase());
         return resourcePath != null && Files.exists(resFiles.resolve(resourcePath));
@@ -56,6 +54,12 @@ public class SharedCacheReader {
 
     public @Nullable String resourceHash(String resource) {
         return this.resourceHashes.get(resource.toLowerCase());
+    }
+
+    public Path getPath(String resource) {
+        Path resourcePath = cacheIndex.get(resource.toLowerCase());
+        if (resourcePath == null) throw new IllegalArgumentException("File not in shared cache: " + resource);
+        return resFiles.resolve(resourcePath);
     }
 
     public byte[] getBytes(String resource) throws IOException {

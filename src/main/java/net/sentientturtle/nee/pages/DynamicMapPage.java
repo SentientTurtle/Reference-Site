@@ -23,8 +23,8 @@ public class DynamicMapPage extends Page {
     }
 
     @Override
-    public @Nullable ResourceLocation getIcon() {
-        return ResourceLocation.iconOfIconID(2355);
+    public @Nullable ResourceLocation getIcon(HtmlContext context) {
+        return ResourceLocation.iconOfIconID(2355, context);
     }
 
     @Override

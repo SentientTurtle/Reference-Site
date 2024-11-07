@@ -26,7 +26,7 @@ public abstract class Page implements Document, HTML {
     /**
      * @return The icon for this page
      */
-    public abstract @Nullable ResourceLocation getIcon();
+    public abstract @Nullable ResourceLocation getIcon(HtmlContext context);
 
     protected @Nullable String getCSS(HtmlContext context) {
         return null;

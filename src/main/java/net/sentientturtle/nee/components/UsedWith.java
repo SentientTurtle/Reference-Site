@@ -6,6 +6,7 @@ import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.pages.Page;
+import net.sentientturtle.nee.util.ResourceLocation;
 
 import java.util.Objects;
 import java.util.Set;
@@ -37,13 +38,13 @@ public class UsedWith extends Component {
                         .sorted(Type.comparator(context.data))
                 )
                 .map(entry -> {
-                        Page page = entry.getPage();
-                        return DIV("used_width_entry").content(
-                            (page.getIcon() != null) ? IMG(page.getIcon(), null, 32).className("used_width_icon") : DIV("used_width_icon"),
-                            new PageLink(page).className("used_width_type font_header")
-                        );
-                    }
-                )
+                    Page page = entry.getPage();
+                    ResourceLocation icon = page.getIcon(context);
+                    return DIV("used_width_entry").content(
+                        (icon != null) ? IMG(icon, null, 32).className("used_width_icon") : DIV("used_width_icon"),
+                        new PageLink(page).className("used_width_type font_header")
+                    );
+                })
         ).toArray(HTML[]::new);
     }
 
