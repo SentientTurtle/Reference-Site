@@ -5,6 +5,7 @@ import net.sentientturtle.nee.util.ResourceLocation;
 import net.sentientturtle.nee.data.DataSupplier;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
@@ -112,5 +113,17 @@ public class Region implements Mappable{
     @Override
     public ResourceLocation getIcon(HtmlContext context) {
         return ResourceLocation.iconOfIconID(2355, context);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Region region)) return false;
+        return regionID == region.regionID;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(regionID);
     }
 }

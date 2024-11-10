@@ -23,4 +23,16 @@ public final class TypeTraitBonus {
                "bonusText=" + bonusText + ", " +
                "unitID=" + unitID + ']';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TypeTraitBonus that)) return false;
+        return Objects.equals(bonusAmount, that.bonusAmount) && Objects.equals(bonusText, that.bonusText) && Objects.equals(unitID, that.unitID);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(bonusAmount, bonusText, unitID);
+    }
 }

@@ -6,6 +6,8 @@ import net.sentientturtle.nee.pages.Page;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Objects;
+
 /**
  * Data object to represent EVE Online Market Groups
  */
@@ -25,5 +27,17 @@ public class MarketGroup implements HasPage {
     @Override
     public @NonNull Page getPage() {
         return new MarketGroupPage(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MarketGroup that)) return false;
+        return marketGroupID == that.marketGroupID;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(marketGroupID);
     }
 }

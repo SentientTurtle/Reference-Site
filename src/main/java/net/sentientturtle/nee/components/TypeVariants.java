@@ -33,7 +33,7 @@ public class TypeVariants extends Component {
             metaVariants.computeIfAbsent(metaGroupID, _ -> new HashSet<>()).add(variantID);
         }
 
-        var table = TABLE("type_variants_table font_text");
+        var table = TABLE("type_variants_table font_header");
 
         if (metaVariants.size() > 1) {
             metaVariants.entrySet()
@@ -50,11 +50,11 @@ public class TypeVariants extends Component {
                     }
                 ))
                 .forEach(entry -> {
-                    table.content(TR().content(TH("font_header").attribute("colspan", "2").text(metaGroups.get(entry.getKey()).metaGroupName)));
+                    table.content(TR().content(TH().attribute("colspan", "2").text(metaGroups.get(entry.getKey()).metaGroupName)));
                     for (Integer variantID : (Iterable<? extends Integer>) entry.getValue().stream().sorted()::iterator) {
                         table.content(TR().content(
                             TD().content(IMG(ResourceLocation.typeIcon(variantID, context), null, 64).className("type_variants_icon")),
-                            TD("font_header").content(SPAN("type_variants_type").content(new PageLink(new TypePage(context.data.getTypes().get(variantID)))))
+                            TD().content(new PageLink(new TypePage(context.data.getTypes().get(variantID))))
                         ));
                     }
                 });
@@ -63,7 +63,7 @@ public class TypeVariants extends Component {
                 for (Integer variantID : (Iterable<? extends Integer>) value.stream().sorted()::iterator) {
                     table.content(TR().content(
                         TD().content(IMG(ResourceLocation.typeIcon(variantID, context), null, 64).className("type_variants_icon")),
-                        TD("font_header").content(SPAN("type_variants_type").content(new PageLink(new TypePage(context.data.getTypes().get(variantID)))))
+                        TD().content(SPAN().content(new PageLink(new TypePage(context.data.getTypes().get(variantID)))))
                     ));
                 }
             }
@@ -84,16 +84,12 @@ public class TypeVariants extends Component {
             
             .type_variants_table {
                 margin-top: 0.5rem;
+                width: 100%;
             }
             
             .type_variants_icon {
                 width: 2rem;
                 height: 2rem;
-            }
-            
-            .type_variants_type {
-                font-size: 1.25rem;
-                margin: 0.5rem;
             }""";
     }
 }

@@ -18,7 +18,6 @@ import net.sentientturtle.nee.util.ResourceLocation;
 import net.sentientturtle.nee.util.ResourceSupplier;
 import net.sentientturtle.nee.util.SDEUtils;
 import net.sentientturtle.util.ExceptionUtil;
-import org.jspecify.annotations.Nullable;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -145,7 +144,10 @@ public class Main {
                     zipOutputStream.putNextEntry(new ZipEntry(page.getPath()));
                     page.renderTo(context);
                     zipOutputStream.closeEntry();
-                    pageCount.incrementAndGet();
+                    int count = pageCount.incrementAndGet();
+                    if (count % 500 == 0) {
+                        System.out.println("\tPages: " + count);
+                    }
 
                     for (Map.Entry<String, ResourceSupplier> entry : context.getFileDependencies().entrySet()) {
                         if (resourceFileSet.add(entry.getKey())) {

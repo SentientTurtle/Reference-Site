@@ -76,7 +76,7 @@ public class TypePage extends Page {
 
         Group group = dataSupplier.getGroups().get(type.groupID);
         if (group == null) {
-            throw new NullPointerException();
+            throw new NullPointerException("Missing group for type: " + type.name + " (" + type.typeID + ")");
         }
         int categoryID = group.categoryID;
         if ((categoryID == 6 || categoryID == 18 || categoryID == 65 || categoryID == 87)) {   // Check if type is a Ship, Drone, Citadel or Fighter
@@ -107,9 +107,9 @@ public class TypePage extends Page {
 
         // Hide health for types that use damage attributes for other purposes, such as modules
         // Ship, Structure, Drone or Fighter
-        if (categoryID == 6 || categoryID == 22 || categoryID == 23 || categoryID == 40 || categoryID == 46 || categoryID == 18 || categoryID == 87) {
+        if (categoryID == 6 || categoryID == 22 || categoryID == 23 || categoryID == 40 || categoryID == 46 || categoryID == 65 || categoryID == 18 || categoryID == 87) {
             // Type is a ship or structure
-            if (categoryID == 6 || categoryID == 22 || categoryID == 23 || categoryID == 40 || categoryID == 46) {
+            if (categoryID == 6 || categoryID == 22 || categoryID == 23 || categoryID == 40 || categoryID == 46 || categoryID == 65) {
                 if (type.capacity > 0.0 || typeAttributes.keySet().stream().map(attributes::get).anyMatch(attribute -> attribute != null && Objects.equals(attribute.categoryID, 40))) {
                     left.content(new ShipCargo(type));
                 }
@@ -233,15 +233,24 @@ public class TypePage extends Page {
             mid.content(new UsedWith("Used with", Set.of(), usedWithTypes));
         }
 
+        if (dataSupplier.getBpActivities().containsKey(type.typeID) || dataSupplier.getOutputSchematicMap().containsKey(type.typeID)) {
+            mid.content(new TypeBlueprint(type));
+        }
 
         if (typeAttributes.containsKey(182))  // Has a skill-required-1 attribute
             right.content(new TypeSkills(type));
 
-        if (dataSupplier.getVariants().containsKey(type.typeID))  // Check if type has variants
+        if (dataSupplier.getVariants().containsKey(type.typeID))  // If type has variants
             right.content(new TypeVariants(type));
 
-        if (dataSupplier.getProductActivityMap().containsKey(type.typeID))
+        // If produced by a blueprint, used in PI, used in a blueprint, or has reprocessing output
+        if (dataSupplier.getProductActivityMap().containsKey(type.typeID)
+            || dataSupplier.getReprocessingMaterials().containsKey(type.typeID)
+            || dataSupplier.getMaterialActivityMap().containsKey(type.typeID)
+            || dataSupplier.getInputSchematicMap().containsKey(type.typeID)
+            || dataSupplier.getOreReprocessingMap().containsKey(type.typeID)) {
             right.content(new TypeIndustry(type));
+        }
 
         var columns = new ArrayList<HTML>();
         if (!left.isEmpty()) columns.add(left);

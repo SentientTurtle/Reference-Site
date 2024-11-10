@@ -2,7 +2,7 @@
 # Expected files: "sqlite-latest.sqlite" (Downloaded using SDEUtils)
 *.sqlite
 
-# Contains native libraries for sqlite4java
+# Native libraries for sqlite4java
 /native/*.so
 /native/*.dylib
 /native/*.dll
@@ -14,8 +14,9 @@
 /rsc/EVE/NOT_IN_REPO/
 # Icons themselves are not included in the repo, a readme file elaborating on the format is.
 /rsc/EVE/type_icons/*.png
-# Java resources containing EVE Online files/data
-src/main/resources/fsdBinary/*json
+# Python stdlib compiled files
+/rsc/pythonlib/*.pyc
+/rsc/pythonlib/*/*.pyc
 
 # Output
 *.zip

@@ -28,6 +28,8 @@ public class SQLiteDataSupplier extends DataSupplier {
     private final Map<Integer, String> eveIcons;
     private final Map<Integer, IndustryActivityType> industryActivityTypes;
     private final Map<Integer, Map<Integer, IndustryActivity>> bpActivities;
+    private final Map<Integer, Map<Integer, Integer>> reprocessingMaterials;
+    private final Map<Integer, PlanetSchematic> planetSchematics;
     private final Map<Integer, MetaGroup> metaGroups;
     private final Map<Integer, Set<Integer>> variants;
     private final Map<Integer, Integer> parentTypes;
@@ -292,6 +294,30 @@ public class SQLiteDataSupplier extends DataSupplier {
         }
         st.dispose();
 
+        reprocessingMaterials = produceMap();
+        st = connection.prepare("SELECT typeID, materialTypeID, quantity FROM invTypeMaterials");
+        while (st.step()) {
+            assert !st.columnNull(0) && !st.columnNull(1) && !st.columnNull(2);
+            reprocessingMaterials.computeIfAbsent(st.columnInt(0), this::produceMap).put(st.columnInt(1), st.columnInt(2));
+        }
+        st.dispose();
+
+        planetSchematics = produceMap();
+        st = connection.prepare("SELECT planetSchematics.schematicID, cycleTime, typeID, quantity FROM planetSchematics JOIN planetSchematicsTypeMap ON planetSchematics.schematicID = planetSchematicsTypeMap.schematicID WHERE isInput = 0");
+        while (st.step()) {
+            assert !st.columnNull(0) && !st.columnNull(1) && !st.columnNull(2) && !st.columnNull(3);
+            int schematicID = st.columnInt(0);
+            planetSchematics.put(schematicID, new PlanetSchematic(schematicID, st.columnInt(1), st.columnInt(2), st.columnInt(3), this.produceMap()));
+        }
+        st.dispose();
+
+        st = connection.prepare("SELECT schematicID, typeID, quantity FROM planetSchematicsTypeMap WHERE isInput = 1");
+        assert !st.columnNull(0) && !st.columnNull(1) && !st.columnNull(2);
+        while (st.step()) {
+            planetSchematics.get(st.columnInt(0)).inputs.put(st.columnInt(1), st.columnInt(2));
+        }
+        st.dispose();
+
         metaGroups = produceMap();
         st = connection.prepare("SELECT metaGroupID, metaGroupName FROM invMetaGroups ORDER BY metaGroupID");
         while (st.step()) {
@@ -532,6 +558,16 @@ public class SQLiteDataSupplier extends DataSupplier {
     @Override
     public Map<Integer, Map<Integer, IndustryActivity>> getBpActivities() {
         return bpActivities;
+    }
+
+    @Override
+    public Map<Integer, Map<Integer, Integer>> getReprocessingMaterials() {
+        return reprocessingMaterials;
+    }
+
+    @Override
+    public Map<Integer, PlanetSchematic> getPlanetSchematics() {
+        return planetSchematics;
     }
 
     @Override

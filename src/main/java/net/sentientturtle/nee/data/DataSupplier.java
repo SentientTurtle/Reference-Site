@@ -71,6 +71,12 @@ public abstract class DataSupplier {
     // Map<Blueprint TypeID, Set<IndustryActivity using blueprint>>
     public abstract Map<Integer, Map<Integer, IndustryActivity>> getBpActivities();
 
+    // Map<TypeID, Map<Material TypeID, quantity>>
+    public abstract Map<Integer, Map<Integer, Integer>> getReprocessingMaterials();
+
+    // Map<SchematicID, PlanetSchematic>
+    public abstract Map<Integer, PlanetSchematic> getPlanetSchematics();
+
     // Map<MetaGroupID, MetaGroup>
     public abstract Map<Integer, MetaGroup> getMetaGroups();
 
@@ -121,6 +127,12 @@ public abstract class DataSupplier {
     private Map<Integer, Set<IndustryActivity>> productActivityMap;
     // Map<Skill TypeID, Set<IndustryActivity using skill>>
     private Map<Integer, Set<IndustryActivity>> skillActivityMap;
+    // Map<Output TypeID, PlanetSchematic producing output>
+    private Map<Integer, PlanetSchematic> outputSchematicMap;
+    // Map<Input TypeID, Set<PlanetSchematic using input>>
+    private Map<Integer, Set<PlanetSchematic>> inputSchematicMap;
+    // Map<Material TypeID, Set<TypeID yielding material>>
+    private Map<Integer, Set<Integer>> oreReprocessingMap;
     // Map<MarketGroupID, Set<Type>>
     private Map<Integer, Set<Type>> marketGroupTypeMap;
     // Map<MarketGroupID, Set<child MarketGroup>>
@@ -162,6 +174,24 @@ public abstract class DataSupplier {
     public Map<Integer, Set<IndustryActivity>> getSkillActivityMap() {
         if (skillActivityMap == null) throw new IllegalStateException("View collections not initialized!");
         return skillActivityMap;
+    }
+
+    // Map<Output TypeID, PlanetSchematic producing output>
+    public Map<Integer, PlanetSchematic> getOutputSchematicMap() {
+        if (outputSchematicMap == null) throw new IllegalStateException("View collections not initialized!");
+        return outputSchematicMap;
+    }
+
+    // Map<Input TypeID, Set<PlanetSchematic using input>>
+    public Map<Integer, Set<PlanetSchematic>> getInputSchematicMap() {
+        if (inputSchematicMap == null) throw new IllegalStateException("View collections not initialized!");
+        return inputSchematicMap;
+    }
+
+    // Map<Material TypeID, Set<TypeID yielding material>>
+    public Map<Integer, Set<Integer>> getOreReprocessingMap() {
+        if (oreReprocessingMap == null) throw new IllegalStateException("View collections not initialized!");
+        return oreReprocessingMap;
     }
 
     // Map<MarketGroupID, Set<Type>>
@@ -223,8 +253,6 @@ public abstract class DataSupplier {
 
     /// Initialize data views
     protected void loadViews() {
-        var bpActivities = this.getBpActivities();
-
         categoryGroups = produceMap();
         for (Group group : getGroups().values()) {
             categoryGroups.computeIfAbsent(group.categoryID, this::produceSet).add(group);
@@ -242,7 +270,7 @@ public abstract class DataSupplier {
         materialActivityMap = produceMap();
         productActivityMap = produceMap();
         skillActivityMap = produceMap();
-        for (Map<Integer, IndustryActivity> activityMap : bpActivities.values()) {
+        for (Map<Integer, IndustryActivity> activityMap : this.getBpActivities().values()) {
             for (IndustryActivity activity : activityMap.values()) {
                 for (Integer materialID : activity.materialMap.keySet()) {
                     materialActivityMap.computeIfAbsent(materialID, this::produceSet).add(activity);
@@ -255,6 +283,26 @@ public abstract class DataSupplier {
                 }
             }
         }
+
+        outputSchematicMap = produceMap();
+        inputSchematicMap = produceMap();
+        for (PlanetSchematic schematic : this.getPlanetSchematics().values()) {
+            outputSchematicMap.put(schematic.outputTypeID, schematic);
+            for (Integer input : schematic.inputs.keySet()) {
+                inputSchematicMap.computeIfAbsent(input, this::produceSet).add(schematic);
+            }
+        }
+
+        oreReprocessingMap = produceMap();
+        for (Map.Entry<Integer, Map<Integer, Integer>> entry : getReprocessingMaterials().entrySet()) {
+            int source = entry.getKey();
+            if (getGroups().get(getTypes().get(source).groupID).categoryID == 25) {
+                for (Integer materialID : entry.getValue().keySet()) {
+                    oreReprocessingMap.computeIfAbsent(materialID, this::produceSet).add(source);
+                }
+            }
+        }
+
 
         marketGroupChildMap = produceMap();
         for (MarketGroup marketGroup : this.getMarketGroups().values()) {
@@ -298,19 +346,22 @@ public abstract class DataSupplier {
                 }
             case 2:     // Kilogram
                 return HTML.TEXT(decimalFormat.format(value) + " kg");
+            case 101:   // Milliseconds
+                value = value / 1000.0;
             case 3:     // Seconds  // TODO: Handle NaN on date/time formats!
-                if (value < 60) {
-                    return HTML.TEXT(String.format("%2ds", (int) value));
-                } else if (value < 60 * 60) {
-                    return HTML.TEXT(String.format("%2dm %2ds", (int) value / 60, (int) value % 60));
-                } else if (value < 60 * 60 * 24) {
-                    return HTML.TEXT(String.format("%2dh %2dm %2ds", (int) value / (60 * 60), (int) value % (60 * 60) / 60, (int) value % 60));
-                } else if (value < 60.0 * 60.0 * 24.0 * 30.0) {
-                    return HTML.TEXT(String.format("%2dd", (int) value / (60 * 60 * 24)) + " " + String.format("%2dh %2dm %2ds", (int) value % (60 * 60 * 24) / (60 * 60), (int) value % (60 * 60) / 60, (int) value % 60));
-                } else if (value < 60.0 * 60.0 * 24.0 * 365.0) {
-                    return HTML.TEXT(String.format("%2dm", (int) value / (60 * 60 * 24 * 30)) + " " + String.format("%2dd", (int) value % (60 * 60 * 24 * 30) / (60 * 60 * 24)) + " " + String.format("%2dh %2dm %2ds", (int) value % (60 * 60 * 24) / (60 * 60), (int) value % (60 * 60) / 60, (int) value % 60));
+                long duration = Math.round(value);  // TODO: Add fractions of a second back
+                if (duration < 60) {
+                    return HTML.TEXT(String.format("%2ds", duration));
+                } else if (duration < 60 * 60) {
+                    return HTML.TEXT(String.format("%2dm %2ds", duration / 60, duration % 60));
+                } else if (duration < 60 * 60 * 24) {
+                    return HTML.TEXT(String.format("%2dh %2dm %2ds", duration / (60 * 60), duration % (60 * 60) / 60, duration % 60));
+                } else if (duration < 60.0 * 60.0 * 24.0 * 30.0) {
+                    return HTML.TEXT(String.format("%2dd", duration / (60 * 60 * 24)) + " " + String.format("%2dh %2dm %2ds", duration % (60 * 60 * 24) / (60 * 60), duration % (60 * 60) / 60, duration % 60));
+                } else if (duration < 60.0 * 60.0 * 24.0 * 365.0) {
+                    return HTML.TEXT(String.format("%2dm", duration / (60 * 60 * 24 * 30)) + " " + String.format("%2dd", duration % (60 * 60 * 24 * 30) / (60 * 60 * 24)) + " " + String.format("%2dh %2dm %2ds", duration % (60 * 60 * 24) / (60 * 60), duration % (60 * 60) / 60, duration % 60));
                 } else {
-                    return HTML.TEXT(String.format("%2dy", (int) value / (60 * 60 * 24 * 365)) + " " + String.format("%2dm", (int) value % (60 * 60 * 24 * 365) / (60 * 60 * 24 * 30)) + " " + String.format("%2dd", (int) value % (60 * 60 * 24 * 30) / (60 * 60 * 24)) + " " + String.format("%2dh %2dm %2ds", (int) value % (60 * 60 * 24) / (60 * 60), (int) value % (60 * 60) / 60, (int) value % 60));
+                    return HTML.TEXT(String.format("%2dy", duration / (60 * 60 * 24 * 365)) + " " + String.format("%2dm", duration % (60 * 60 * 24 * 365) / (60 * 60 * 24 * 30)) + " " + String.format("%2dd", duration % (60 * 60 * 24 * 30) / (60 * 60 * 24)) + " " + String.format("%2dh %2dm %2ds", duration % (60 * 60 * 24) / (60 * 60), duration % (60 * 60) / 60, duration % 60));
                 }
             case 4:     // Ampere
                 return HTML.TEXT(decimalFormat.format(value) + " A");
@@ -345,20 +396,7 @@ public abstract class DataSupplier {
             case 19:    // Mass fraction / Kilogram per Kilogram
                 return HTML.TEXT(decimalFormat.format(value));
             // No units 20 to 100
-            case 101:   // Milliseconds
-                if (value < 1000 * 60) {
-                    return HTML.TEXT(String.format("%2ds", (int) (value / 1000)));
-                } else if (value < 1000 * 60 * 60) {
-                    return HTML.TEXT(String.format("%2dm %2ds", (int) (value / 1000) / 60, (int) (value / 1000) % 60));
-                } else if (value < 1000 * 60 * 60 * 24) {
-                    return HTML.TEXT(String.format("%2dh %2dm %2ds", (int) (value / 1000) / (60 * 60), (int) (value / 1000) % (60 * 60) / 60, (int) (value / 1000) % 60));
-                } else if (value < 1000.0 * 60.0 * 60.0 * 24.0 * 30.0) {
-                    return HTML.TEXT(String.format("%2dd", (int) (value / 1000) / (60 * 60 * 24)) + " " + String.format("%2dh %2dm %2ds", (int) (value / 1000) % (60 * 60 * 24) / (60 * 60), (int) (value / 1000) % (60 * 60) / 60, (int) (value / 1000) % 60));
-                } else if (value < 1000.0 * 60.0 * 60.0 * 24.0 * 365.0) {
-                    return HTML.TEXT(String.format("%2dm", (int) (value / 1000) / (60 * 60 * 24 * 30)) + " " + String.format("%2dd", (int) (value / 1000) % (60 * 60 * 24 * 30) / (60 * 60 * 24)) + " " + String.format("%2dh %2dm %2ds", (int) (value / 1000) % (60 * 60 * 24) / (60 * 60), (int) (value / 1000) % (60 * 60) / 60, (int) (value / 1000) % 60));
-                } else {
-                    return HTML.TEXT(String.format("%2dy", (int) (value / 1000) / (60 * 60 * 24 * 365)) + " " + String.format("%2dm", (int) (value / 1000) % (60 * 60 * 24 * 365) / (60 * 60 * 24 * 30)) + " " + String.format("%2dd", (int) (value / 1000) % (60 * 60 * 24 * 30) / (60 * 60 * 24)) + " " + String.format("%2dh %2dm %2ds", (int) (value / 1000) % (60 * 60 * 24) / (60 * 60), (int) (value / 1000) % (60 * 60) / 60, (int) (value / 1000) % 60));
-                }
+            // 101 merged with 3 for durations
             case 102:    // Millimetre
                 return HTML.TEXT(decimalFormat.format(value) + " mm");
             case 103:   // MegaPascal
@@ -435,7 +473,7 @@ public abstract class DataSupplier {
                 return HTML.TEXT(decimalFormat.format(value * 100) + "%");
             case 128:   // Drone bandwidth
                 return HTML.TEXT(decimalFormat.format(value) + " Mbit/s");
-            case 129:   // Hours
+            case 129:   // Hours TODO: Merge with other durations
                 value *= 60 * 60;
                 if (value < 60) {
                     return HTML.TEXT(String.format("%2ds", (int) value));
@@ -516,14 +554,24 @@ public abstract class DataSupplier {
         // Wrong published status
         Set<Integer> publishedGroups = Set.of(6);
 
-        this.getTypes().get(3404).published = false;
-        this.getTypes().get(21097).published = false;
-        this.getTypes().get(28320).published = false;
-        this.getTypes().get(34574).published = false;
-        this.getTypes().get(47449).published = false;
+        Set<Integer> unpublishedTypes = Set.of(
+            3404,   // Legacy item, other items in this group are set unpublished
+            27038,  // Mission item
+            28320,  // Group is unpublished
+            34574,  // Legacy entry
+            47449,  // Mission item, other items in group set unpublished
+            // Defunct starbase Blueprint
+            2742, 2743, 2744, 2745, 2746, 2747, 2748, 2786, 2790, 2791, 2793, 2795, 2797, 2820, 2821, 28605, 33515, 33584, 2788, 2789, 2800, 33582,
+            // Defunct starbase structure
+            12239, 14343, 16221, 16869, 17982, 20175, 22634, 24684, 25270, 25271, 25280, 25821, 30655, 30656, 16216, 24567, 28351, 32245, 33477, 33581, 33583,
+            27673, 27674, 27897
+        );
+        for (Integer unpublishedType : unpublishedTypes) {
+            this.getTypes().get(unpublishedType).published = false;
+        }
 
         Map<Integer, Group> groups = this.getGroups();
-        Set<Integer> unpublishedTypeCategories = Set.of(11, 25, 54, 91, 2118);
+        Set<Integer> unpublishedTypeCategories = Set.of(11, 54, 91, 2118);
         Set<Integer> unpublishedTypeGroups = groups  // Data supplier views are not available during patch
             .values()
             .stream()
@@ -531,7 +579,7 @@ public abstract class DataSupplier {
             .map(group -> group.groupID)
             .collect(Collectors.toCollection(HashSet::new));
 
-        Collections.addAll(unpublishedTypeGroups, 186, 316, 920, 935, 952, 110, 1324, 1461, 1717, 1975, 1977, 2004, 2022, 2026, 4161);
+        Collections.addAll(unpublishedTypeGroups, 186, 316, 920, 935, 952, 110, 1324, 1461, 1717, 1975, 1977, 2004, 2022, 2026, 4161, 1048);
 
         var types = this.getTypes();
         var validGroups = new HashSet<Integer>();
@@ -541,7 +589,7 @@ public abstract class DataSupplier {
                 type.published = true;
             }
 
-            if (!type.published || unpublishedTypeGroups.contains(type.groupID)) {
+            if (!type.published || unpublishedTypeGroups.contains(type.groupID) || type.name.startsWith("Batch Compressed")) {
                 iterator.remove();
             } else {
                 validGroups.add(type.groupID);
@@ -559,6 +607,9 @@ public abstract class DataSupplier {
                 validCategories.add(group.categoryID);
             }
         }
+
+        types.values().removeIf(type -> !groups.containsKey(type.groupID));
+
         Map<Integer, Category> categories = this.getCategories();
         categories.keySet().retainAll(validCategories);
         categories.values().removeIf(category -> !category.published);
@@ -571,6 +622,11 @@ public abstract class DataSupplier {
 
         this.getTypeAttributes().keySet().removeIf(typeID -> !types.containsKey(typeID));
         this.getBpActivities().keySet().removeIf(typeID -> !types.containsKey(typeID));
+        for (Map<Integer, IndustryActivity> map : this.getBpActivities().values()) {
+            map.values().removeIf(activity -> activity.productMap.keySet().stream().anyMatch(typeID -> !types.containsKey(typeID)));
+        }
+        getBpActivities().values().removeIf(Map::isEmpty);
+        this.getReprocessingMaterials().keySet().removeIf(typeID -> !types.containsKey(typeID));
 
         this.getVariants().keySet().removeIf(typeID -> !types.containsKey(typeID));
         for (Set<Integer> variants : this.getVariants().values()) {

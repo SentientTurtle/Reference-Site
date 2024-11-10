@@ -63,7 +63,6 @@ public class UsedWith extends Component {
             
             .used_width_entry {
                 width: 100%;
-                font-size: 1.25rem;
                 display: flex;
                 align-items: center;
             }

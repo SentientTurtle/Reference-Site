@@ -9,6 +9,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Data object representing EVE Online items
@@ -111,5 +112,17 @@ public class Type implements HasPage {
     @Override
     public @NonNull Page getPage() {
         return new TypePage(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Type type)) return false;
+        return typeID == type.typeID;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(typeID);
     }
 }

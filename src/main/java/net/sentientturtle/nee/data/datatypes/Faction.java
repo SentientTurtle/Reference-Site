@@ -10,9 +10,6 @@ public final class Faction {
     public final String factionName;
     public final @Nullable Integer corporationID;
 
-    /**
-     *
-     */
     public Faction(int factionID, String factionName, @Nullable Integer corporationID) {
         this.factionID = factionID;
         this.factionName = factionName;
