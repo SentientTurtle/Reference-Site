@@ -123,18 +123,14 @@ public class TypeTraits extends Component {
             
             .type_traits_blank {
                 height: 1rem;
-            }
-            
-            .type_traits_data {
-                font-size: 0.9rem;
             }""";
     }
 
     private void appendTrait(Element table, TypeTraitBonus traitTuple, DataSupplier dataSupplier) {
         table.content(
             TR().content(
-                TD("type_traits_data").content(traitTuple.bonusAmount != null ? dataSupplier.format_with_unit(traitTuple.bonusAmount, traitTuple.unitID) : TEXT("")),
-                TD("type_traits_data").content(EVEText.escape(traitTuple.bonusText, dataSupplier))
+                TD().content(traitTuple.bonusAmount != null ? dataSupplier.format_with_unit(traitTuple.bonusAmount, traitTuple.unitID) : TEXT("")),
+                TD().content(EVEText.escape(traitTuple.bonusText, dataSupplier))
             )
         );
     }

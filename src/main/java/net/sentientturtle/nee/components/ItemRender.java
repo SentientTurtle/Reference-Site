@@ -27,7 +27,7 @@ public class ItemRender extends Component {
     @Override
     protected HTML[] getContent(HtmlContext context) {
         return new HTML[]{
-            IMG(resourceLocation, null, 512)
+            IMG(resourceLocation, null)
         };
     }
 
@@ -37,8 +37,8 @@ public class ItemRender extends Component {
             .item_render img {
                 display: block;
                 margin: 0 auto;
-                width: 32rem;
-                height: 32rem;
+                width: min(100%, 512px);
+                aspect-ratio: 1/1;
             }""";
     }
 }

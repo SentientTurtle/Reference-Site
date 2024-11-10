@@ -178,7 +178,7 @@ public class Main {
             zipOutputStream.write("\n\n".getBytes(StandardCharsets.UTF_8));
         }
 
-        zipOutputStream.putNextEntry(new ZipEntry("searchindex.js"));
+        zipOutputStream.putNextEntry(new ZipEntry("rsc/searchindex.js"));
         OutputStreamHtmlContext searchContext = new OutputStreamHtmlContext(0, new IDContext("searchindex"), dataSupplier, sharedCache, fsdData, zipOutputStream);
         ObjectMapper objectMapper = new ObjectMapper();
         record IndexEntry(String index, String name, String path, String icon) {}

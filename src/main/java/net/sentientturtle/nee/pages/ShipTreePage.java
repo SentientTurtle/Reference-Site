@@ -228,7 +228,9 @@ public class ShipTreePage extends Page {
                                 groupRow.content(shipContainer);
                             }
                             shipContainer.content(DIV("ship_tree_entry colour_" + themeName).content(
-                                IMG(ResourceLocation.typeIcon(typeArray[k].typeID, context), null, 64).className("ship_tree_icon"),
+                                IMG(ResourceLocation.typeIcon(typeArray[k].typeID, context), null, 64)
+                                    .className("ship_tree_icon")
+                                    .attribute("loading", "lazy"),
                                 new PageLink(new TypePage(typeArray[k]))
                             ));
                         }

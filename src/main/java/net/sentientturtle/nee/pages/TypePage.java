@@ -215,8 +215,14 @@ public class TypePage extends Page {
                     }
                 }
 
+                // Exclude charges which cannot fit the module
+                if (categoryID == 7 && t.volume > type.capacity) return false;
+                if (categoryID == 8 && t.capacity < type.volume) return false;
+
+                // Exclude charges which do not have the module type set as usedWith
                 if (targetUsedWithGroups.contains(type.groupID)) {
                     Double chargeSize = dataSupplier.getTypeAttributes().get(t.typeID).get(128);
+                    // exclude charges with a different chargeSize as this module
                     if (chargeSize != null && targetChargeSize != null) {
                         return (double) chargeSize == (double) targetChargeSize;
                     } else {

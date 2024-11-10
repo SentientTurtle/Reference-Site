@@ -17,12 +17,12 @@ public class Sidebar extends Component {
     @Override
     protected HTML[] getContent(HtmlContext context) {
         return new HTML[]{
-            new PageLink(new IndexPage(), DIV("sidebar_button eve_clip_bottom_right").text("Home")).className("sidebar_button_border eve_clip_bottom_right"),
-            new PageLink(new ShipTreePage(), DIV("sidebar_button eve_clip_bottom_right").text("Ships")).className("sidebar_button_border eve_clip_bottom_right"),
-            new PageLink(new StructureTreePage(), DIV("sidebar_button eve_clip_bottom_right").text("Structures")).className("sidebar_button_border eve_clip_bottom_right"),
-            new PageLink(new MarketGroupPage(context.data.getMarketGroups().get(9)), DIV("sidebar_button eve_clip_bottom_right").text("Modules")).className("sidebar_button_border eve_clip_bottom_right"),
-            new PageLink(new MarketGroupPage(context.data.getMarketGroups().get(-1)), DIV("sidebar_button eve_clip_bottom_right").text("Items")).className("sidebar_button_border eve_clip_bottom_right"),
-            new PageLink(new DynamicMapPage(), DIV("sidebar_button eve_clip_bottom_right").text("Map")).className("sidebar_button_border eve_clip_bottom_right")
+            new PageLink(new IndexPage(), DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text("Home")).className("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset"),
+            new PageLink(new ShipTreePage(), DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text("Ships")).className("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset"),
+            new PageLink(new StructureTreePage(), DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text("Structures")).className("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset"),
+            new PageLink(new MarketGroupPage(context.data.getMarketGroups().get(9)), DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text("Modules")).className("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset"),
+            new PageLink(new MarketGroupPage(context.data.getMarketGroups().get(-1)), DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text("Items")).className("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset"),
+            new PageLink(new DynamicMapPage(), DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text("Map")).className("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset")
         };
     }
 
@@ -34,6 +34,14 @@ public class Sidebar extends Component {
                 flex-direction: column;
                 align-items: center;
                 gap: 0.5rem;
+            }
+        
+            @media (max-width: 47.5rem) {
+                .sidebar {
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                    justify-content: center;
+                }
             }
             
             .sidebar a:link, .sidebar a:visited, .sidebar a:hover, .sidebar a:active  {

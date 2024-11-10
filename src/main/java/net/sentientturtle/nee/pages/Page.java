@@ -45,7 +45,9 @@ public abstract class Page implements Document, HTML {
                 TEXT_BOLD().className("font_header").id(context.ids.tryID("header_text")).content(new PageLink(new IndexPage()))
             ),
             SPAN("header_span header_search").content(
-                HTML.RAW("<form class='font_header' action='" + (this.getPageKind() == PageKind.STATIC ? "" : "../") + PageKind.STATIC.getPageFilePath("SearchResults") + "'>Search: <input class='font_header' id='search_input' type='text' placeholder='Search...' name='search'></form>")
+                HTML.RAW("<form class='font_header' action='" + context.pathTo(new SearchResults()) + "'>" +
+                         "<input class='font_header' id='search_input' type='text' placeholder='Search...' name='search' aria-label='Search'>" +
+                         "</form>")
             )
         );
     }
@@ -78,8 +80,8 @@ public abstract class Page implements Document, HTML {
     @Override
     public void renderTo(HtmlContext context) throws RenderingException {
         var head = HEAD().content(
-            META().attribute("charset", "UTF-8")
-                .attribute("name", "viewport"),
+            META().attribute("charset", "UTF-8"),
+            META().attribute("name", "viewport").attribute("content", "width=device-width, initial-scale=1"),
             TITLE(this.title()),
             LINK().attribute("rel", "stylesheet").attribute("href", context.pathTo("stylesheet.css")),
             HTML.RAW("<script type='module' src='" + HTMLUtil.escapeAttributeValue(context.pathTo("script.js")) + "'></script>")
@@ -150,9 +152,16 @@ public abstract class Page implements Document, HTML {
             font-family: sans-serif; /* Generic sans-serif */
         }
         
+        @media (max-width: 47.5rem) {
+            body {
+                display: flex;
+                flex-direction: column;
+            }
+        }
+        
         #header {
             grid-area: 1 / 1 / 2 / 3;
-            height: 4rem;
+            min-height: 4rem;
             width: 100%;
             display: flex;
             justify-content: space-between;
@@ -161,6 +170,12 @@ public abstract class Page implements Document, HTML {
         
         #header_text {
             font-size: 2.25rem;
+        }
+        
+        @media (max-width: 47.5rem) {
+            #header_text {
+                font-size: 1rem;
+            }
         }
         
         .header_span {
@@ -601,6 +616,12 @@ public abstract class Page implements Document, HTML {
         }
         .eve_clip_bottom_left {
             clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 1em 100%, 0% calc(100% - 1em));
+        }
+        
+        @media (max-width: 47.5rem) {
+            .eve_clip_mobile_unset {
+                clip-path: unset;
+            }
         }
         """;
 }
