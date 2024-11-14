@@ -5,9 +5,8 @@ The New Eden Encyclopedia project is a set of tools to automatically generate a 
 ## Setup & Usage
 
 1) Place Sqlite4Java native libraries in the `./native` folder within the working directory where you wish to run the project.
-2) (Optional) Place item-type icons from the EVE Online Image Export Collection (https://developers.eveonline.com/resource) in the `./rsc/EVE/type_icons` folder.
-3) Configure properties in `./nee.properties` file. (Run application to generate if absent)
-4) Start application with `net.sentientturtle.nee.Main#main` entrypoint.
+2) Configure properties in `./nee.properties` file. (Run application to generate if absent)
+3) Start application with `net.sentientturtle.nee.Main#main` entrypoint.
 
 ## License
 
