@@ -2,10 +2,11 @@ package net.sentientturtle.html.context;
 
 import net.sentientturtle.html.Document;
 import net.sentientturtle.html.id.IDContext;
-import net.sentientturtle.nee.data.DataSupplier;
+import net.sentientturtle.nee.data.DataSources;
+import net.sentientturtle.nee.data.SDEData;
 import net.sentientturtle.nee.data.sharedcache.FSDData;
 import net.sentientturtle.nee.data.sharedcache.SharedCacheReader;
-import net.sentientturtle.nee.util.ResourceSupplier;
+import net.sentientturtle.nee.data.ResourceLocation;
 import org.jspecify.annotations.NonNull;
 
 import java.io.IOException;
@@ -25,20 +26,23 @@ public abstract class HtmlContext {
     private final LinkedHashSet<String> css;
     private final LinkedHashSet<String> js;
     // TODO: Rework to be less clumsy
-    /// External files that need including in the output, a map of file paths to ResourceSuppliers
-    private final HashMap<String, ResourceSupplier> fileDependencies;
+    /// External files that need including in the output, a map of file paths to ResourceData
+    private final HashMap<String, ResourceLocation.ResourceData> fileDependencies;
 
     // EVE-specific fields; These live here because Java generic inference breaks with generic HTML and Element, otherwise HtmlContext could have a generic type for data extension
-    public final DataSupplier data;
+    public final DataSources dataSources;
+    public final SDEData data;
     public final SharedCacheReader sharedCache;
     public final FSDData fsdData;
 
-    public HtmlContext(int folderDepth, IDContext ids, DataSupplier data, SharedCacheReader sharedCache, FSDData fsdData) {
+    public HtmlContext(int folderDepth, IDContext ids, DataSources dataSources) {
         this.ids = ids;
-        this.data = data;
         this.folderDepth = folderDepth;
-        this.sharedCache = sharedCache;
-        this.fsdData = fsdData;
+
+        this.dataSources = dataSources;
+        this.data = dataSources.SDEData();
+        this.sharedCache = dataSources.sharedCache();
+        this.fsdData = dataSources.fsdData();
         this.css = new LinkedHashSet<>();
         this.js = new LinkedHashSet<>();
         this.fileDependencies = new HashMap<>();
@@ -49,7 +53,7 @@ public abstract class HtmlContext {
      * @return Relative path from this page to {@code absolutePath}
      */
     public String pathTo(@NonNull String absolutePath) {
-        return "../".repeat(folderDepth) + absolutePath;
+        return "../".repeat(folderDepth) + absolutePath.replace("\\", "/");
     }
 
     /**
@@ -75,11 +79,11 @@ public abstract class HtmlContext {
     }
 
     /// Add a file dependency for this page
-    public void addFileDependency(String path, ResourceSupplier supplier) {
-        this.fileDependencies.put(path, supplier);
+    public void addFileDependency(String path, ResourceLocation.ResourceData resourceData) {
+        this.fileDependencies.put(path, resourceData);
     }
 
-    public HashMap<String, ResourceSupplier> getFileDependencies() {
+    public HashMap<String, ResourceLocation.ResourceData> getFileDependencies() {
         return fileDependencies;
     }
 

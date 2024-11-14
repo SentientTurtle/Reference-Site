@@ -2,7 +2,7 @@ package net.sentientturtle.nee.pages;
 
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.nee.util.ResourceLocation;
+import net.sentientturtle.nee.data.ResourceLocation;
 import org.jspecify.annotations.Nullable;
 
 /// Page for the dynamic Map

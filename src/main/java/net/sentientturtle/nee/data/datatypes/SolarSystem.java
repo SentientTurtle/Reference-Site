@@ -1,8 +1,8 @@
 package net.sentientturtle.nee.data.datatypes;
 
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.nee.util.ResourceLocation;
-import net.sentientturtle.nee.data.DataSupplier;
+import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.SDEData;
 import org.jspecify.annotations.Nullable;
 
 import java.util.OptionalDouble;
@@ -58,12 +58,12 @@ public final class SolarSystem implements Mappable {
     }
 
     @Override
-    public Stream<? extends Mappable> getMapPoints(DataSupplier dataSupplier) {
+    public Stream<? extends Mappable> getMapPoints(SDEData SDEData) {
         return Stream.empty();
     }
 
     @Override
-    public Stream<Jump> getMapLines(DataSupplier dataSupplier) {
+    public Stream<Jump> getMapLines(SDEData SDEData) {
         return Stream.empty();
     }
 
@@ -75,7 +75,7 @@ public final class SolarSystem implements Mappable {
 
     @Override
     @Nullable
-    public OptionalDouble getSecurity(DataSupplier dataSupplier) {
+    public OptionalDouble getSecurity(SDEData SDEData) {
         return OptionalDouble.of(security);
     }
 
@@ -85,7 +85,7 @@ public final class SolarSystem implements Mappable {
     }
 
     @Override
-    public Stream<Mappable> getConstituents(DataSupplier dataSupplier) {
+    public Stream<Mappable> getConstituents(SDEData SDEData) {
         return Stream.empty();
     }
 

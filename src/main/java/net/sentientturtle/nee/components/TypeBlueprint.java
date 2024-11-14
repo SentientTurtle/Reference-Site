@@ -9,15 +9,11 @@ import net.sentientturtle.nee.data.datatypes.IndustryActivity;
 import net.sentientturtle.nee.data.datatypes.PlanetSchematic;
 import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.pages.TypePage;
-import net.sentientturtle.nee.util.ResourceLocation;
+import net.sentientturtle.nee.data.ResourceLocation;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.ToIntFunction;
-import java.util.stream.Stream;
 
 import static net.sentientturtle.html.HTML.*;
 

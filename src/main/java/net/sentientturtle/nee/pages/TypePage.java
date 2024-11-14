@@ -2,10 +2,12 @@ package net.sentientturtle.nee.pages;
 
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
+import net.sentientturtle.nee.Main;
 import net.sentientturtle.nee.data.datatypes.Attribute;
 import net.sentientturtle.nee.data.datatypes.Group;
+import net.sentientturtle.nee.data.sharedcache.IconProvider;
 import net.sentientturtle.nee.util.EVEText;
-import net.sentientturtle.nee.util.ResourceLocation;
+import net.sentientturtle.nee.data.ResourceLocation;
 import net.sentientturtle.nee.components.*;
 import net.sentientturtle.nee.data.datatypes.Type;
 import org.jspecify.annotations.Nullable;
@@ -79,7 +81,19 @@ public class TypePage extends Page {
             throw new NullPointerException("Missing group for type: " + type.name + " (" + type.typeID + ")");
         }
         int categoryID = group.categoryID;
-        if ((categoryID == 6 || categoryID == 18 || categoryID == 65 || categoryID == 87)) {   // Check if type is a Ship, Drone, Citadel or Fighter
+
+        // Check if type is a Ship, Drone, Citadel or Fighter
+        boolean hasRender = categoryID == 6         // Ship
+                            || categoryID == 18     // Drone
+                            || categoryID == 22     // Deployable
+                            || categoryID == 24     // Starbase
+                            || categoryID == 65     // Structure
+                            || categoryID == 87;    // Fighter
+        if (Main.GENERATE_ICONS) {
+            hasRender = hasRender && IconProvider.hasRender(this.type.typeID, context.dataSources);
+        }
+
+        if (hasRender) {
             left.content(
                 new Title(type.name, null),
                 new TypeGroup(type),

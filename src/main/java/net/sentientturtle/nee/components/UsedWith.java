@@ -6,7 +6,7 @@ import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.pages.Page;
-import net.sentientturtle.nee.util.ResourceLocation;
+import net.sentientturtle.nee.data.ResourceLocation;
 
 import java.util.Objects;
 import java.util.Set;

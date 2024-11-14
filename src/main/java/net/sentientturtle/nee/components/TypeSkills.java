@@ -4,7 +4,7 @@ import net.sentientturtle.html.Element;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.Component;
-import net.sentientturtle.nee.data.DataSupplier;
+import net.sentientturtle.nee.data.SDEData;
 import net.sentientturtle.nee.data.datatypes.Type;
 
 import java.util.Map;
@@ -74,8 +74,8 @@ public class TypeSkills extends Component {
             """;
     }
 
-    private void fetchSkills(int typeID, DataSupplier dataSupplier, Element parent, int indent) {
-        Map<Integer, Map<Integer, Double>> attributeValues = dataSupplier.getTypeAttributes();
+    private void fetchSkills(int typeID, SDEData SDEData, Element parent, int indent) {
+        Map<Integer, Map<Integer, Double>> attributeValues = SDEData.getTypeAttributes();
 
         for (int i = 0; i < skillAttributes.length; i++) {
             Double skill = attributeValues.get(typeID).get(skillAttributes[i]);
@@ -91,7 +91,7 @@ public class TypeSkills extends Component {
                 row.content(
                     HTML.repeat(indent, DIV("type_skills_spacer")),
                     SPAN("type_skills_text").content(
-                        dataSupplier.format_with_unit(skill, 116), // 116 = typeID unit
+                        SDEData.format_with_unit(skill, 116), // 116 = typeID unit
                         SPAN("type_skills_level font_roman_numeral").text(" " + level + " ").content(
                             SPAN("type_skills_indicator").text(levelBoxes)
                         )
@@ -99,7 +99,7 @@ public class TypeSkills extends Component {
                 );
 
                 if (attributeValues.get(skill.intValue()).containsKey(182)) {
-                    fetchSkills(skill.intValue(), dataSupplier, parent, indent + 1);
+                    fetchSkills(skill.intValue(), SDEData, parent, indent + 1);
                 }
             }
         }

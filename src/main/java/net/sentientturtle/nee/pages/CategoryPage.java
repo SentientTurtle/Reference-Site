@@ -2,7 +2,7 @@ package net.sentientturtle.nee.pages;
 
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.nee.util.ResourceLocation;
+import net.sentientturtle.nee.data.ResourceLocation;
 import net.sentientturtle.nee.components.GroupList;
 import net.sentientturtle.nee.components.Title;
 import net.sentientturtle.nee.data.datatypes.Category;

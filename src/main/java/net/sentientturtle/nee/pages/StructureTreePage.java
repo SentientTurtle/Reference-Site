@@ -3,14 +3,13 @@ package net.sentientturtle.nee.pages;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.components.ItemTree;
-import net.sentientturtle.nee.data.DataSupplier;
+import net.sentientturtle.nee.data.SDEData;
 import net.sentientturtle.nee.data.datatypes.Category;
 import net.sentientturtle.nee.data.datatypes.Group;
 import net.sentientturtle.nee.data.datatypes.Type;
-import net.sentientturtle.nee.util.ResourceLocation;
+import net.sentientturtle.nee.data.ResourceLocation;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Comparator;
 import java.util.Map;
 
 /// Page containing the ship tree
@@ -35,7 +34,7 @@ public class StructureTreePage extends Page {
         return null;
     }
 
-    private static ItemTree.Entry entryFor(int categoryID, DataSupplier data) {
+    private static ItemTree.Entry entryFor(int categoryID, SDEData data) {
         Category category = data.getCategories().get(categoryID);
         ItemTree.Group[] groups = data.getCategoryGroups().get(categoryID)
             .stream()
@@ -49,7 +48,7 @@ public class StructureTreePage extends Page {
         );
     }
 
-    private static ItemTree.Group groupFor(Group group, DataSupplier data) {
+    private static ItemTree.Group groupFor(Group group, SDEData data) {
         Type[] types = data.getGroupTypes().get(group.groupID)
             .stream().sorted(Type.comparator(data))
             .toArray(Type[]::new);

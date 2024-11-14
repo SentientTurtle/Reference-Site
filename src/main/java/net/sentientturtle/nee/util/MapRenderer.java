@@ -1,6 +1,6 @@
 package net.sentientturtle.nee.util;
 
-import net.sentientturtle.nee.data.DataSupplier;
+import net.sentientturtle.nee.data.SDEData;
 import net.sentientturtle.nee.data.datatypes.Mappable;
 import net.sentientturtle.nee.data.datatypes.Region;
 import net.sentientturtle.util.ExceptionUtil;
@@ -26,9 +26,9 @@ public class MapRenderer {
     private static final int STAR_SIZE = 32;
 
     @SuppressWarnings("WeakerAccess")
-    public static byte[] render(Mappable mappable, DataSupplier dataSupplier) {
+    public static byte[] render(Mappable mappable, SDEData SDEData) {
         HashMap<Integer, Mappable> points = new HashMap<>();
-        mappable.getMapPoints(dataSupplier).forEach(point -> points.put(point.getID(), point));
+        mappable.getMapPoints(SDEData).forEach(point -> points.put(point.getID(), point));
 
         double mini = Double.MAX_VALUE;
         double maxiX = Double.MAX_VALUE * -1;
@@ -57,11 +57,6 @@ public class MapRenderer {
         } else {
             renderSize = (int) Math.max(sizeHeight / Math.pow(10, 14), 512.0);
         }
-        System.out.println("Render size: " + renderSize);
-
-        if (renderSize == 0) {
-            System.out.println("ERR!");
-        }
 
         double scaleX = renderSize / (maxX - minX);
         double scaleZ = renderSize / (maxZ - minZ);
@@ -72,7 +67,7 @@ public class MapRenderer {
         graphics.setStroke(new BasicStroke(5));
         graphics.setColor(new Color(155, 155, 155));
 
-        mappable.getMapLines(dataSupplier).forEach(jump -> {
+        mappable.getMapLines(SDEData).forEach(jump -> {
             Mappable from = points.get(jump.fromSolarSystemID());
             Mappable to = points.get(jump.toSolarSystemID());
             graphics.drawLine(
@@ -84,7 +79,7 @@ public class MapRenderer {
         });
 
         for (Mappable point : points.values()) {
-            OptionalDouble security = point.getSecurity(dataSupplier);
+            OptionalDouble security = point.getSecurity(SDEData);
             if (security.isPresent()) {
                 graphics.setColor(calcColor(security.getAsDouble()));
             } else {

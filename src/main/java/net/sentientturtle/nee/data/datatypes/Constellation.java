@@ -1,8 +1,8 @@
 package net.sentientturtle.nee.data.datatypes;
 
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.nee.util.ResourceLocation;
-import net.sentientturtle.nee.data.DataSupplier;
+import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.SDEData;
 import org.jspecify.annotations.Nullable;
 
 import java.util.OptionalDouble;
@@ -58,13 +58,13 @@ public class Constellation implements Mappable {
     }
 
     @Override
-    public Stream<SolarSystem> getMapPoints(DataSupplier dataSupplier) {
-        return dataSupplier.getConstellationSolarSystemMap().get(constellationID).stream();
+    public Stream<SolarSystem> getMapPoints(SDEData SDEData) {
+        return SDEData.getConstellationSolarSystemMap().get(constellationID).stream();
     }
 
     @Override
-    public Stream<Jump> getMapLines(DataSupplier dataSupplier) {
-        return dataSupplier.getConstellationJumps().getOrDefault(this.constellationID, Set.of()).stream();
+    public Stream<Jump> getMapLines(SDEData SDEData) {
+        return SDEData.getConstellationJumps().getOrDefault(this.constellationID, Set.of()).stream();
     }
 
 
@@ -76,8 +76,8 @@ public class Constellation implements Mappable {
 
     @Override
     @Nullable
-    public OptionalDouble getSecurity(DataSupplier dataSupplier) {
-        return getMapPoints(dataSupplier).mapToDouble(solarsystem -> solarsystem.security).average();
+    public OptionalDouble getSecurity(SDEData SDEData) {
+        return getMapPoints(SDEData).mapToDouble(solarsystem -> solarsystem.security).average();
     }
 
     @Override
@@ -86,8 +86,8 @@ public class Constellation implements Mappable {
     }
 
     @Override
-    public Stream<SolarSystem> getConstituents(DataSupplier dataSupplier) {
-        return dataSupplier.getSolarSystems().stream().filter(solarSystem -> solarSystem.constellationID == this.constellationID);
+    public Stream<SolarSystem> getConstituents(SDEData SDEData) {
+        return SDEData.getSolarSystems().stream().filter(solarSystem -> solarSystem.constellationID == this.constellationID);
     }
 
     @Override

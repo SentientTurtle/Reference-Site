@@ -4,7 +4,7 @@ import net.sentientturtle.html.*;
 import net.sentientturtle.html.Component;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.datatypes.TypeTraitBonus;
-import net.sentientturtle.nee.data.DataSupplier;
+import net.sentientturtle.nee.data.SDEData;
 import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.pages.TypePage;
 import net.sentientturtle.nee.util.EVEText;
@@ -12,7 +12,6 @@ import net.sentientturtle.nee.util.EVEText;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import static net.sentientturtle.html.HTML.*;
 
@@ -119,6 +118,7 @@ public class TypeTraits extends Component {
             
             .type_traits_table {
                 width: 100%;
+                border-spacing: 0.25rem 0.5rem;
             }
             
             .type_traits_blank {
@@ -126,11 +126,11 @@ public class TypeTraits extends Component {
             }""";
     }
 
-    private void appendTrait(Element table, TypeTraitBonus traitTuple, DataSupplier dataSupplier) {
+    private void appendTrait(Element table, TypeTraitBonus traitTuple, SDEData SDEData) {
         table.content(
             TR().content(
-                TD().content(traitTuple.bonusAmount != null ? dataSupplier.format_with_unit(traitTuple.bonusAmount, traitTuple.unitID) : TEXT("")),
-                TD().content(EVEText.escape(traitTuple.bonusText, dataSupplier))
+                TD().content(traitTuple.bonusAmount != null ? SDEData.format_with_unit(traitTuple.bonusAmount, traitTuple.unitID) : TEXT("")),
+                TD().content(EVEText.escape(traitTuple.bonusText, SDEData))
             )
         );
     }

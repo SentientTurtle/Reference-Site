@@ -5,7 +5,7 @@ import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.Component;
 import net.sentientturtle.nee.pages.Page;
 import net.sentientturtle.html.PageLink;
-import net.sentientturtle.nee.util.ResourceLocation;
+import net.sentientturtle.nee.data.ResourceLocation;
 
 import java.util.Arrays;
 

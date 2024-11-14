@@ -2,10 +2,13 @@ package net.sentientturtle.nee.data.sharedcache;
 
 import org.jspecify.annotations.Nullable;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import static net.sentientturtle.util.ExceptionUtil.sneakyThrow;
@@ -14,7 +17,7 @@ import static net.sentientturtle.util.ExceptionUtil.sneakyThrow;
 public class SharedCacheReader {
     private final HashMap<String, Path> cacheIndex;
     private final HashMap<String, String> resourceHashes;
-    private final HashMap<String, byte[]> dataCache;
+    private final ConcurrentHashMap<String, byte[]> dataCache;
     private final Path cacheFolder;
     private final Path resFiles;
 
@@ -40,7 +43,7 @@ public class SharedCacheReader {
             });
         }
 
-        this.dataCache = new HashMap<>();
+        this.dataCache = new ConcurrentHashMap<>();
     }
 
     Path getCacheFolder() {
@@ -76,5 +79,21 @@ public class SharedCacheReader {
                 }
             }
         );
+    }
+
+    public InputStream getInputStream(String resource) throws IOException {
+        Path resourcePath = cacheIndex.get(resource.toLowerCase());
+        if (resourcePath == null) throw new IllegalArgumentException("File not in shared cache: " + resource);
+
+        return new ByteArrayInputStream(dataCache.computeIfAbsent(
+            resource.toLowerCase(),
+            _ -> {
+                try {
+                    return Files.readAllBytes(resFiles.resolve(resourcePath));
+                } catch (IOException e) {
+                    return sneakyThrow(e);
+                }
+            }
+        ));
     }
 }

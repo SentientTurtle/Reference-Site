@@ -9,7 +9,7 @@ import net.sentientturtle.html.PageLink;
 import net.sentientturtle.nee.data.datatypes.Group;
 import net.sentientturtle.nee.pages.GroupPage;
 import net.sentientturtle.nee.pages.TypePage;
-import net.sentientturtle.nee.util.ResourceLocation;
+import net.sentientturtle.nee.data.ResourceLocation;
 import net.sentientturtle.nee.data.datatypes.Category;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;

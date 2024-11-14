@@ -16,11 +16,11 @@ import java.util.stream.Collectors;
 /**
  * Datasource for EVE Online Data.
  * <br>
- * Implementors must call {@link DataSupplier#patch()} and then {@link DataSupplier#loadViews()} after initializing the abstract collections in this type
+ * Implementors must call {@link SDEData#patch()} and then {@link SDEData#loadViews()} after initializing the abstract collections in this type
  *
- * @see SQLiteDataSupplier
+ * @see SQLiteSDEData
  */
-public abstract class DataSupplier {
+public abstract class SDEData {
     private static final DecimalFormat decimalFormat;
     private static final SimpleDateFormat dateFormat;
 
@@ -332,7 +332,7 @@ public abstract class DataSupplier {
      * @param unitID UnitID of the unit to format the value with
      * @return Value formatted as a String with the specified unit
      */
-    public HTML format_with_unit(double value, @Nullable Integer unitID) {
+    public HTML format_with_unit(double value, @Nullable Integer unitID) {  // TODO: Apply to-break to text?
         if (unitID == null) unitID = -1;
 
         switch (unitID) {

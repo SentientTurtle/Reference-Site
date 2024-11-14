@@ -1,9 +1,7 @@
 package net.sentientturtle.nee.pages;
 
 import net.sentientturtle.html.HTMLUtil;
-import net.sentientturtle.nee.data.DataSupplier;
-import net.sentientturtle.nee.data.datatypes.Mappable;
-import net.sentientturtle.nee.data.datatypes.singleton.Cluster;
+import net.sentientturtle.nee.data.SDEData;
 
 import java.util.Arrays;
 import java.util.function.Function;
@@ -61,23 +59,23 @@ public enum PageKind {
         }
     };
 
-    public final Function<DataSupplier, Stream<Page>> streamSupplier;
+    public final Function<SDEData, Stream<Page>> streamSupplier;
 
     /**
      * @param streamSupplier Function that returns a stream of all pages of the type, using a specified data supplier.
      */
-    PageKind(Function<DataSupplier, Stream<Page>> streamSupplier) {
+    PageKind(Function<SDEData, Stream<Page>> streamSupplier) {
         this.streamSupplier = streamSupplier;
     }
 
     /**
      * Utility method to get a single stream containing all pages that can be generated.
      *
-     * @param dataSupplier Data supplier to use.
+     * @param SDEData Data supplier to use.
      * @return Stream containing all pages that can be generated.
      */
-    public static Stream<Page> pageStream(DataSupplier dataSupplier) {
-        return Arrays.stream(values()).flatMap((Function<PageKind, Stream<Page>>) pageType -> pageType.streamSupplier.apply(dataSupplier));
+    public static Stream<Page> pageStream(SDEData SDEData) {
+        return Arrays.stream(values()).flatMap((Function<PageKind, Stream<Page>>) pageType -> pageType.streamSupplier.apply(SDEData));
     }
 
     @Override

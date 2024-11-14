@@ -2,7 +2,7 @@ package net.sentientturtle.html;
 
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.id.ID;
-import net.sentientturtle.nee.util.ResourceLocation;
+import net.sentientturtle.nee.data.ResourceLocation;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 

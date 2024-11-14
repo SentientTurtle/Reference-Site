@@ -1,6 +1,6 @@
 package net.sentientturtle.nee.components;
 
-import net.sentientturtle.nee.data.DataSupplier;
+import net.sentientturtle.nee.data.SDEData;
 import net.sentientturtle.nee.data.datatypes.Type;
 
 /**
@@ -24,7 +24,7 @@ public class ShipArmor extends ShipHealth {
     }
 
     @Override
-    protected Resists getResists(DataSupplier dataSupplier) {
-        return super.getResists(dataSupplier, 267, 270, 269, 268);
+    protected Resists getResists(SDEData SDEData) {
+        return super.getResists(SDEData, 267, 270, 269, 268);
     }
 }

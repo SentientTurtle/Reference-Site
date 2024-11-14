@@ -4,7 +4,7 @@ import net.sentientturtle.html.*;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.Main;
 import net.sentientturtle.nee.components.Sidebar;
-import net.sentientturtle.nee.util.ResourceLocation;
+import net.sentientturtle.nee.data.ResourceLocation;
 
 import org.jspecify.annotations.Nullable;
 
@@ -525,6 +525,22 @@ public abstract class Page implements Document, HTML {
         .colour_sotc_highlight_bg { background-color: #535643; }
         .colour_sotc_highlight_border { border: 1px solid #8F9474 }
         .colour_sotc_highlight_border_bg { background-color: #8F9474; }
+        .colour_deathless { background-color: #4D1900; border: 1px solid #B04300; }
+        .colour_deathless_bg { background-color: #4D1900; }
+        .colour_deathless_border { border: 1px solid #B04300 }
+        .colour_deathless_border_bg { background-color: #B04300; }
+        .colour_deathless_minor { background-color: #0A0A0A; border: 1px solid #6E2700; }
+        .colour_deathless_minor_bg { background-color: #0A0A0A; }
+        .colour_deathless_minor_border { border: 1px solid #6E2700 }
+        .colour_deathless_minor_border_bg { background-color: #6E2700; }
+        .colour_deathless_major { background-color: #973900; border: 1px solid #AC4200; }
+        .colour_deathless_major_bg { background-color: #973900; }
+        .colour_deathless_major_border { border: 1px solid #AC4200 }
+        .colour_deathless_major_border_bg { background-color: #AC4200; }
+        .colour_deathless_highlight { background-color: #933700; border: 1px solid #BC4900; }
+        .colour_deathless_highlight_bg { background-color: #933700; }
+        .colour_deathless_highlight_border { border: 1px solid #BC4900 }
+        .colour_deathless_highlight_border_bg { background-color: #BC4900; }
         
         /* Global CSS */
         
@@ -553,12 +569,12 @@ public abstract class Page implements Document, HTML {
         }
         
         a:link {
-            color: #a4a4c8;
+            color: #B3B3D0;
             text-decoration: none;
         }
         
         a:visited {
-            color: #a4a4c8;
+            color: #B3B3D0;
             text-decoration: none;
         }
         

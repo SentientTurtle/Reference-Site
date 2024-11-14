@@ -1,6 +1,6 @@
 package net.sentientturtle.nee.data.datatypes;
 
-import net.sentientturtle.nee.data.DataSupplier;
+import net.sentientturtle.nee.data.SDEData;
 import net.sentientturtle.nee.pages.HasPage;
 import net.sentientturtle.nee.pages.Page;
 import net.sentientturtle.nee.pages.TypePage;
@@ -41,7 +41,7 @@ public class Type implements HasPage {
         this.marketGroupID = marketGroupID;
     }
 
-    public static Comparator<Type> comparator(DataSupplier data) {
+    public static Comparator<Type> comparator(SDEData data) {
         Map<Integer, Integer> metaTypes = data.getMetaTypes();
         Map<Integer, Map<Integer, Double>> typeAttributes = data.getTypeAttributes();
 
@@ -86,7 +86,7 @@ public class Type implements HasPage {
     /// There are several attributes that can specify a module activation time, this utility method checks them
     ///
     /// @return Module activation time if present, else 0.0
-    public double getModuleActivationTime(DataSupplier data) {
+    public double getModuleActivationTime(SDEData data) {
         Map<Integer, Double> typeAttributes = data.getTypeAttributes().getOrDefault(this.typeID, Map.of());
         double activationTime = 0.0;
         for (int activationTimeAttribute : ACTIVATION_TIME_ATTRIBUTES) {
@@ -103,10 +103,10 @@ public class Type implements HasPage {
     @Override
     public String toString() {
         return "Type{" +
-                "typeID=" + typeID +
-                ", groupID=" + groupID +
-                ", name='" + name +
-                '}';
+               "typeID=" + typeID +
+               ", groupID=" + groupID +
+               ", name='" + name + '\'' +
+               '}';
     }
 
     @Override

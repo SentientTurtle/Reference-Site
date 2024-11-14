@@ -4,7 +4,7 @@ import net.sentientturtle.html.Component;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.datatypes.Type;
-import net.sentientturtle.nee.util.ResourceLocation;
+import net.sentientturtle.nee.data.ResourceLocation;
 
 import java.util.HashMap;
 import java.util.Map;

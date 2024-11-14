@@ -3,13 +3,12 @@ package net.sentientturtle.nee.pages;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.components.Title;
-import net.sentientturtle.nee.util.ResourceLocation;
+import net.sentientturtle.nee.data.ResourceLocation;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
-import static net.sentientturtle.html.HTML.DIV;
-import static net.sentientturtle.html.HTML.TABLE;
+import static net.sentientturtle.html.HTML.*;
 
 /// Page for search results
 public class SearchResults extends Page {
@@ -45,7 +44,7 @@ public class SearchResults extends Page {
         return DIV("search_results_grid").content(
             new Title("Search results:", null),
             TABLE().id(context.ids.tryID("search_results_table"))
-                .content(HTML.TEXT("Loading..."))   // Cursed invalid table contents
+                .content(TR().content(TD().text("Loading...")))   // This table is replaced on update
         );
     }
 
@@ -89,7 +88,7 @@ public class SearchResults extends Page {
                         for (var j = 0; j < results.length; j++) {
                             table += "<tr>";
                             table += "<td class='search_results_entry'>"
-                            if ('icon' in results[j]) {
+                            if ('icon' in results[j] && results[j].icon != null) {
                                 table += "<img src='" + results[j].icon + "' height='64' width='64'>"
                             }
                             table += "</td><td class='search_results_entry font_header'><span class='search_results_page'><a href='" + results[j].path + "'>" + results[j].name + "</a></span></td>";

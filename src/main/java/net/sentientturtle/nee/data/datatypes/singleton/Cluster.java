@@ -2,8 +2,8 @@ package net.sentientturtle.nee.data.datatypes.singleton;
 
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.datatypes.Jump;
-import net.sentientturtle.nee.util.ResourceLocation;
-import net.sentientturtle.nee.data.DataSupplier;
+import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.SDEData;
 import net.sentientturtle.nee.data.datatypes.Mappable;
 import net.sentientturtle.nee.data.datatypes.SolarSystem;
 
@@ -40,12 +40,12 @@ public interface Cluster extends Mappable {
         }
 
         @Override
-        public Stream<SolarSystem> getMapPoints(DataSupplier dataSupplier) {
-            return dataSupplier.getSolarSystems().stream().filter(solarSystem -> solarSystem.solarSystemID < 31_000_000);
+        public Stream<SolarSystem> getMapPoints(SDEData SDEData) {
+            return SDEData.getSolarSystems().stream().filter(solarSystem -> solarSystem.solarSystemID < 31_000_000);
         }
 
         @Override
-        public Stream<Jump> getMapLines(DataSupplier dataSupplier) {
+        public Stream<Jump> getMapLines(SDEData SDEData) {
             return Stream.empty();
         }
 
@@ -56,8 +56,8 @@ public interface Cluster extends Mappable {
         }
 
         @Override
-        public OptionalDouble getSecurity(DataSupplier dataSupplier) {
-            return getMapPoints(dataSupplier).mapToDouble(solarsystem -> solarsystem.security).average();
+        public OptionalDouble getSecurity(SDEData SDEData) {
+            return getMapPoints(SDEData).mapToDouble(solarsystem -> solarsystem.security).average();
         }
 
         @Override
@@ -66,8 +66,8 @@ public interface Cluster extends Mappable {
         }
 
         @Override
-        public Stream<? extends Mappable> getConstituents(DataSupplier dataSupplier) {
-            return dataSupplier.getRegions().stream().filter(region -> region.regionID < 11_000_000);
+        public Stream<? extends Mappable> getConstituents(SDEData SDEData) {
+            return SDEData.getRegions().stream().filter(region -> region.regionID < 11_000_000);
         }
 
         @Override
@@ -111,12 +111,12 @@ public interface Cluster extends Mappable {
         }
 
         @Override
-        public Stream<SolarSystem> getMapPoints(DataSupplier dataSupplier) {
-            return dataSupplier.getSolarSystems().stream().filter(solarSystem -> solarSystem.solarSystemID > 31_000_000 && solarSystem.solarSystemID < 32_000_000);
+        public Stream<SolarSystem> getMapPoints(SDEData SDEData) {
+            return SDEData.getSolarSystems().stream().filter(solarSystem -> solarSystem.solarSystemID > 31_000_000 && solarSystem.solarSystemID < 32_000_000);
         }
 
         @Override
-        public Stream<Jump> getMapLines(DataSupplier dataSupplier) {
+        public Stream<Jump> getMapLines(SDEData SDEData) {
             return Stream.empty();
         }
 
@@ -126,8 +126,8 @@ public interface Cluster extends Mappable {
         }
 
         @Override
-        public OptionalDouble getSecurity(DataSupplier dataSupplier) {
-            return getMapPoints(dataSupplier).mapToDouble(solarsystem -> solarsystem.security).average();
+        public OptionalDouble getSecurity(SDEData SDEData) {
+            return getMapPoints(SDEData).mapToDouble(solarsystem -> solarsystem.security).average();
         }
 
         @Override
@@ -136,8 +136,8 @@ public interface Cluster extends Mappable {
         }
 
         @Override
-        public Stream<? extends Mappable> getConstituents(DataSupplier dataSupplier) {
-            return dataSupplier.getRegions().stream().filter(region -> region.regionID > 11_000_000);
+        public Stream<? extends Mappable> getConstituents(SDEData SDEData) {
+            return SDEData.getRegions().stream().filter(region -> region.regionID > 11_000_000);
         }
 
         @Override

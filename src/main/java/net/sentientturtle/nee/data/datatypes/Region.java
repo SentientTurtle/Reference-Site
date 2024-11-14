@@ -1,8 +1,8 @@
 package net.sentientturtle.nee.data.datatypes;
 
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.nee.util.ResourceLocation;
-import net.sentientturtle.nee.data.DataSupplier;
+import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.SDEData;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
@@ -69,13 +69,13 @@ public class Region implements Mappable{
     }
 
     @Override
-    public Stream<SolarSystem> getMapPoints(DataSupplier dataSupplier) {
-        return dataSupplier.getRegionSolarSystemMap().get(regionID).stream();
+    public Stream<SolarSystem> getMapPoints(SDEData SDEData) {
+        return SDEData.getRegionSolarSystemMap().get(regionID).stream();
     }
 
     @Override
-    public Stream<Jump> getMapLines(DataSupplier dataSupplier) {
-        return dataSupplier.getRegionJumps().getOrDefault(this.regionID, Set.of()).stream();
+    public Stream<Jump> getMapLines(SDEData SDEData) {
+        return SDEData.getRegionJumps().getOrDefault(this.regionID, Set.of()).stream();
     }
 
     @Nullable
@@ -86,8 +86,8 @@ public class Region implements Mappable{
 
     @Override
     @Nullable
-    public OptionalDouble getSecurity(DataSupplier dataSupplier) {
-        return getMapPoints(dataSupplier).mapToDouble(solarsystem -> solarsystem.security).average();
+    public OptionalDouble getSecurity(SDEData SDEData) {
+        return getMapPoints(SDEData).mapToDouble(solarsystem -> solarsystem.security).average();
     }
 
     @Override
@@ -96,8 +96,8 @@ public class Region implements Mappable{
     }
 
     @Override
-    public Stream<? extends Mappable> getConstituents(DataSupplier dataSupplier) {
-        return dataSupplier.getConstellations().stream().filter(constellation -> constellation.regionID == regionID);
+    public Stream<? extends Mappable> getConstituents(SDEData SDEData) {
+        return SDEData.getConstellations().stream().filter(constellation -> constellation.regionID == regionID);
     }
 
     @Override

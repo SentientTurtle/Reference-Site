@@ -5,10 +5,9 @@ import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.PageLink;
 import net.sentientturtle.nee.components.TabBox;
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.nee.data.DataSupplier;
 import net.sentientturtle.nee.data.datatypes.Group;
 import net.sentientturtle.nee.data.datatypes.Type;
-import net.sentientturtle.nee.util.ResourceLocation;
+import net.sentientturtle.nee.data.ResourceLocation;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
@@ -322,6 +321,10 @@ public class ShipTreePage extends Page {
                 getTree(context, shipTypeIDs, "Society of Conscious Thought", "sotc", SOCT_SHIPS)
             ),
             new TabBox.Tab(
+                IMG(ResourceLocation.fromSharedCache("res:/ui/texture/classes/shiptree/factions/deathless.png", context), "Deathless Circle", 64).title("Deathless Circle").className("ship_tree_icon"),
+                getTree(context, shipTypeIDs, "Deathless Circle", "deathless", DEATHLESS_SHIPS)
+            ),
+            new TabBox.Tab(
                 IMG(ResourceLocation.iconOfIconID(21065, context), "Alliance Tournament Prizes", 64).title("Alliance Tournament").className("ship_tree_icon"),
                 getTree(context, shipTypeIDs, "Alliance Tournament Prizes", "theme", TOURNAMENT_SHIPS)
             ),
@@ -333,7 +336,7 @@ public class ShipTreePage extends Page {
 
         if (shipTypeIDs.size() > 0) {
             for (Integer shipTypeID : shipTypeIDs) {
-                System.out.println("WARNING: Ship not in ship tree: " + context.data.getTypes().get(shipTypeID).name);
+                System.out.println("WARNING: Ship not in ship tree: " + context.data.getTypes().get(shipTypeID).name + "\t(" + shipTypeID + ")");
             }
         }
 
@@ -707,6 +710,8 @@ public class ShipTreePage extends Page {
 
     private static final int[] CONCORD_SHIPS = new int[]{34496, 44993, 44995, 44996, 45534};
 
+    private static final int[] DEATHLESS_SHIPS = new int[]{85086, 85087};
+
     private static final int[] TOURNAMENT_SHIPS = new int[]{
         32788,
         32790,
@@ -735,7 +740,10 @@ public class ShipTreePage extends Page {
         48636,
         3516,
         26840,
-        26842
+        26842,
+        85062,
+        85229,
+        85236
     };
 
     private static final int[] SPECIAL_SHIPS = new int[]{

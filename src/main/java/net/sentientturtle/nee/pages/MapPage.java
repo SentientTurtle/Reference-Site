@@ -2,7 +2,7 @@ package net.sentientturtle.nee.pages;
 
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.nee.util.ResourceLocation;
+import net.sentientturtle.nee.data.ResourceLocation;
 import net.sentientturtle.nee.components.*;
 import net.sentientturtle.nee.data.datatypes.Mappable;
 import org.jspecify.annotations.Nullable;

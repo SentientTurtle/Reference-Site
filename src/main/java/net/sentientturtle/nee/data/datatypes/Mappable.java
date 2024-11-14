@@ -5,8 +5,8 @@ import net.sentientturtle.nee.data.datatypes.singleton.Cluster;
 import net.sentientturtle.nee.pages.HasPage;
 import net.sentientturtle.nee.pages.MapPage;
 import net.sentientturtle.nee.pages.Page;
-import net.sentientturtle.nee.util.ResourceLocation;
-import net.sentientturtle.nee.data.DataSupplier;
+import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.SDEData;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -29,28 +29,28 @@ public interface Mappable extends HasPage {
     double z();
 
     /**
-     * @param dataSupplier Data supplier to use
+     * @param SDEData Data supplier to use
      * @return Stream of mappable objects that form points on the map/chart of this mappable
      */
-    Stream<? extends Mappable> getMapPoints(DataSupplier dataSupplier);
+    Stream<? extends Mappable> getMapPoints(SDEData SDEData);
 
     /**
-     * Returns a stream of lines between the points provided by {@link #getMapPoints(DataSupplier)
+     * Returns a stream of lines between the points provided by {@link #getMapPoints(SDEData)
      *
      * @param dataSupplier Datasupplier to use
-     * @return Stream of Line-tuple of IDs (of Mappables in stream returned by {@link #getMapPoints(DataSupplier)}
+     * @return Stream of Line-tuple of IDs (of Mappables in stream returned by {@link #getMapPoints(SDEData)}
      */
     //
-    Stream<Jump> getMapLines(DataSupplier dataSupplier);
+    Stream<Jump> getMapLines(SDEData SDEData);
 
     OptionalInt getFactionID();
-    OptionalDouble getSecurity(DataSupplier dataSupplier);
+    OptionalDouble getSecurity(SDEData SDEData);
 
     /**
      * @return The plural noun of the constituents of this mappable (Such as "Regions" being the constituents of a {@link Cluster})
      */
     String getConstituentName();
-    Stream<? extends Mappable> getConstituents(DataSupplier dataSupplier);
+    Stream<? extends Mappable> getConstituents(SDEData SDEData);
 
     boolean hasRender();
 

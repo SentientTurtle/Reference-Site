@@ -4,16 +4,15 @@ import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteException;
 import com.almworks.sqlite4java.SQLiteStatement;
 import net.sentientturtle.nee.data.datatypes.*;
-import net.sentientturtle.nee.util.*;
 
 import java.util.*;
 
 /**
- * {@link DataSupplier} implementation that retrieves data from (an SQLite conversion of) the EVE Online Static Data Export
+ * {@link SDEData} implementation that retrieves data from (an SQLite conversion of) the EVE Online Static Data Export
  *
  * @see SDEUtils
  */
-public class SQLiteDataSupplier extends DataSupplier {
+public class SQLiteSDEData extends SDEData {
     private final Map<Integer, Category> categories;
     private final Map<Integer, Group> groups;
 
@@ -44,7 +43,7 @@ public class SQLiteDataSupplier extends DataSupplier {
     private final Map<Integer, Faction> factions;
     private final Map<Integer, MarketGroup> marketGroups;
 
-    public SQLiteDataSupplier(SQLiteConnection connection) throws SQLiteException {
+    public SQLiteSDEData(SQLiteConnection connection, boolean patch) throws SQLiteException {
         if (!connection.isOpen()) connection.open();
 
         categories = produceMap();
@@ -501,7 +500,7 @@ public class SQLiteDataSupplier extends DataSupplier {
         st.dispose();
         connection.dispose();
 
-        this.patch();
+        if (patch) this.patch();
         this.loadViews();
     }
 

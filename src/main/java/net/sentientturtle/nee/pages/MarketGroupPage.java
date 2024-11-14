@@ -7,11 +7,10 @@ import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.components.ItemDescription;
 import net.sentientturtle.nee.components.ItemTree;
 import net.sentientturtle.nee.components.Title;
-import net.sentientturtle.nee.data.DataSupplier;
+import net.sentientturtle.nee.data.SDEData;
 import net.sentientturtle.nee.data.datatypes.MarketGroup;
-import net.sentientturtle.nee.data.datatypes.MetaGroup;
 import net.sentientturtle.nee.data.datatypes.Type;
-import net.sentientturtle.nee.util.ResourceLocation;
+import net.sentientturtle.nee.data.ResourceLocation;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Comparator;
@@ -139,7 +138,7 @@ public class MarketGroupPage extends Page {
         return container;
     }
 
-    private static ItemTree.@Nullable Group groupForItems(@Nullable Set<Type> types, DataSupplier data) {
+    private static ItemTree.@Nullable Group groupForItems(@Nullable Set<Type> types, SDEData data) {
         if (types == null || types.isEmpty()) return null;
         HasPage[] pages = types.stream()
             .sorted(Type.comparator(data))
@@ -147,7 +146,7 @@ public class MarketGroupPage extends Page {
         return new ItemTree.Group((HTML) null, pages);
     }
 
-    private static ItemTree.Entry entryForGroup(MarketGroup group, DataSupplier data, boolean showItems) {
+    private static ItemTree.Entry entryForGroup(MarketGroup group, SDEData data, boolean showItems) {
         ItemTree.Group[] treeGroups = Stream.concat(
                 data.getMarketGroupChildMap()
                     .getOrDefault(group.marketGroupID, Set.of())

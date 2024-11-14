@@ -7,7 +7,7 @@ import net.sentientturtle.html.PageLink;
 import net.sentientturtle.nee.data.datatypes.IndustryActivity;
 import net.sentientturtle.nee.data.datatypes.PlanetSchematic;
 import net.sentientturtle.nee.pages.TypePage;
-import net.sentientturtle.nee.util.ResourceLocation;
+import net.sentientturtle.nee.data.ResourceLocation;
 import net.sentientturtle.nee.data.datatypes.Type;
 
 import java.util.Comparator;

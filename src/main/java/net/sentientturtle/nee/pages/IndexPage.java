@@ -5,7 +5,7 @@ import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.Component;
 import net.sentientturtle.nee.Main;
 import net.sentientturtle.nee.components.PageList;
-import net.sentientturtle.nee.util.ResourceLocation;
+import net.sentientturtle.nee.data.ResourceLocation;
 import org.jspecify.annotations.Nullable;
 
 import static net.sentientturtle.html.HTML.*;
@@ -47,12 +47,11 @@ public class IndexPage extends Page {
                     </ul>
                     Work in progress features:
                     <ul>
-                        <li>Module stats</li>
                         <li>Dynamic map</li>
                     </ul>
                     Features needing feedback:
                     <ul>
-                        <li>Ship/Structure stats</li>
+                        <li>Ship/Structure/Module stats</li>
                         <li>Ship/Structure/Module index</li>
                         <li>Item/market index</li>
                         <li>Website name ("Encyclopedia" connotations as opposed to user-edited "wiki" connotations?)</li>

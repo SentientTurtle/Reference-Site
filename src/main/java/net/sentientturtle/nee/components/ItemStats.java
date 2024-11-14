@@ -7,7 +7,7 @@ import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.datatypes.Attribute;
 import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.data.sharedcache.FSDData;
-import net.sentientturtle.nee.util.ResourceLocation;
+import net.sentientturtle.nee.data.ResourceLocation;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -370,6 +370,9 @@ public class ItemStats extends Component {
         5426,   // Requires Active Siege Module
         5686,   // Max capital ships jumped
         5687,   // Warp scramble duration
+        5735,   // Damage effect duration
+        5736,   // Maximum damage per second
+        5737,   // Maximum percentage of target HP damaged per second TODO: Patch this to be shorter
 
         // Overload Bonuses
         1935, 1936, 1937, 1205, 1206, 1208, 1210, 1222, 1223, 1225, 1230, 1213,

@@ -3,8 +3,8 @@ package net.sentientturtle.nee.components;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.Component;
-import net.sentientturtle.nee.util.ResourceLocation;
-import net.sentientturtle.nee.data.DataSupplier;
+import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.SDEData;
 import net.sentientturtle.nee.data.datatypes.Type;
 
 import static net.sentientturtle.html.HTML.*;
@@ -165,44 +165,44 @@ public abstract class ShipHealth extends Component {
     /**
      * Specifies resist attribute values for the health type implemented by subclass
      *
-     * @param dataSupplier Data supplier to use
+     * @param SDEData Data supplier to use
      * @return Damage resistance values, as damage multiplier value (i.e. 60% resistance = 0.4)
      */
-    protected abstract Resists getResists(DataSupplier dataSupplier);
+    protected abstract Resists getResists(SDEData SDEData);
 
     /**
      * Specifies text to be shown for HP regeneration for the health type implemented by subclass
      *
-     * @param dataSupplier Data supplier to use
+     * @param SDEData Data supplier to use
      * @return Text to be shown for HP regeneration, or null if no such text should be shown
      */
-    protected HTML[] getRechargeText(DataSupplier dataSupplier) {
+    protected HTML[] getRechargeText(SDEData SDEData) {
         return null;
     }
 
     // Helper method for fetching hitpoints string
-    private HTML getHp(DataSupplier dataSupplier, int hpAttributeID) {
-        return dataSupplier.format_with_unit(dataSupplier.getTypeAttributes().get(type.typeID).get(hpAttributeID), dataSupplier.getAttributes().get(hpAttributeID).unitID);
+    private HTML getHp(SDEData SDEData, int hpAttributeID) {
+        return SDEData.format_with_unit(SDEData.getTypeAttributes().get(type.typeID).get(hpAttributeID), SDEData.getAttributes().get(hpAttributeID).unitID);
     }
 
 
     /**
      * Helper method for subclasses, fetches resists from a given data supplier using attributes for the resists of the health type implemented by subclass
      *
-     * @param dataSupplier Data supplier to use
+     * @param SDEData Data supplier to use
      * @param emAttribute  Electromagnetic resistance attributeID
      * @param thAttribute  Thermal resistance attributeID
      * @param kiAttribute  Kinetic resistance attributeID
      * @param exAttribute  Explosive resistance attributeID
-     * @see #getResists(DataSupplier)
+     * @see #getResists(SDEData)
      */
     @SuppressWarnings("WeakerAccess")
-    protected Resists getResists(DataSupplier dataSupplier, int emAttribute, int thAttribute, int kiAttribute, int exAttribute) {
+    protected Resists getResists(SDEData SDEData, int emAttribute, int thAttribute, int kiAttribute, int exAttribute) {
         return new Resists(
-            dataSupplier.getTypeAttributes().get(type.typeID).getOrDefault(emAttribute, 1.0),   // Default to 1.0, which is 0% resistance
-            dataSupplier.getTypeAttributes().get(type.typeID).getOrDefault(thAttribute, 1.0),
-            dataSupplier.getTypeAttributes().get(type.typeID).getOrDefault(kiAttribute, 1.0),
-            dataSupplier.getTypeAttributes().get(type.typeID).getOrDefault(exAttribute, 1.0)
+            SDEData.getTypeAttributes().get(type.typeID).getOrDefault(emAttribute, 1.0),   // Default to 1.0, which is 0% resistance
+            SDEData.getTypeAttributes().get(type.typeID).getOrDefault(thAttribute, 1.0),
+            SDEData.getTypeAttributes().get(type.typeID).getOrDefault(kiAttribute, 1.0),
+            SDEData.getTypeAttributes().get(type.typeID).getOrDefault(exAttribute, 1.0)
         );
     }
 

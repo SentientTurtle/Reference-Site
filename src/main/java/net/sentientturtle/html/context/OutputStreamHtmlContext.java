@@ -1,9 +1,7 @@
 package net.sentientturtle.html.context;
 
 import net.sentientturtle.html.id.IDContext;
-import net.sentientturtle.nee.data.DataSupplier;
-import net.sentientturtle.nee.data.sharedcache.FSDData;
-import net.sentientturtle.nee.data.sharedcache.SharedCacheReader;
+import net.sentientturtle.nee.data.DataSources;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -13,8 +11,8 @@ import java.nio.charset.StandardCharsets;
 public class OutputStreamHtmlContext extends HtmlContext {
     private final OutputStream out;
 
-    public OutputStreamHtmlContext(int folderDepth, IDContext ids, DataSupplier data, SharedCacheReader sharedCache, FSDData fsdData, OutputStream out) {
-        super(folderDepth, ids, data, sharedCache, fsdData);
+    public OutputStreamHtmlContext(int folderDepth, IDContext ids, DataSources dataSources, OutputStream out) {
+        super(folderDepth, ids, dataSources);
         this.out = out;
     }
 

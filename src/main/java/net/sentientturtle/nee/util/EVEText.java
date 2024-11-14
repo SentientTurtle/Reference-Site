@@ -2,7 +2,7 @@ package net.sentientturtle.nee.util;
 
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.PageLink;
-import net.sentientturtle.nee.data.DataSupplier;
+import net.sentientturtle.nee.data.SDEData;
 import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.pages.TypePage;
 import org.jspecify.annotations.Nullable;
@@ -18,7 +18,7 @@ public class EVEText {
     private static final Pattern linkHref = Pattern.compile("<a href=\".+?\">(.+?)</a>|<url=.+?>(.+?)</url>");
     private static final Pattern showInfoHref = Pattern.compile("<a href=showinfo:(\\d+?)>(.+?)</a>");
 
-    public static HTML[] escape(String text, DataSupplier dataSupplier) {
+    public static HTML[] escape(String text, SDEData SDEData) {
         // First regex pass -> write to a string builder
         StringBuilder textBuilder = new StringBuilder();
         int start = 0;
@@ -57,7 +57,7 @@ public class EVEText {
             start = matcher.end();
 
             @Nullable   // Only allow links to existing types
-            Type type = dataSupplier.getTypes().get(Integer.valueOf(typeID));
+            Type type = SDEData.getTypes().get(Integer.valueOf(typeID));
             if (type != null) {
                 descriptionContent.add(new PageLink(new TypePage(type), matcher.group(2)));
             } else {

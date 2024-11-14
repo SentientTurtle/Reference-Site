@@ -1,8 +1,9 @@
-package net.sentientturtle.nee.util;
+package net.sentientturtle.nee.data;
 
 import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteException;
 import com.almworks.sqlite4java.SQLiteStatement;
+import net.sentientturtle.nee.util.Hex;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
@@ -33,6 +34,7 @@ public class SDEUtils {
         boolean download;
         if (file.exists()) {
             try {
+                // TODO: Why doesn't this just calculate the MD5 from the file?
                 SQLiteConnection sqLiteConnection = new SQLiteConnection(file);
                 sqLiteConnection.open();
                 SQLiteStatement prepare = sqLiteConnection.prepare("SELECT * FROM metaData");

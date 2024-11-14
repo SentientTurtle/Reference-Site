@@ -6,7 +6,7 @@ import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.Component;
 import net.sentientturtle.nee.data.datatypes.MetaGroup;
 import net.sentientturtle.nee.pages.TypePage;
-import net.sentientturtle.nee.util.ResourceLocation;
+import net.sentientturtle.nee.data.ResourceLocation;
 import net.sentientturtle.nee.data.datatypes.Type;
 
 import java.util.*;
