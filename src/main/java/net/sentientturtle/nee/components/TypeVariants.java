@@ -5,7 +5,7 @@ import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.Component;
 import net.sentientturtle.nee.data.datatypes.MetaGroup;
-import net.sentientturtle.nee.pages.TypePage;
+import net.sentientturtle.nee.page.TypePage;
 import net.sentientturtle.nee.data.ResourceLocation;
 import net.sentientturtle.nee.data.datatypes.Type;
 
@@ -26,10 +26,10 @@ public class TypeVariants extends Component {
 
     @Override
     protected HTML[] getContent(HtmlContext context) {
-        Map<Integer, MetaGroup> metaGroups = context.data.getMetaGroups();
+        Map<Integer, MetaGroup> metaGroups = context.sde.getMetaGroups();
         HashMap<Integer, Set<Integer>> metaVariants = new HashMap<>();
-        for (int variantID : context.data.getVariants().get(type.typeID)) {
-            Integer metaGroupID = context.data.getMetaTypes().getOrDefault(variantID, 1);
+        for (int variantID : context.sde.getVariants().get(type.typeID)) {
+            Integer metaGroupID = context.sde.getMetaTypes().getOrDefault(variantID, 1);
             metaVariants.computeIfAbsent(metaGroupID, _ -> new HashSet<>()).add(variantID);
         }
 
@@ -54,7 +54,7 @@ public class TypeVariants extends Component {
                     for (Integer variantID : (Iterable<? extends Integer>) entry.getValue().stream().sorted()::iterator) {
                         table.content(TR().content(
                             TD().content(IMG(ResourceLocation.typeIcon(variantID, context), null, 64).className("type_variants_icon")),
-                            TD().content(new PageLink(new TypePage(context.data.getTypes().get(variantID))))
+                            TD().content(new PageLink(new TypePage(context.sde.getTypes().get(variantID))))
                         ));
                     }
                 });
@@ -63,7 +63,7 @@ public class TypeVariants extends Component {
                 for (Integer variantID : (Iterable<? extends Integer>) value.stream().sorted()::iterator) {
                     table.content(TR().content(
                         TD().content(IMG(ResourceLocation.typeIcon(variantID, context), null, 64).className("type_variants_icon")),
-                        TD().content(SPAN().content(new PageLink(new TypePage(context.data.getTypes().get(variantID)))))
+                        TD().content(SPAN().content(new PageLink(new TypePage(context.sde.getTypes().get(variantID)))))
                     ));
                 }
             }

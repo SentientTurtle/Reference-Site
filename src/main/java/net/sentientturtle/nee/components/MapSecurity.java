@@ -23,7 +23,7 @@ public class MapSecurity extends Component {
 
     @Override
     protected HTML[] getContent(HtmlContext context) {
-        OptionalDouble security = mappable.getSecurity(context.data);
+        OptionalDouble security = mappable.getSecurity(context.sde);
         assert security.isPresent();
         int color = (int) Math.max(0, Math.round(security.getAsDouble() * 10));
 

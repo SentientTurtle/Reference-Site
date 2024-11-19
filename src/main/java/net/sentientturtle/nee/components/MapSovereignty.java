@@ -26,7 +26,7 @@ public class MapSovereignty extends Component {
     protected HTML[] getContent(HtmlContext context) {
         OptionalInt factionID = mappable.getFactionID();
         assert factionID.isPresent();
-        Faction faction = context.data.getFactions().get(factionID.getAsInt());
+        Faction faction = context.sde.getFactions().get(factionID.getAsInt());
         Integer corporationID = faction.corporationID;
 
         if (corporationID != null) {

@@ -7,8 +7,8 @@ import net.sentientturtle.html.Component;
 import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.html.PageLink;
 import net.sentientturtle.nee.data.datatypes.Group;
-import net.sentientturtle.nee.pages.GroupPage;
-import net.sentientturtle.nee.pages.TypePage;
+import net.sentientturtle.nee.page.GroupPage;
+import net.sentientturtle.nee.page.TypePage;
 import net.sentientturtle.nee.data.ResourceLocation;
 import net.sentientturtle.nee.data.datatypes.Category;
 import org.jspecify.annotations.NonNull;
@@ -45,7 +45,7 @@ public class GroupList extends Component {
     protected HTML[] getContent(HtmlContext context) {
         Stream<Element> entries;
         if (category != null && group == null) {
-            entries = context.data.getCategoryGroups()
+            entries = context.sde.getCategoryGroups()
                 .getOrDefault(category.categoryID, (Set<Group>) EMPTY_SET)
                 .stream()
                 .filter(g -> g.published)
@@ -61,11 +61,11 @@ public class GroupList extends Component {
                     )
                 );
         } else if (category == null && group != null) {
-            entries = context.data.getGroupTypes()
+            entries = context.sde.getGroupTypes()
                 .getOrDefault(group.groupID, (Set<Type>) EMPTY_SET)
                 .stream()
                 .filter(t -> t.published)
-                .sorted(Type.comparator(context.data))
+                .sorted(Type.comparator(context.sde))
                 .map(type ->
                     DIV("group_list_entry")
                         .content(

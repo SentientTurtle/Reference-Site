@@ -5,7 +5,7 @@ import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.datatypes.Type;
-import net.sentientturtle.nee.pages.Page;
+import net.sentientturtle.nee.page.Page;
 import net.sentientturtle.nee.data.ResourceLocation;
 
 import java.util.Objects;
@@ -32,10 +32,10 @@ public class UsedWith extends Component {
         return Stream.concat(
             Stream.of(HEADER("font_header").text(this.title)),
             Stream.concat(
-                    groups.stream().map(context.data.getGroups()::get)
+                    groups.stream().map(context.sde.getGroups()::get)
                         .filter(Objects::nonNull),// Can be fitted to / Used with attributes may specify invalid groups
-                    types.stream().map(context.data.getTypes()::get)
-                        .sorted(Type.comparator(context.data))
+                    types.stream().map(context.sde.getTypes()::get)
+                        .sorted(Type.comparator(context.sde))
                 )
                 .map(entry -> {
                     Page page = entry.getPage();

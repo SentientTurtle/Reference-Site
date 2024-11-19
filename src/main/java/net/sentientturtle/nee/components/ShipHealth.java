@@ -30,14 +30,14 @@ public abstract class ShipHealth extends Component {
     protected HTML[] getContent(HtmlContext context) {
         var table = TABLE("ship_health_table font_text").content(
             TR().content(
-                TD("ship_health_icon").content(IMG(ResourceLocation.iconOfIconID(context.data.getAttributes().get(getHpAttribute()).iconID, context), null, 32)),
-                TD().content(TEXT(healthKindName() + " Hitpoints: "), getHp(context.data, getHpAttribute())),
+                TD("ship_health_icon").content(IMG(ResourceLocation.iconOfIconID(context.sde.getAttributes().get(getHpAttribute()).iconID, context), null, 32)),
+                TD().content(TEXT(healthKindName() + " Hitpoints: "), getHp(context.sde, getHpAttribute())),
                 TD()    // Intentionally blank column
             )
         );
 
 
-        HTML[] rechargeText = getRechargeText(context.data);
+        HTML[] rechargeText = getRechargeText(context.sde);
         if (rechargeText != null) {
             table.content(
                 TR().content(
@@ -49,7 +49,7 @@ public abstract class ShipHealth extends Component {
         }
 
 
-        Resists resists = getResists(context.data);
+        Resists resists = getResists(context.sde);
         if (resists != null) {
             table.content(
                 TR().title("Electromagnetic Damage Resistance").content(
@@ -59,7 +59,7 @@ public abstract class ShipHealth extends Component {
                             .attribute("aria-label", "Electromagnetic Damage Resistance")
                             .style("width: " + (1 - resists.EM) * 100 + "%;")
                     )),
-                    TD("ship_health_text").content(context.data.format_with_unit(resists.EM, context.data.getAttributes().get(267).unitID))
+                    TD("ship_health_text").content(context.sde.format_with_unit(resists.EM, context.sde.getAttributes().get(267).unitID))
                 ),
                 TR().title("Thermal Damage Resistance").content(
                     TD("ship_health_icon").content(IMG(ResourceLocation.iconOfIconID(1386, context), null, 32)),
@@ -68,7 +68,7 @@ public abstract class ShipHealth extends Component {
                             .attribute("aria-label", "Thermal Damage Resistance")
                             .style("width: " + (1 - resists.TH) * 100 + "%;")
                     )),
-                    TD("ship_health_text").content(context.data.format_with_unit(resists.TH, context.data.getAttributes().get(270).unitID))
+                    TD("ship_health_text").content(context.sde.format_with_unit(resists.TH, context.sde.getAttributes().get(270).unitID))
                 ),
                 TR().title("Kinetic Damage Resistance").content(
                     TD("ship_health_icon").content(IMG(ResourceLocation.iconOfIconID(1385, context), null, 32)),
@@ -77,7 +77,7 @@ public abstract class ShipHealth extends Component {
                             .attribute("aria-label", "Kinetic Damage Resistance")
                             .style("width: " + (1 - resists.KI) * 100 + "%;")
                     )),
-                    TD("ship_health_text").content(context.data.format_with_unit(resists.KI, context.data.getAttributes().get(269).unitID))
+                    TD("ship_health_text").content(context.sde.format_with_unit(resists.KI, context.sde.getAttributes().get(269).unitID))
                 ),
                 TR().title("Explosive Damage Resistance").content(
                     TD("ship_health_icon").content(IMG(ResourceLocation.iconOfIconID(1387, context), null, 32)),
@@ -86,7 +86,7 @@ public abstract class ShipHealth extends Component {
                             .attribute("aria-label", "Explosive Damage Resistance")
                             .style("width: " + (1 - resists.EX) * 100 + "%;")
                     )),
-                    TD("ship_health_text").content(context.data.format_with_unit(resists.EX, context.data.getAttributes().get(268).unitID))
+                    TD("ship_health_text").content(context.sde.format_with_unit(resists.EX, context.sde.getAttributes().get(268).unitID))
                 )
             );
         }

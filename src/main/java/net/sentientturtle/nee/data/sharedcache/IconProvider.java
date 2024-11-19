@@ -9,13 +9,20 @@ import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.util.ExceptionUtil;
 import org.jspecify.annotations.Nullable;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class IconProvider {
@@ -25,7 +32,7 @@ public class IconProvider {
         int total = sources.SDEData().getTypes().size();
         AtomicInteger processed = new AtomicInteger(0);
 
-        ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream("./icon_export.zip"));
+        ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(Main.OUTPUT_DIR.resolve("icon_export.zip").toFile()));
         sources.SDEData().getTypes()
             .values()
             .parallelStream()
@@ -59,9 +66,44 @@ public class IconProvider {
         zipOutputStream.close();
     }
 
-    private static Path techOverlayPath(Type type, DataSources dataSources, boolean useOld) {
-        Integer metaGroup = dataSources.SDEData().getMetaTypes().get(type.typeID);
-        if (metaGroup == null || metaGroup == 1) {
+    // ConcurrentMap's support for parallel writes is required for icon generation parallelism to work!
+    private static final AtomicBoolean CACHE_INVALID = new AtomicBoolean(false);
+    private static final ConcurrentHashMap<String, byte[]> CACHED_ICONS = new ConcurrentHashMap<>();
+
+    public static void readIconCache() throws IOException {
+        if (Files.exists(Main.ICON_CACHE_FILE)) {
+            try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(Main.ICON_CACHE_FILE.toFile()))) {
+                ZipEntry entry;
+                while ((entry = zipInputStream.getNextEntry()) != null) {
+                    CACHED_ICONS.put(entry.getName(), zipInputStream.readAllBytes());
+                }
+            } catch (FileNotFoundException e) { // shouldn't happen, rethrow as runtime exception
+                ExceptionUtil.sneakyThrow(e);
+            } catch (IOException e) { // Rethrow to signal something unexpected happened
+                ExceptionUtil.sneakyThrow(e);
+            }
+        }
+    }
+
+    public static void writeIconCache() throws IOException {
+        if (!CACHE_INVALID.get()) return;
+
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(Main.ICON_CACHE_FILE.toFile()))) {
+            zipOutputStream.setLevel(Deflater.NO_COMPRESSION);
+            CACHED_ICONS.forEach((name, bytes) -> {
+                try {
+                    zipOutputStream.putNextEntry(new ZipEntry(name));
+                    zipOutputStream.write(bytes);
+                    zipOutputStream.closeEntry();
+                } catch (IOException e) {
+                    ExceptionUtil.sneakyThrow(e);
+                }
+            });
+        }
+    }
+
+    private static Path techOverlayPath(int metaGroup, DataSources dataSources, boolean useOld) {
+        if (metaGroup == 1) {
             return null;
         } else if (!useOld) {
             return dataSources.sharedCache().getPath(
@@ -78,7 +120,7 @@ public class IconProvider {
                     case 52 -> "res:/ui/texture/shared/structureoverlayfaction.png";
                     case 53 -> "res:/ui/texture/shared/structureoverlayt2.png";
                     case 54 -> "res:/ui/texture/shared/structureoverlay.png";
-                    default -> throw new IllegalStateException("Unknown metaGroup " + metaGroup + " for " + type);
+                    default -> throw new IllegalStateException("Unknown metaGroup " + metaGroup);
                 }
             );
         } else {
@@ -95,7 +137,7 @@ public class IconProvider {
                 case 52 -> Main.RES_FOLDER.resolve("EVE/type_overlays_old/Structure Faction.png");
                 case 53 -> Main.RES_FOLDER.resolve("EVE/type_overlays_old/Structure Tech 2.png");
                 case 54 -> Main.RES_FOLDER.resolve("EVE/type_overlays_old/Structure Tech 1.png");
-                default -> throw new IllegalStateException("Unknown metaGroup " + metaGroup + " for " + type);
+                default -> throw new IllegalStateException("Unknown metaGroup " + metaGroup);
             };
         }
     }
@@ -103,7 +145,9 @@ public class IconProvider {
     public static @Nullable byte[] getTypeIcon64(int typeID, DataSources dataSources, boolean isBPC, boolean useOldOverlay) throws IOException {
         Type type = dataSources.SDEData().getTypes().get(typeID);
         Group group = dataSources.SDEData().getGroups().get(type.groupID);
+        int metaGroup = dataSources.SDEData().getMetaTypes().getOrDefault(type.typeID, 1);
 
+        String cacheKey = null;
         ProcessBuilder imageMagickCall = null;
         if (group.categoryID == 9) {    // Blueprint
             String backgroundResource;
@@ -146,17 +190,18 @@ public class IconProvider {
             FSDData.Graphic graphic = dataSources.fsdData().graphics.get(outputType.graphicID != null ? outputType.graphicID : 0);
             if (imageMagickCall == null && graphic != null && graphic.iconInfo() != null) {
                 String graphicResource;
-                if (isBPC) {
-                    graphicResource = graphic.iconInfo().folder() + "/" + outputType.graphicID + "_64_bpc.png";
+                if (graphic.iconInfo().folder().endsWith("/")) {
+                    graphicResource = graphic.iconInfo().folder() + outputType.graphicID + (isBPC ? "_64_bpc.png" : "_64_bp.png");
                 } else {
-                    graphicResource = graphic.iconInfo().folder() + "/" + outputType.graphicID + "_64_bp.png";
+                    graphicResource = graphic.iconInfo().folder() + "/" + outputType.graphicID + (isBPC ? "_64_bpc.png" : "_64_bp.png");
                 }
 
                 if (dataSources.sharedCache().containsResource(graphicResource)) {
-                    Path techOverlay = techOverlayPath(outputType, dataSources, useOldOverlay);
+                    Path techOverlay = techOverlayPath(metaGroup, dataSources, useOldOverlay);
                     if (techOverlay == null) {
                         return dataSources.sharedCache().getBytes(graphicResource);    // TODO: BPC
                     } else {
+                        cacheKey = metaGroup + ";" + dataSources.sharedCache().getResourceHash(graphicResource);
                         imageMagickCall = new ProcessBuilder(
                             "magick",
                             dataSources.sharedCache().getPath(graphicResource).toString(),
@@ -172,13 +217,17 @@ public class IconProvider {
             if (imageMagickCall == null && outputType.iconID != null) {
                 String iconResource = dataSources.SDEData().getEveIcons().get(outputType.iconID);
 
-                Path techOverlay = techOverlayPath(outputType, dataSources, useOldOverlay);
+                Path techOverlay = techOverlayPath(metaGroup, dataSources, useOldOverlay);
                 if (techOverlay != null) {
+                    cacheKey = metaGroup
+                               + ";" + dataSources.sharedCache().getResourceHash(backgroundResource)
+                               + ";" + dataSources.sharedCache().getResourceHash(iconResource)
+                               + ";" + dataSources.sharedCache().getResourceHash(overlayResource);
                     imageMagickCall = new ProcessBuilder(
                         "magick",
                         dataSources.sharedCache().getPath(backgroundResource).toString(),
-                        "-resize", "64x64",
                         dataSources.sharedCache().getPath(iconResource).toString(),
+                        "-resize", "64x64",
                         "-composite",
                         "-compose", "plus",
                         dataSources.sharedCache().getPath(overlayResource).toString(),
@@ -189,6 +238,10 @@ public class IconProvider {
                         "png:-"
                     );
                 } else {
+                    cacheKey = metaGroup
+                               + ";" + dataSources.sharedCache().getResourceHash(backgroundResource)
+                               + ";" + dataSources.sharedCache().getResourceHash(iconResource)
+                               + ";" + dataSources.sharedCache().getResourceHash(overlayResource);
                     imageMagickCall = new ProcessBuilder(
                         "magick",
                         dataSources.sharedCache().getPath(backgroundResource).toString(),
@@ -225,8 +278,9 @@ public class IconProvider {
             if (iconResource == null || !dataSources.sharedCache().containsResource(iconResource)) {
                 return null;
             }
-            Path techOverlay = techOverlayPath(type, dataSources, useOldOverlay);
+            Path techOverlay = techOverlayPath(metaGroup, dataSources, useOldOverlay);
             if (techOverlay != null) {
+                cacheKey = metaGroup + ";" + dataSources.sharedCache().getResourceHash(iconResource);
                 imageMagickCall = new ProcessBuilder(
                     "magick",
                     dataSources.sharedCache().getPath(iconResource).toString(),
@@ -240,22 +294,30 @@ public class IconProvider {
             }
         }
 
-        Process process = imageMagickCall.start();
-        byte[] bytes = process.getInputStream().readAllBytes();
+        assert cacheKey != null;
+        ProcessBuilder finalImageMagickCall = imageMagickCall;
+        return CACHED_ICONS.computeIfAbsent(
+            cacheKey,
+            _ -> {
+                CACHE_INVALID.set(true);
+                try {
+                    Process process = finalImageMagickCall.start();
+                    byte[] bytes = process.getInputStream().readAllBytes();
 
-        int statusCode = 0;
-        try {
-            // This shouldn't block as we've already read all bytes
-            statusCode = process.waitFor();
-        } catch (InterruptedException e) {
-            ExceptionUtil.sneakyThrow(e);
-        }
-        if (statusCode != 0) {
-            System.err.println(new String(bytes, StandardCharsets.UTF_8));
-            System.err.println(new String(process.getErrorStream().readAllBytes(), StandardCharsets.UTF_8));
-            throw new IllegalStateException("An imagemagick error occurred!");
-        }
-        return bytes;
+                    // This shouldn't block as we've already read all bytes
+                    int statusCode = process.waitFor();
+                    if (statusCode != 0) {
+                        System.err.println(new String(bytes, StandardCharsets.UTF_8));
+                        System.err.println(new String(process.getErrorStream().readAllBytes(), StandardCharsets.UTF_8));
+                        throw new IllegalStateException("An imagemagick error occurred!");
+                    }
+
+                    return bytes;
+                } catch (InterruptedException | IOException e) {
+                    return ExceptionUtil.sneakyThrow(e);
+                }
+            }
+        );
     }
 
     public static boolean hasRender(int typeID, DataSources dataSources) {
@@ -278,7 +340,7 @@ public class IconProvider {
     public static @Nullable byte[] getTypeRender512(int typeID, DataSources dataSources) throws IOException {
         Type type = dataSources.SDEData().getTypes().get(typeID);
 
-        String renderResource = null;
+        String renderResource;
         FSDData.Graphic graphic = dataSources.fsdData().graphics.get(type.graphicID != null ? type.graphicID : 0);
         if (graphic != null && graphic.iconInfo() != null) {
             if (graphic.iconInfo().folder().endsWith("/")) {
@@ -286,33 +348,40 @@ public class IconProvider {
             } else {
                 renderResource = graphic.iconInfo().folder() + "/" + type.graphicID + "_512.jpg";
             }
+        } else {
+            renderResource = null;
         }
 
         if (renderResource == null || !dataSources.sharedCache().containsResource(renderResource)) {
             return null;
         } else {
-            ProcessBuilder imageMagickCall = new ProcessBuilder(
-                "magick",
-                dataSources.sharedCache().getPath(renderResource).toString(),
-                "png:-"
+            String cacheKey = dataSources.sharedCache().getResourceHash(renderResource);
+            return CACHED_ICONS.computeIfAbsent(
+                cacheKey,
+                _ -> {
+                    try {
+                        Process process = new ProcessBuilder(
+                            "magick",
+                            dataSources.sharedCache().getPath(renderResource).toString(),
+                            "png:-"
+                        ).start();
+                        byte[] bytes = process.getInputStream().readAllBytes();
+
+                        // This shouldn't block as we've already read all bytes
+                        int statusCode = process.waitFor();
+
+                        if (statusCode != 0) {
+                            System.err.println(new String(bytes, StandardCharsets.UTF_8));
+                            System.err.println(new String(process.getErrorStream().readAllBytes(), StandardCharsets.UTF_8));
+                            throw new IllegalStateException("An imagemagick error occurred!");
+                        }
+
+                        return bytes;
+                    } catch (InterruptedException | IOException e) {
+                        return ExceptionUtil.sneakyThrow(e);
+                    }
+                }
             );
-
-            Process process = imageMagickCall.start();
-            byte[] bytes = process.getInputStream().readAllBytes();
-
-            int statusCode = 0;
-            try {
-                // This shouldn't block as we've already read all bytes
-                statusCode = process.waitFor();
-            } catch (InterruptedException e) {
-                ExceptionUtil.sneakyThrow(e);
-            }
-            if (statusCode != 0) {
-                System.err.println(new String(bytes, StandardCharsets.UTF_8));
-                System.err.println(new String(process.getErrorStream().readAllBytes(), StandardCharsets.UTF_8));
-                throw new IllegalStateException("An imagemagick error occurred!");
-            }
-            return bytes;
         }
     }
 }

@@ -1,4 +1,4 @@
-package net.sentientturtle.nee.pages;
+package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
@@ -61,11 +61,11 @@ public class IndexPage extends Page {
             )),
             new PageList(
                 "Featured pages",
-                new TypePage(context.data.getTypes().get(35834)),
-                new TypePage(context.data.getTypes().get(648)),
-                new TypePage(context.data.getTypes().get(2464)),
-                new TypePage(context.data.getTypes().get(16213)),
-                new TypePage(context.data.getTypes().get(33474))
+                new TypePage(context.sde.getTypes().get(35834)),
+                new TypePage(context.sde.getTypes().get(648)),
+                new TypePage(context.sde.getTypes().get(2464)),
+                new TypePage(context.sde.getTypes().get(16213)),
+                new TypePage(context.sde.getTypes().get(33474))
             )
         );
     }

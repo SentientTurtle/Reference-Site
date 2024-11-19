@@ -55,7 +55,7 @@ public class SharedCacheReader {
         return resourcePath != null && Files.exists(resFiles.resolve(resourcePath));
     }
 
-    public @Nullable String resourceHash(String resource) {
+    public @Nullable String getResourceHash(String resource) {
         return this.resourceHashes.get(resource.toLowerCase());
     }
 

@@ -4,7 +4,7 @@ import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.Component;
-import net.sentientturtle.nee.pages.*;
+import net.sentientturtle.nee.page.*;
 
 import static net.sentientturtle.html.HTML.*;
 
@@ -20,8 +20,8 @@ public class Sidebar extends Component {
             new PageLink(new IndexPage(), DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text("Home")).className("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset"),
             new PageLink(new ShipTreePage(), DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text("Ships")).className("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset"),
             new PageLink(new StructureTreePage(), DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text("Structures")).className("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset"),
-            new PageLink(new MarketGroupPage(context.data.getMarketGroups().get(9)), DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text("Modules")).className("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset"),
-            new PageLink(new MarketGroupPage(context.data.getMarketGroups().get(-1)), DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text("Items")).className("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset"),
+            new PageLink(new MarketGroupPage(context.sde.getMarketGroups().get(9)), DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text("Modules")).className("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset"),
+            new PageLink(new MarketGroupPage(context.sde.getMarketGroups().get(-1)), DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text("Items")).className("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset"),
             new PageLink(new DynamicMapPage(), DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text("Map")).className("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset")
         };
     }

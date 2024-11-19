@@ -1,4 +1,4 @@
-package net.sentientturtle.nee.pages;
+package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.*;
 import net.sentientturtle.html.context.HtmlContext;

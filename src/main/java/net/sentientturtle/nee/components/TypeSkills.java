@@ -18,8 +18,8 @@ import static net.sentientturtle.html.HTML.*;
  */
 public class TypeSkills extends Component {
     private final Type type;
-    private static final int[] skillAttributes = {182, 183, 184, 1285, 1289, 1290};
-    private static final int[] levelAttributes = {277, 278, 279, 1286, 1287, 1288};
+    public static final int[] SKILL_ATTRIBUTES = {182, 183, 184, 1285, 1289, 1290};
+    public static final int[] LEVEL_ATTRIBUTES = {277, 278, 279, 1286, 1287, 1288};
 
     public TypeSkills(Type type) {
         super("type_skills colour_theme_minor");
@@ -29,7 +29,7 @@ public class TypeSkills extends Component {
     @Override
     protected HTML[] getContent(HtmlContext context) {
         Element list = DIV("type_skills_list font_text");
-        fetchSkills(type.typeID, context.data, list, 1);
+        fetchSkills(type.typeID, context.sde, list, 1);
         return new HTML[]{
             HEADER("type_skills_title font_header").text("Required skills"),
             list
@@ -77,13 +77,13 @@ public class TypeSkills extends Component {
     private void fetchSkills(int typeID, SDEData SDEData, Element parent, int indent) {
         Map<Integer, Map<Integer, Double>> attributeValues = SDEData.getTypeAttributes();
 
-        for (int i = 0; i < skillAttributes.length; i++) {
-            Double skill = attributeValues.get(typeID).get(skillAttributes[i]);
+        for (int i = 0; i < SKILL_ATTRIBUTES.length; i++) {
+            Double skill = attributeValues.get(typeID).get(SKILL_ATTRIBUTES[i]);
             if (skill != null) {
                 Element row = DIV("type_skills_row");
                 parent.content(row);
 
-                int level = attributeValues.get(typeID).get(levelAttributes[i]).intValue();
+                int level = attributeValues.get(typeID).get(LEVEL_ATTRIBUTES[i]).intValue();
                 if (level < 0 || level > 5) throw new RuntimeException("Invalid skill level: " + level);
 
                 String levelBoxes = "■".repeat(level) + "□".repeat(5 - level);

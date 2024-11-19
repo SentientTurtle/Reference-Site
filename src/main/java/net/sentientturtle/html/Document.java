@@ -1,7 +1,7 @@
 package net.sentientturtle.html;
 
 import net.sentientturtle.nee.Main;
-import net.sentientturtle.nee.pages.PageKind;
+import net.sentientturtle.nee.page.PageKind;
 
 /// Top level interface for (HTML) Documents
 public interface Document {

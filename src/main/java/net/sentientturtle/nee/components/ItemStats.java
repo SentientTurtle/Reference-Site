@@ -419,9 +419,9 @@ public class ItemStats extends Component {
     }
 
     private boolean tryRow(HtmlContext context, Element table, String title, int... attributes) {
-        Map<Integer, Double> typeAttributes = context.data.getTypeAttributes().getOrDefault(type.typeID, Map.of());
+        Map<Integer, Double> typeAttributes = context.sde.getTypeAttributes().getOrDefault(type.typeID, Map.of());
         for (int attributeID : attributes) {
-            Attribute a = context.data.getAttributes().get(attributeID);
+            Attribute a = context.sde.getAttributes().get(attributeID);
             Double v = typeAttributes.get(attributeID);
 
             if (v != null && v != a.defaultValue()) {
@@ -429,7 +429,7 @@ public class ItemStats extends Component {
                     DIV().text(title),
                     SPAN("item_stats_multirow_content").content(
                         Arrays.stream(attributes).mapToObj(id -> {
-                            Attribute attr = context.data.getAttributes().get(id);
+                            Attribute attr = context.sde.getAttributes().get(id);
                             Integer iconID = attr.iconID;
                             Double attributeValue = typeAttributes.getOrDefault(id, attr.defaultValue());   // TODO: Replace all getOrDefault(attributeID, 0.0) with getOrDefault attribute.defaultValue()!!!!
 
@@ -438,7 +438,7 @@ public class ItemStats extends Component {
                                 .attribute("aria-label", attr.displayName != null ? attr.displayName : attr.attributeName)
                                 .content(
                                     iconID != null ? IMG(ResourceLocation.iconOfIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
-                                    context.data.format_with_unit(attributeValue, attr.unitID)
+                                    context.sde.format_with_unit(attributeValue, attr.unitID)
                                 );
                         })
                     )
@@ -452,8 +452,8 @@ public class ItemStats extends Component {
 
     @Override
     protected HTML[] getContent(HtmlContext context) {
-        Map<Integer, Attribute> attributes = context.data.getAttributes();
-        Map<Integer, Double> typeAttributes = context.data.getTypeAttributes().getOrDefault(type.typeID, Map.of());
+        Map<Integer, Attribute> attributes = context.sde.getAttributes();
+        Map<Integer, Double> typeAttributes = context.sde.getTypeAttributes().getOrDefault(type.typeID, Map.of());
 
         var table = TABLE("item_stats_table");
 
@@ -487,7 +487,7 @@ public class ItemStats extends Component {
                     }
 
                     double totalCycles = (crystalHP / volatilityDamage) / crystalVolatility;
-                    cycles = context.data.format_with_unit(totalCycles, -1);
+                    cycles = context.sde.format_with_unit(totalCycles, -1);
                 } else {
                     name = "Crystal Lifespan";
                     cycles = TEXT("∞");
@@ -503,7 +503,7 @@ public class ItemStats extends Component {
             }
         }
 
-        double activationTime = type.getModuleActivationTime(context.data);
+        double activationTime = type.getModuleActivationTime(context.sde);
 
         // Slightly inefficient, but we want the ordering of LISTED_ATTRIBUTES
         for (int attributeID : LISTED_ATTRIBUTES) {
@@ -519,16 +519,16 @@ public class ItemStats extends Component {
                     double reactivationDelay = typeAttributes.getOrDefault(669, 0.0);
 
                     valueTD.content(
-                        context.data.format_with_unit(attributeValue, attribute.unitID),
+                        context.sde.format_with_unit(attributeValue, attribute.unitID),
                         TEXT(" "),
                         SPAN("no_break").content(
                             TEXT("("),
-                            context.data.format_with_unit(attributeValue / ((activationTime + reactivationDelay) / 1000.0), attribute.unitID),
+                            context.sde.format_with_unit(attributeValue / ((activationTime + reactivationDelay) / 1000.0), attribute.unitID),
                             TEXT("/s)")
                         )
                     );
                 } else {
-                    valueTD.content(context.data.format_with_unit(attributeValue, attribute.unitID));
+                    valueTD.content(context.sde.format_with_unit(attributeValue, attribute.unitID));
                 }
 
                 table.content(TR().content(
@@ -546,7 +546,7 @@ public class ItemStats extends Component {
         if ((fuelType = typeAttributes.get(713)) != null) {
             double fuelQuantity = typeAttributes.getOrDefault(714, 0.0);
 
-            Integer iconID = context.data.getTypes().get((int) (double) fuelType).iconID;
+            Integer iconID = context.sde.getTypes().get((int) (double) fuelType).iconID;
             table.content(TR().content(
                 TD().content(SPAN("item_stats_span").title("Fuel required").content(
                         iconID != null ? IMG(ResourceLocation.iconOfIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
@@ -554,11 +554,11 @@ public class ItemStats extends Component {
                     )
                 ),
                 TD().content(
-                    context.data.format_with_unit(fuelType, attributes.get(713).unitID),
+                    context.sde.format_with_unit(fuelType, attributes.get(713).unitID),
                     TEXT(" "),
                     SPAN("no_break").content(
                         TEXT("("),
-                        context.data.format_with_unit(fuelQuantity, attributes.get(714).unitID),
+                        context.sde.format_with_unit(fuelQuantity, attributes.get(714).unitID),
                         TEXT(")")
                     )
                 )
@@ -598,9 +598,9 @@ public class ItemStats extends Component {
                                 TEXT(name + ":")
                             )
                         ),
-                        TD().content(context.data.format_with_unit(bad, 109)),
+                        TD().content(context.sde.format_with_unit(bad, 109)),
                         TD().attribute("aria-hidden", "true").content(TEXT(order)),
-                        TD().content(context.data.format_with_unit(good, 109))
+                        TD().content(context.sde.format_with_unit(good, 109))
                     ));
                 }
             }
@@ -623,8 +623,8 @@ public class ItemStats extends Component {
                 FSDData.WarfareBuff warfareBuff = context.fsdData.warfareBuffs.get(warfareBuffID);
                 Element valueTD = TD();
                 switch (warfareBuff.showOutputValueInUI()) {
-                    case "ShowNormal" -> valueTD.content(context.data.format_with_unit(buffAmount, 124));
-                    case "ShowInverted" -> valueTD.content(context.data.format_with_unit(-buffAmount, 124));
+                    case "ShowNormal" -> valueTD.content(context.sde.format_with_unit(buffAmount, 124));
+                    case "ShowInverted" -> valueTD.content(context.sde.format_with_unit(-buffAmount, 124));
                     default -> throw new RuntimeException("Unknown warfare buff display : " + warfareBuff.showOutputValueInUI() + " for buff: " + warfareBuffID);
                 };
 
@@ -643,7 +643,7 @@ public class ItemStats extends Component {
 
         }
 
-        String itemKind = context.data.getCategories().get(context.data.getGroups().get(type.groupID).categoryID).name;
+        String itemKind = context.sde.getCategories().get(context.sde.getGroups().get(type.groupID).categoryID).name;
         return new HTML[]{
             HEADER("font_header").text(itemKind + " stats"),
             table.isEmpty() ? HTML.empty() : table,

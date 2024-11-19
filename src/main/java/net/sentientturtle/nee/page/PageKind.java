@@ -1,4 +1,4 @@
-package net.sentientturtle.nee.pages;
+package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTMLUtil;
 import net.sentientturtle.nee.data.SDEData;

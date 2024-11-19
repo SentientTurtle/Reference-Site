@@ -4,7 +4,7 @@ import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.PageLink;
 import net.sentientturtle.nee.data.SDEData;
 import net.sentientturtle.nee.data.datatypes.Type;
-import net.sentientturtle.nee.pages.TypePage;
+import net.sentientturtle.nee.page.TypePage;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public class EVEText {
             .replace("<li>", "").replace("</li>", "")
             .replace("<ul>", "").replace("</ul>", "")
             .replace("<br>", "\n")
-            .replaceAll("<a href=showinfo:\\d+?//\\d+?>", "") // Clear links with itemIDs
+            .replaceAll("<a href=showinfo:\\d+?//\\d+?>(.+?)</a>", "$1") // Clear links with itemIDs
             .trim();
 
         ArrayList<HTML> descriptionContent = new ArrayList<>();

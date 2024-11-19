@@ -1,8 +1,8 @@
 package net.sentientturtle.nee.data.datatypes;
 
-import net.sentientturtle.nee.pages.HasPage;
-import net.sentientturtle.nee.pages.MarketGroupPage;
-import net.sentientturtle.nee.pages.Page;
+import net.sentientturtle.nee.page.HasPage;
+import net.sentientturtle.nee.page.MarketGroupPage;
+import net.sentientturtle.nee.page.Page;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 

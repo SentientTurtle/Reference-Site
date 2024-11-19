@@ -1,4 +1,4 @@
-package net.sentientturtle.nee.pages;
+package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.PageLink;
@@ -67,24 +67,24 @@ public class MarketGroupPage extends Page {
     @Override
     protected HTML getContent(HtmlContext context) {
         boolean hasItems;
-        if (context.data.getMarketGroupTypeMap().getOrDefault(marketGroup.marketGroupID, Set.of()).size() > 0) {
+        if (context.sde.getMarketGroupTypeMap().getOrDefault(marketGroup.marketGroupID, Set.of()).size() > 0) {
             hasItems = true;
         } else {
-            hasItems = context.data.getMarketGroupChildMap()
+            hasItems = context.sde.getMarketGroupChildMap()
                 .getOrDefault(marketGroup.marketGroupID, Set.of()).stream()
                 .anyMatch(childGroup ->
-                    context.data.getMarketGroupTypeMap().getOrDefault(childGroup.marketGroupID, Set.of()).size() > 0
-                    && context.data.getMarketGroupChildMap().getOrDefault(childGroup.marketGroupID, Set.of()).size() > 0
+                    context.sde.getMarketGroupTypeMap().getOrDefault(childGroup.marketGroupID, Set.of()).size() > 0
+                    && context.sde.getMarketGroupChildMap().getOrDefault(childGroup.marketGroupID, Set.of()).size() > 0
                 );
         }
 
         ItemTree.Entry[] entries = Stream.concat(
-                context.data.getMarketGroupChildMap()
+                context.sde.getMarketGroupChildMap()
                     .getOrDefault(marketGroup.marketGroupID, Set.of())
                     .stream()
                     .sorted(Comparator.comparing(m -> m.name))
-                    .map(group -> entryForGroup(group, context.data, hasItems)),
-                Stream.ofNullable(groupForItems(context.data.getMarketGroupTypeMap().get(marketGroup.marketGroupID), context.data))
+                    .map(group -> entryForGroup(group, context.sde, hasItems)),
+                Stream.ofNullable(groupForItems(context.sde.getMarketGroupTypeMap().get(marketGroup.marketGroupID), context.sde))
                     .map(treeGroup -> new ItemTree.Entry("Items", new ItemTree.Group(HTML.empty(), treeGroup.pages())))
             )
             .toArray(ItemTree.Entry[]::new);
@@ -94,7 +94,7 @@ public class MarketGroupPage extends Page {
             container.content(new Component("market_group_page_parent colour_theme_minor") {
                 @Override
                 protected HTML[] getContent(HtmlContext context) {
-                    var parentGroup = context.data.getMarketGroups().get(marketGroup.parentGroupID);
+                    var parentGroup = context.sde.getMarketGroups().get(marketGroup.parentGroupID);
                     return new HTML[]{
                         new PageLink(
                             new MarketGroupPage(parentGroup),

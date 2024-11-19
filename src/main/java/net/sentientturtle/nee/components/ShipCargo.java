@@ -25,7 +25,7 @@ public class ShipCargo extends Component {
     @Override
     protected HTML[] getContent(HtmlContext context) {
         var table = TABLE("ship_cargo_table");
-        int category = context.data.getGroups().get(type.groupID).categoryID;
+        int category = context.sde.getGroups().get(type.groupID).categoryID;
 
         if (type.capacity > 0) {
             String basicName;
@@ -39,12 +39,12 @@ public class ShipCargo extends Component {
             table.content(
                 TR().content(
                     TD().text(basicName),   // TODO: Link to cargo bay explanation page
-                    TD().content(context.data.format_with_unit(type.capacity, 9))
+                    TD().content(context.sde.format_with_unit(type.capacity, 9))
                 )
             );
         }
-        Map<Integer, Attribute> attributeMap = context.data.getAttributes();
-        Map<Integer, Map<Integer, Double>> attributeValueMap = context.data.getTypeAttributes();
+        Map<Integer, Attribute> attributeMap = context.sde.getAttributes();
+        Map<Integer, Map<Integer, Double>> attributeValueMap = context.sde.getTypeAttributes();
 
         attributeMap.values()
             .stream()
@@ -54,7 +54,7 @@ public class ShipCargo extends Component {
                 if (value != null) {
                     table.content(TR().content(
                         TD().text(attribute.displayName),
-                        TD().content(context.data.format_with_unit(value, attribute.unitID))
+                        TD().content(context.sde.format_with_unit(value, attribute.unitID))
                     ));
                 }
             });

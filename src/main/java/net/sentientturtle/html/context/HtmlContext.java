@@ -31,7 +31,7 @@ public abstract class HtmlContext {
 
     // EVE-specific fields; These live here because Java generic inference breaks with generic HTML and Element, otherwise HtmlContext could have a generic type for data extension
     public final DataSources dataSources;
-    public final SDEData data;
+    public final SDEData sde;
     public final SharedCacheReader sharedCache;
     public final FSDData fsdData;
 
@@ -40,7 +40,7 @@ public abstract class HtmlContext {
         this.folderDepth = folderDepth;
 
         this.dataSources = dataSources;
-        this.data = dataSources.SDEData();
+        this.sde = dataSources.SDEData();
         this.sharedCache = dataSources.sharedCache();
         this.fsdData = dataSources.fsdData();
         this.css = new LinkedHashSet<>();

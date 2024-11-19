@@ -1,4 +1,4 @@
-package net.sentientturtle.nee.pages;
+package net.sentientturtle.nee.page;
 
 import org.jspecify.annotations.NonNull;
 

@@ -43,8 +43,8 @@ public class ResourceLocation {
         if (Main.GENERATE_ICONS) {
             return new ResourceLocation(new ResourceData.IconProvider64(typeID, false, true), "type_icons/" + typeID + ".png");
         } else {
-            Type invType = context.data.getTypes().get(typeID);
-            Group group = context.data.getGroups().get(invType.groupID);
+            Type invType = context.sde.getTypes().get(typeID);
+            Group group = context.sde.getGroups().get(invType.groupID);
             try {
                 if (group.categoryID == 9) {
                     return new ResourceLocation(new ResourceData.Remote(new URI("https://images.evetech.net/types/" + typeID + "/bp?size=64")), "type_icons/" + typeID + ".png");
@@ -77,7 +77,7 @@ public class ResourceLocation {
     }
 
     private static String sharedCacheDestination(String resource, HtmlContext context) {
-        String hash = context.sharedCache.resourceHash(resource);
+        String hash = context.sharedCache.getResourceHash(resource);
         // If we have a file extension, append that to hash
         // This is required to make Data URI logic below figure out the mime type of the sharedcache resource
         int dotIndex = (resource).lastIndexOf('.');
@@ -97,7 +97,7 @@ public class ResourceLocation {
     }
 
     public static ResourceLocation iconOfIconID(int iconID, HtmlContext context) {
-        String iconResource = context.data.getEveIcons().get(iconID);
+        String iconResource = context.sde.getEveIcons().get(iconID);
         if (context.sharedCache.containsResource(iconResource)) {
             return new ResourceLocation(new ResourceData.SharedCache(iconResource), sharedCacheDestination(iconResource, context));
         } else {

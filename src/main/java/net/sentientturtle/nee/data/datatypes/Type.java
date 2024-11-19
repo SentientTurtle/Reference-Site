@@ -1,9 +1,9 @@
 package net.sentientturtle.nee.data.datatypes;
 
 import net.sentientturtle.nee.data.SDEData;
-import net.sentientturtle.nee.pages.HasPage;
-import net.sentientturtle.nee.pages.Page;
-import net.sentientturtle.nee.pages.TypePage;
+import net.sentientturtle.nee.page.HasPage;
+import net.sentientturtle.nee.page.Page;
+import net.sentientturtle.nee.page.TypePage;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 

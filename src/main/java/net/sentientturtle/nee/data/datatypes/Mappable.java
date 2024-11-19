@@ -2,9 +2,9 @@ package net.sentientturtle.nee.data.datatypes;
 
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.datatypes.singleton.Cluster;
-import net.sentientturtle.nee.pages.HasPage;
-import net.sentientturtle.nee.pages.MapPage;
-import net.sentientturtle.nee.pages.Page;
+import net.sentientturtle.nee.page.HasPage;
+import net.sentientturtle.nee.page.MapPage;
+import net.sentientturtle.nee.page.Page;
 import net.sentientturtle.nee.data.ResourceLocation;
 import net.sentientturtle.nee.data.SDEData;
 import org.jspecify.annotations.NonNull;

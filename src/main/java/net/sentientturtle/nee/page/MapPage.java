@@ -1,4 +1,4 @@
-package net.sentientturtle.nee.pages;
+package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
@@ -41,7 +41,7 @@ public class MapPage extends Page {
             grid.content(new ItemRender(ResourceLocation.map(mappable)));
         }
 
-        if (mappable.getSecurity(context.data).isPresent()) {
+        if (mappable.getSecurity(context.sde).isPresent()) {
             grid.content(new MapSecurity(mappable));
         }
 

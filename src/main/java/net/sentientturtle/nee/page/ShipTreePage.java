@@ -1,4 +1,4 @@
-package net.sentientturtle.nee.pages;
+package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.Element;
 import net.sentientturtle.html.HTML;
@@ -170,10 +170,10 @@ public class ShipTreePage extends Page {
         for (int ship : ships) {
             if (!shipTypes.remove(ship)) throw new RuntimeException("Ship typeID not in data: " + ship);
 
-            Type type = context.data.getTypes().get(ship);
+            Type type = context.sde.getTypes().get(ship);
             for (int i = 0; i < GROUP_ORDER.length; i++) {
                 for (int j = 0; j < GROUP_ORDER[i].length; j++) {
-                    if (!context.data.getGroups().containsKey(GROUP_ORDER[i][j])) throw new RuntimeException("Unknown groupID: " + GROUP_ORDER[i][j]);
+                    if (!context.sde.getGroups().containsKey(GROUP_ORDER[i][j])) throw new RuntimeException("Unknown groupID: " + GROUP_ORDER[i][j]);
                     if (type.groupID == GROUP_ORDER[i][j]) {
                         orderedShips.get(i).get(j).add(type);
                         continue shipLoop;
@@ -212,12 +212,12 @@ public class ShipTreePage extends Page {
 
                     if (types.size() > 0) {
                         var groupContainer = DIV("ship_tree_group colour_" + themeName + "_minor_border");
-                        groupContainer.content(HEADER().text(context.data.getGroups().get(groupID).name));
+                        groupContainer.content(HEADER().text(context.sde.getGroups().get(groupID).name));
                         var groupRow = DIV("ship_tree_group_row");
                         groupContainer.content(groupRow);
 
                         Type[] typeArray = types.stream()
-                            .sorted(Type.comparator(context.data))
+                            .sorted(Type.comparator(context.sde))
                             .toArray(Type[]::new);
 
                         Element shipContainer = null;
@@ -243,12 +243,12 @@ public class ShipTreePage extends Page {
 
     @Override
     protected HTML getContent(HtmlContext context) {
-        Set<Group> shipGroups = context.data.getCategoryGroups().get(6);
+        Set<Group> shipGroups = context.sde.getCategoryGroups().get(6);
         Objects.requireNonNull(shipGroups);
         Set<Integer> shipTypeIDs = shipGroups
             .stream()
             .filter(group -> group.published)
-            .flatMap(group -> context.data.getGroupTypes().getOrDefault(group.groupID, Set.of()).stream())
+            .flatMap(group -> context.sde.getGroupTypes().getOrDefault(group.groupID, Set.of()).stream())
             .filter(type -> type.published)
             .map(type -> type.typeID)
             .collect(Collectors.toCollection(HashSet::new));
@@ -336,7 +336,7 @@ public class ShipTreePage extends Page {
 
         if (shipTypeIDs.size() > 0) {
             for (Integer shipTypeID : shipTypeIDs) {
-                System.out.println("WARNING: Ship not in ship tree: " + context.data.getTypes().get(shipTypeID).name + "\t(" + shipTypeID + ")");
+                System.out.println("WARNING: Ship not in ship tree: " + context.sde.getTypes().get(shipTypeID).name + "\t(" + shipTypeID + ")");
             }
         }
 

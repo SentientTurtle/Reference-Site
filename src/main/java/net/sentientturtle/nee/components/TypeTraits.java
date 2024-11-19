@@ -6,7 +6,7 @@ import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.datatypes.TypeTraitBonus;
 import net.sentientturtle.nee.data.SDEData;
 import net.sentientturtle.nee.data.datatypes.Type;
-import net.sentientturtle.nee.pages.TypePage;
+import net.sentientturtle.nee.page.TypePage;
 import net.sentientturtle.nee.util.EVEText;
 
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public class TypeTraits extends Component {
 
         Element table = TABLE("type_traits_table font_text");
 
-        Map<Integer, List<TypeTraitBonus>> traitMap = context.data.getTypeTraits().get(type.typeID);
+        Map<Integer, List<TypeTraitBonus>> traitMap = context.sde.getTypeTraits().get(type.typeID);
         ArrayList<Integer> keyList = new ArrayList<>(traitMap.keySet());
         keyList.sort(Integer::compareUnsigned);
         for (Integer skillID : keyList) {
@@ -61,7 +61,7 @@ public class TypeTraits extends Component {
                 table.content(
                     TR("font_header").content(
                         TH().attribute("colspan", "2").content(HEADER().content(
-                            new PageLink(new TypePage(context.data.getTypes().get(skillID))),
+                            new PageLink(new TypePage(context.sde.getTypes().get(skillID))),
                             TEXT(" bonuses (per skill level)")
                         ))
                     )
@@ -73,7 +73,7 @@ public class TypeTraits extends Component {
                 List<TypeTraitBonus> modeTraits = traits.subList(4, traits.size());
                 modeTraits.stream()
                     .filter(t -> !(t.bonusText.contains("Defense Mode") || t.bonusText.contains("Propulsion Mode") || t.bonusText.contains("Sharpshooter Mode")))
-                    .forEach(trait -> appendTrait(table, trait, context.data));
+                    .forEach(trait -> appendTrait(table, trait, context.sde));
 
                 // Trait 0 is the "Additional bonuses available" message, we skip it
                 for (int i = 1; i < 4; i++) {
@@ -97,11 +97,11 @@ public class TypeTraits extends Component {
 
                     modeTraits.stream()
                         .filter(trait -> trait.bonusText.contains(modeString))
-                        .forEach(trait -> appendTrait(table, trait, context.data));
+                        .forEach(trait -> appendTrait(table, trait, context.sde));
                 }
             } else {
                 for (TypeTraitBonus traitTuple : traitMap.get(skillID)) {
-                    appendTrait(table, traitTuple, context.data);
+                    appendTrait(table, traitTuple, context.sde);
                 }
             }
         }

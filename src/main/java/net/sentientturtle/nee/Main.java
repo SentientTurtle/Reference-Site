@@ -15,7 +15,8 @@ import net.sentientturtle.nee.data.SDEData;
 import net.sentientturtle.nee.data.SQLiteSDEData;
 import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.data.sharedcache.FSDData;
-import net.sentientturtle.nee.pages.PageKind;
+import net.sentientturtle.nee.data.sharedcache.IconProvider;
+import net.sentientturtle.nee.page.PageKind;
 import net.sentientturtle.nee.data.sharedcache.SharedCacheReader;
 import net.sentientturtle.nee.data.ResourceLocation;
 import net.sentientturtle.nee.data.SDEUtils;
@@ -42,6 +43,7 @@ public class Main {
 
     public static Path SHARED_CACHE_PATH;
     public static Path SDE_FILE;
+    public static Path ICON_CACHE_FILE;
     public static boolean UPDATE_SDE;
     public static int COMPRESSION;  // No compression is moderately faster
     public static boolean GENERATE_ICONS;
@@ -55,7 +57,9 @@ public class Main {
         System.setProperty("sqlite4java.library.path", "./native");
     }
 
+    private static DataSources initializedData = null;
     public static DataSources initialize(boolean patch) throws IOException, SQLiteException {
+        if (initializedData != null) return initializedData;
         String propertyPath = System.getProperty("net.sentientturtle.nee.properties", "./nee.properties");
 
         Properties properties = new Properties();
@@ -77,6 +81,7 @@ public class Main {
             RES_FOLDER = Path.of(properties.getProperty("RESOURCE_FOLDER", "./rsc/"));
             TEMP_DIR = RES_FOLDER.resolve("temp");
             SDE_FILE = RES_FOLDER.resolve("sqlite-latest.sqlite");
+            ICON_CACHE_FILE = RES_FOLDER.resolve("iconcache.zip");
             UPDATE_SDE = properties.getProperty("UPDATE_SDE", "TRUE").equalsIgnoreCase("TRUE");
 
             if (properties.getProperty("COMPRESSION").equalsIgnoreCase("TRUE")) {
@@ -138,15 +143,22 @@ public class Main {
             }
         }
         System.out.println("Data initialized");
-        return new DataSources(SDEData, sharedCache, fsdData);
+        return (initializedData = new DataSources(SDEData, sharedCache, fsdData));
     }
 
+    public static Path OUTPUT_DIR = Path.of("./output");
     public static void main(String[] args) throws SQLiteException, IOException {
         long startTime = System.nanoTime();
         DataSources sources = Main.initialize(true);
 
+        System.out.println("Loading icon cache...");
+        IconProvider.readIconCache();
+        System.out.println("\tIcon cache loaded");
+
+        Files.createDirectories(OUTPUT_DIR);
+
         // The OS does not like creating thousands of small files, saving to an archive is significantly faster.
-        ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(Path.of("website.zip").toFile()));
+        ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(OUTPUT_DIR.resolve("website.zip").toFile()));
         zipOutputStream.setLevel(COMPRESSION);
 
         Set<String> css = Collections.synchronizedSet(new LinkedHashSet<>());
@@ -250,5 +262,10 @@ public class Main {
 
         System.out.println("Took: " + TimeUnit.SECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS) + " seconds.");
         System.out.println("Generated: " + pageCount.get() + " pages.");
+
+
+        System.out.println("Writing icon cache...");
+        IconProvider.writeIconCache();
+        System.out.println("All finished.");
     }
 }

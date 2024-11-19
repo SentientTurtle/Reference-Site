@@ -6,7 +6,7 @@ import net.sentientturtle.html.Component;
 import net.sentientturtle.nee.data.datatypes.Constellation;
 import net.sentientturtle.nee.data.datatypes.Region;
 import net.sentientturtle.nee.data.datatypes.SolarSystem;
-import net.sentientturtle.nee.pages.MapPage;
+import net.sentientturtle.nee.page.MapPage;
 import net.sentientturtle.html.PageLink;
 import net.sentientturtle.nee.data.datatypes.Mappable;
 
@@ -28,7 +28,7 @@ public class MapList extends Component {
         return new HTML[]{
             SPAN("map_list_title").content(HEADER("font_header").text(mappable.getConstituentName())),
             DIV("map_list_list font_text").content(   // TODO: Test what text copied out of browser does formatting-wise; Replace with table if copied text is not tabular
-                mappable.getConstituents(context.data).map(entry ->
+                mappable.getConstituents(context.sde).map(entry ->
                     DIV("map_list_entry").content(
                         (entry.getIcon(context) != null) ? IMG(entry.getIcon(context), null, 64).className("map_list_icon") : DIV("map_list_icon"),
                         SPAN("map_list_link").content(new PageLink(new MapPage(entry)))

@@ -34,8 +34,8 @@ public class ModuleFitting extends Component {
 
     @Override
     protected HTML[] getContent(HtmlContext context) {
-        Map<Integer, Double> typeAttributes = context.data.getTypeAttributes().getOrDefault(type.typeID, Map.of());
-        Set<Integer> typeEffects = context.data.getTypeEffects().getOrDefault(type.typeID, Set.of());
+        Map<Integer, Double> typeAttributes = context.sde.getTypeAttributes().getOrDefault(type.typeID, Map.of());
+        Set<Integer> typeEffects = context.sde.getTypeEffects().getOrDefault(type.typeID, Set.of());
 
         var table = TABLE("module_fitting_table");
         if (typeEffects.contains(11)) {
@@ -86,7 +86,7 @@ public class ModuleFitting extends Component {
             rigRow.content(TD().content(
                 SPAN("module_fitting_span").content(
                     IMG(ResourceLocation.iconOfIconID(3266, context), null, 32).className("module_fitting_icon"),
-                    context.data.format_with_unit(rigSize, context.data.getAttributes().get(1547).unitID),
+                    context.sde.format_with_unit(rigSize, context.sde.getAttributes().get(1547).unitID),
                     TEXT(" rigging slot")
                 )
             ));
@@ -97,7 +97,7 @@ public class ModuleFitting extends Component {
                     TD().content(
                         SPAN("module_fitting_span").content(
                             IMG(ResourceLocation.iconOfIconID(3266, context), null, 32).className("module_fitting_icon"),
-                            TEXT("Calibration: "), context.data.format_with_unit(calibrationUsage, context.data.getAttributes().get(1153).unitID)
+                            TEXT("Calibration: "), context.sde.format_with_unit(calibrationUsage, context.sde.getAttributes().get(1153).unitID)
                         )
                     )
                 );
@@ -130,19 +130,19 @@ public class ModuleFitting extends Component {
                 TD().content(
                     SPAN("module_fitting_span").content(
                         IMG(ResourceLocation.iconOfIconID(1405, context), null, 32).className("module_fitting_icon"),
-                        TEXT("CPU usage: "), context.data.format_with_unit(cpuUsage, context.data.getAttributes().get(50).unitID)
+                        TEXT("CPU usage: "), context.sde.format_with_unit(cpuUsage, context.sde.getAttributes().get(50).unitID)
                     )
                 ),
                 TD().content(
                     SPAN("module_fitting_span").content(
                         IMG(ResourceLocation.iconOfIconID(1400, context), null, 32).className("module_fitting_icon"),
-                        TEXT("Powergrid usage: "), context.data.format_with_unit(pgUsage, context.data.getAttributes().get(30).unitID)
+                        TEXT("Powergrid usage: "), context.sde.format_with_unit(pgUsage, context.sde.getAttributes().get(30).unitID)
                     )
                 )
             ));
         }
 
-        double activationTime = type.getModuleActivationTime(context.data);
+        double activationTime = type.getModuleActivationTime(context.sde);
         double reactivationDelay = typeAttributes.getOrDefault(669, 0.0);
 
         double activationCost = typeAttributes.getOrDefault(6, 0.0);
@@ -151,7 +151,7 @@ public class ModuleFitting extends Component {
                 TD().content(
                     SPAN("module_fitting_span").content(
                         IMG(ResourceLocation.iconOfIconID(1668, context), null, 32).className("module_fitting_icon"),
-                        TEXT("Activation cost: "), context.data.format_with_unit(activationCost, context.data.getAttributes().get(6).unitID)
+                        TEXT("Activation cost: "), context.sde.format_with_unit(activationCost, context.sde.getAttributes().get(6).unitID)
                     )
                 )
             );
@@ -162,7 +162,7 @@ public class ModuleFitting extends Component {
                     TD().content(
                         SPAN("module_fitting_span").content(
                             IMG(ResourceLocation.iconOfIconID(1668, context), null, 32).className("module_fitting_icon"),
-                            TEXT("Capacitor usage: "), context.data.format_with_unit(capacitorUsage, context.data.getAttributes().get(6).unitID), TEXT("/s")
+                            TEXT("Capacitor usage: "), context.sde.format_with_unit(capacitorUsage, context.sde.getAttributes().get(6).unitID), TEXT("/s")
                         )
                     )
                 );
@@ -174,7 +174,7 @@ public class ModuleFitting extends Component {
                 TD().content(
                     SPAN("module_fitting_span").content(
                         IMG(ResourceLocation.iconOfIconID(1392, context), null, 32).className("module_fitting_icon"),
-                        TEXT("Activation time: "), context.data.format_with_unit(activationTime, context.data.getAttributes().get(73).unitID)
+                        TEXT("Activation time: "), context.sde.format_with_unit(activationTime, context.sde.getAttributes().get(73).unitID)
                     )
                 )
             );
@@ -184,7 +184,7 @@ public class ModuleFitting extends Component {
                     TD().content(
                         SPAN("module_fitting_span").content(
                             IMG(ResourceLocation.iconOfIconID(1392, context), null, 32).className("module_fitting_icon"),
-                            TEXT("Reactivation delay: "), context.data.format_with_unit(reactivationDelay, context.data.getAttributes().get(669).unitID)
+                            TEXT("Reactivation delay: "), context.sde.format_with_unit(reactivationDelay, context.sde.getAttributes().get(669).unitID)
                         )
                     )
                 );

@@ -2,9 +2,10 @@ package net.sentientturtle.nee.data;
 
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.PageLink;
+import net.sentientturtle.nee.components.TypeSkills;
 import net.sentientturtle.nee.data.datatypes.*;
-import net.sentientturtle.nee.pages.GroupPage;
-import net.sentientturtle.nee.pages.TypePage;
+import net.sentientturtle.nee.page.GroupPage;
+import net.sentientturtle.nee.page.TypePage;
 import org.jspecify.annotations.Nullable;
 
 import java.text.DecimalFormat;
@@ -143,6 +144,8 @@ public abstract class SDEData {
     private Map<Integer, List<SolarSystem>> regionSolarSystems;
     // Map<RegionID, List<Constellation>>
     private Map<Integer, List<Constellation>> regionConstellations;
+    // Map<skill TypeID, Map<Level, Set<TypeID requiring skill>>>
+    private Map<Integer, Map<Integer, Set<Integer>>> requiresSkillMap;
 
     // View getters
 
@@ -222,6 +225,12 @@ public abstract class SDEData {
     public Map<Integer, List<Constellation>> getRegionConstellationMap() {
         if (regionConstellations == null) throw new IllegalStateException("View collections not initialized!");
         return regionConstellations;
+    }
+
+    // Map<skill TypeID, Map<Level, Set<TypeID requiring skill>>>
+    public Map<Integer, Map<Integer, Set<Integer>>> getRequiresSkillMap() {
+        if (requiresSkillMap == null) throw new IllegalStateException("View collections not initialized!");
+        return requiresSkillMap;
     }
 
     /*
@@ -321,6 +330,20 @@ public abstract class SDEData {
         regionConstellations = produceMap();
         for (Constellation constellation : getConstellations()) {
             regionConstellations.computeIfAbsent(constellation.regionID, this::produceList).add(constellation);
+        }
+
+        requiresSkillMap = produceMap();
+        for (Map.Entry<Integer, Map<Integer, Double>> entry : getTypeAttributes().entrySet()) {
+            int typeID = entry.getKey();
+            Map<Integer, Double> typeAttributes = entry.getValue();
+            int[] skillAttributes = TypeSkills.SKILL_ATTRIBUTES;
+            for (int i = 0; i < skillAttributes.length; i++) {
+                Double skillTypeID = typeAttributes.get(skillAttributes[i]);
+                if (skillTypeID != null) {
+                    int level = (int) (double) typeAttributes.getOrDefault(TypeSkills.LEVEL_ATTRIBUTES[i], 1.0);
+                    requiresSkillMap.computeIfAbsent((int) (double) skillTypeID, this::produceMap).computeIfAbsent(level, this::produceSet).add(typeID);
+                }
+            }
         }
     }
 

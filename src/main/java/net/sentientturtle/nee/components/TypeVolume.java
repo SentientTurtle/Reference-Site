@@ -24,7 +24,7 @@ public class TypeVolume extends Component {
     protected HTML[] getContent(HtmlContext context) {
         double volume = this.type.volume;
         double mass;
-        if (context.data.getGroups().get(type.groupID).categoryID == 6) {
+        if (context.sde.getGroups().get(type.groupID).categoryID == 6) {
             mass = this.type.mass;
         } else {
             mass = 0.0;
@@ -37,12 +37,12 @@ public class TypeVolume extends Component {
                         TD().content(SPAN("type_volume_span").title("Volume").content(
                             IMG(ResourceLocation.iconOfIconID(67, context), null, 32).className("type_volume_icon"),
                             TEXT("Volume: "),
-                            context.data.format_with_unit(volume, 9)
+                            context.sde.format_with_unit(volume, 9)
                         )),
                         TD().content(SPAN("type_volume_span").title("Packaged").content(
                             IMG(ResourceLocation.iconOfIconID(67, context), null, 32).className("type_volume_icon"),
                             TEXT("Packaged Volume: "),
-                            context.data.format_with_unit(PACKAGED_VOLUMES.get(type.typeID), 9)
+                            context.sde.format_with_unit(PACKAGED_VOLUMES.get(type.typeID), 9)
                         ))
                     ),
                     mass > 0.0 ?
@@ -50,7 +50,7 @@ public class TypeVolume extends Component {
                             TD().content(SPAN("type_volume_span").content(
                                 IMG(ResourceLocation.iconOfIconID(76, context), null, 32).title("Mass").className("type_volume_icon"),
                                 TEXT("Mass: "),
-                                context.data.format_with_unit(mass, 2)
+                                context.sde.format_with_unit(mass, 2)
                             ))
                         )
                         : HTML.empty()
@@ -63,13 +63,13 @@ public class TypeVolume extends Component {
                         TD().content(SPAN("type_volume_span").content(
                             IMG(ResourceLocation.iconOfIconID(67, context), null, 32).title("Volume").className("type_volume_icon"),
                             TEXT("Volume: "),
-                            context.data.format_with_unit(volume, 9)
+                            context.sde.format_with_unit(volume, 9)
                         )),
                         mass > 0.0 ?
                             TD().content(SPAN("type_volume_span").title("Mass").content(
                                 IMG(ResourceLocation.iconOfIconID(76, context), null, 32).className("type_volume_icon"),
                                 TEXT("Mass: "),
-                                context.data.format_with_unit(mass, 2)
+                                context.sde.format_with_unit(mass, 2)
                             ))
                             : HTML.empty()
                     )
@@ -913,6 +913,4 @@ public class TypeVolume extends Component {
         PACKAGED_VOLUMES.put(34473, 15000.0);
         PACKAGED_VOLUMES.put(24569, 1000.0);
     }
-
-    ;
 }

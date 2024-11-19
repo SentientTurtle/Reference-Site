@@ -24,8 +24,8 @@ public class ShipSensors extends Component {    // TODO: Maybe rename TypeSensor
 
     @Override
     protected HTML[] getContent(HtmlContext context) {
-        Map<Integer, Attribute> attributeMap = context.data.getAttributes();
-        Map<Integer, Double> typeAttributes = context.data.getTypeAttributes().get(type.typeID);
+        Map<Integer, Attribute> attributeMap = context.sde.getAttributes();
+        Map<Integer, Double> typeAttributes = context.sde.getTypeAttributes().get(type.typeID);
         var table = TABLE("ship_sensors_table font_text");
 
         double targetingRange = typeAttributes.getOrDefault(76, 0.0);
@@ -36,7 +36,7 @@ public class ShipSensors extends Component {    // TODO: Maybe rename TypeSensor
                         SPAN("ship_sensors_span").title("Targeting Range").content(
                             IMG(ResourceLocation.iconOfIconID(attributeMap.get(76).iconID, context), null, 32).className("ship_sensors_icon"),
                             TEXT("Targeting Range: "),
-                            context.data.format_with_unit(targetingRange > 1000.0 ? targetingRange / 1000.0 : targetingRange, -1),
+                            context.sde.format_with_unit(targetingRange > 1000.0 ? targetingRange / 1000.0 : targetingRange, -1),
                             TEXT(targetingRange > 1000.0 ? " km" : " m")
                         )
                     ),
@@ -44,7 +44,7 @@ public class ShipSensors extends Component {    // TODO: Maybe rename TypeSensor
                         SPAN("ship_sensors_span").title("Scan Resolution").content(
                             IMG(ResourceLocation.iconOfIconID(attributeMap.get(564).iconID, context), null, 32).className("ship_sensors_icon"),
                             TEXT("Scan Resolution: "),
-                            context.data.format_with_unit(typeAttributes.getOrDefault(564, 0.0), attributeMap.get(564).unitID)
+                            context.sde.format_with_unit(typeAttributes.getOrDefault(564, 0.0), attributeMap.get(564).unitID)
                         )
                     )
                 ),
@@ -53,7 +53,7 @@ public class ShipSensors extends Component {    // TODO: Maybe rename TypeSensor
                         SPAN("ship_sensors_span").title("Maximum Targets").content(
                             IMG(ResourceLocation.iconOfIconID(attributeMap.get(192).iconID, context), null, 32).className("ship_sensors_icon"),
                             TEXT("Maximum Targets: "),
-                            context.data.format_with_unit(typeAttributes.getOrDefault(192, 0.0), attributeMap.get(192).unitID)
+                            context.sde.format_with_unit(typeAttributes.getOrDefault(192, 0.0), attributeMap.get(192).unitID)
                         )
                     )
                 )
@@ -108,7 +108,7 @@ public class ShipSensors extends Component {    // TODO: Maybe rename TypeSensor
                     SPAN("ship_sensors_span").title("Sensor Strength").content(
                         IMG(ResourceLocation.iconOfIconID(attributeMap.get(sensorAttribute).iconID, context), null, 32).className("ship_sensors_icon"),
                         TEXT("Sensor Strength: "),
-                        context.data.format_with_unit(sensorStrength, attributeMap.get(sensorAttribute).unitID)
+                        context.sde.format_with_unit(sensorStrength, attributeMap.get(sensorAttribute).unitID)
                     )
                 )
             ));

@@ -24,8 +24,8 @@ public class TypeAttributes extends Component {
 
     @Override
     protected HTML[] getContent(HtmlContext context) {
-        Map<Integer, Double> attributes = context.data.getTypeAttributes().get(type.typeID);
-        Map<Integer, Attribute> attributeMap = context.data.getAttributes();
+        Map<Integer, Double> attributes = context.sde.getTypeAttributes().get(type.typeID);
+        Map<Integer, Attribute> attributeMap = context.sde.getAttributes();
 
         LinkedHashMap<Attribute, Double> attributeValues = new LinkedHashMap<>();   // Ordered map is required here
 
@@ -51,7 +51,7 @@ public class TypeAttributes extends Component {
             }
             row.content(
                 TD("type_attributes_td").text(attribute.displayName == null ? attribute.attributeName : attribute.displayName),
-                TD("type_attributes_td").content(context.data.format_with_unit(value, attribute.unitID))
+                TD("type_attributes_td").content(context.sde.format_with_unit(value, attribute.unitID))
             );
         });
 

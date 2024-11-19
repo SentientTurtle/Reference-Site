@@ -1,4 +1,4 @@
-package net.sentientturtle.nee.pages;
+package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
@@ -69,7 +69,7 @@ public class TypePage extends Page {
 
     @Override
     protected HTML getContent(HtmlContext context) {
-        var dataSupplier = context.data;
+        var dataSupplier = context.sde;
 
 //        var grid = DIV("type_page_grid");
         var left = DIV("type_page_column");
@@ -111,7 +111,7 @@ public class TypePage extends Page {
         }
 
         if (type.description != null && type.description.length() > 0)
-            left.content(new ItemDescription(EVEText.escape(type.description, context.data)));
+            left.content(new ItemDescription(EVEText.escape(type.description, context.sde)));
 
         if (!dataSupplier.getTypeTraits().getOrDefault(type.typeID, Map.of()).isEmpty())
             left.content(new TypeTraits(type));
@@ -259,6 +259,9 @@ public class TypePage extends Page {
 
         if (typeAttributes.containsKey(182))  // Has a skill-required-1 attribute
             right.content(new TypeSkills(type));
+
+        if (dataSupplier.getRequiresSkillMap().containsKey(type.typeID))
+            right.content(new SkillRequiredFor(type));
 
         if (dataSupplier.getVariants().containsKey(type.typeID))  // If type has variants
             right.content(new TypeVariants(type));

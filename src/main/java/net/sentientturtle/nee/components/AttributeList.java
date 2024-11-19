@@ -30,8 +30,8 @@ public abstract class AttributeList extends Component {
 
     @Override
     protected HTML[] getContent(HtmlContext context) {
-        Map<Integer, Attribute> attributeMap = context.data.getAttributes();
-        Map<Integer, Map<Integer, Double>> attributeValueMap = context.data.getTypeAttributes();
+        Map<Integer, Attribute> attributeMap = context.sde.getAttributes();
+        Map<Integer, Map<Integer, Double>> attributeValueMap = context.sde.getTypeAttributes();
 
         var table = TABLE("attribute_list_table font_text");
 
@@ -68,7 +68,7 @@ public abstract class AttributeList extends Component {
                             SPAN("attribute_list_span").title(entry.name).content(
                                 icon,
                                 TEXT(entry.name + ": "),
-                                context.data.format_with_unit(value, attributeMap.get(entry.attributeID).unitID)
+                                context.sde.format_with_unit(value, attributeMap.get(entry.attributeID).unitID)
                             )
                         )
                     );
@@ -77,7 +77,7 @@ public abstract class AttributeList extends Component {
                         TD().content(
                             SPAN("attribute_list_span").content(
                                 icon,
-                                context.data.format_with_unit(value, attributeMap.get(entry.attributeID).unitID)
+                                context.sde.format_with_unit(value, attributeMap.get(entry.attributeID).unitID)
                             )
                         )
                     );

@@ -3,8 +3,8 @@ package net.sentientturtle.nee.components;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.Component;
-import net.sentientturtle.nee.pages.CategoryPage;
-import net.sentientturtle.nee.pages.GroupPage;
+import net.sentientturtle.nee.page.CategoryPage;
+import net.sentientturtle.nee.page.GroupPage;
 import net.sentientturtle.html.PageLink;
 import net.sentientturtle.nee.data.datatypes.Category;
 import net.sentientturtle.nee.data.datatypes.Group;
@@ -28,8 +28,8 @@ public class TypeGroup extends Component {
 
     @Override
     protected HTML[] getContent(HtmlContext context) {
-        Group group = context.data.getGroups().get(this.type.groupID);
-        Category category = context.data.getCategories().get(group.categoryID);
+        Group group = context.sde.getGroups().get(this.type.groupID);
+        Category category = context.sde.getCategories().get(group.categoryID);
 
         return new HTML[]{
             TEXT_BOLD().className("type_group_text").content(new PageLink(new GroupPage(group))),
