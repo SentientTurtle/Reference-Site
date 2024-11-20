@@ -35,7 +35,7 @@ public class SharedCacheReader {
                 String[] split = line.split(",");
                 if (split.length < 5) throw new IllegalStateException("Invalid index file format!");
 
-                String resource = split[0];
+                String resource = split[0].replace('\\', '/');
                 String location = split[1];
                 String fileHash = split[2];
                 cacheIndex.put(resource.toLowerCase(), Path.of(location));

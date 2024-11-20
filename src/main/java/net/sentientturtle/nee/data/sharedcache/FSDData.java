@@ -26,36 +26,24 @@ public class FSDData {
         List<Integer> excludedTypeIDs,
         List<Integer> excludedGroupIDs,
         List<Integer> excludedCategoryIDs
-    ) {
-    }
-
+    ) {}
     public final LinkedHashMap<Integer, TypeList> typeLists;
 
-    public record IOMapping(int resultingType, List<Integer> applicableTypes) {
-    }
-
-    public record DyAttribute(double min, double max, Boolean highIsGood) {
-    }
-
-    public record DynamicAttributes(List<IOMapping> inputOutputMapping, LinkedHashMap<Integer, DyAttribute> attributeIDs) {
-    }
-
+    public record IOMapping(int resultingType, List<Integer> applicableTypes) {}
+    public record DyAttribute(double min, double max, Boolean highIsGood) {}
+    public record DynamicAttributes(List<IOMapping> inputOutputMapping, LinkedHashMap<Integer, DyAttribute> attributeIDs) {}
     public final LinkedHashMap<Integer, DynamicAttributes> dynamicAttributes;
 
     public record IconInfo(String folder) {
+        public IconInfo(String folder) {
+            this.folder = folder.replace('\\', '/');
+        }
     }
-
-    public record Graphic(int explosionBucketID, IconInfo iconInfo, String sofRaceName, String sofFactionName, String sofHullName) {
-    }
-
+    public record Graphic(int explosionBucketID, IconInfo iconInfo, String sofRaceName, String sofFactionName, String sofHullName) {}
     public final LinkedHashMap<Integer, Graphic> graphics;
 
-    public record WarfareBuff(int displayNameID, String developerDescription, List<BuffModifier> itemModifiers, String showOutputValueInUI) {
-    }
-
-    public record BuffModifier(int dogmaAttributeID) {
-    }
-
+    public record WarfareBuff(int displayNameID, String developerDescription, List<BuffModifier> itemModifiers, String showOutputValueInUI) {}
+    public record BuffModifier(int dogmaAttributeID) {}
     public final LinkedHashMap<Integer, WarfareBuff> warfareBuffs;
 
     public final HashMap<Integer, String> localizationStrings;
