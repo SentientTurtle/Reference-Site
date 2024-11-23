@@ -278,6 +278,15 @@ public interface HTML {
                 .text(title);
     }
 
+    /// {@code <ul></ul> }
+    static Element UL() {
+        return new Element("ul");
+    }
+    /// {@code <li></li> }
+    static Element LI() {
+        return new Element("li");
+    }
+
 
     // Methods
 

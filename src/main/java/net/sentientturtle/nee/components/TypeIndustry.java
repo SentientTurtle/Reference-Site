@@ -90,13 +90,17 @@ public class TypeIndustry extends Component {
         Map<Integer, Integer> reprocessingMaterials = context.sde.getReprocessingMaterials().getOrDefault(type.typeID, Map.of());
         if (reprocessingMaterials.size() > 0) {
             table.content(TR().content(TH("font_header").attribute("colspan", "3").text("Reprocessing")));
-            for (Map.Entry<Integer, Integer> entry : reprocessingMaterials.entrySet()) {
-                table.content(TR().content(
-                    TD().content(IMG(ResourceLocation.typeIcon(entry.getKey(), context), null, 64).className("type_industry_icon")),
-                    TD().content(new PageLink(new TypePage(context.sde.getTypes().get(entry.getKey())))),
-                    TD().content(context.sde.format_with_unit(entry.getValue(), -1))
-                ));
-            }
+
+            reprocessingMaterials.entrySet()
+                .stream()
+                .sorted(Comparator.<Map.Entry<Integer, Integer>>comparingInt(Map.Entry::getValue).reversed())
+                .forEach(entry -> {
+                    table.content(TR().content(
+                        TD().content(IMG(ResourceLocation.typeIcon(entry.getKey(), context), null, 64).className("type_industry_icon")),
+                        TD().content(new PageLink(new TypePage(context.sde.getTypes().get(entry.getKey())))),
+                        TD().content(context.sde.format_with_unit(entry.getValue(), -1))
+                    ));
+                });
         }
 
         return new HTML[]{

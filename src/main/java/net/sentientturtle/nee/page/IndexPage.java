@@ -2,9 +2,9 @@ package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.html.Component;
 import net.sentientturtle.nee.Main;
 import net.sentientturtle.nee.components.PageList;
+import net.sentientturtle.nee.components.TextBox;
 import net.sentientturtle.nee.data.ResourceLocation;
 import org.jspecify.annotations.Nullable;
 
@@ -30,14 +30,14 @@ public class IndexPage extends Page {
     @Override
     protected HTML getContent(HtmlContext context) {
         return HTML.multi(
-            new IndexAbout("About", HTML.RAW(
+            new TextBox("About", HTML.RAW(
                 "<pre>The " + Main.WEBSITE_NAME +
                 " is an automatically updated reference site for <a href='https://en.wikipedia.org/wiki/Eve_Online'>EVE Online.<a>" +   // No link to official site as it's got login options
                 "<br>Issues can be reported on the project's <a href=''>Github repository.</a>" + // TODO: Set URL
                 "<br><br><i>The " + Main.WEBSITE_NAME + " project is not affiliated with CCP hf.</i></pre>"
             )),
             // TODO: Put behind a flag
-            new IndexAbout("Development notes", HTML.RAW(
+            new TextBox("Development notes", HTML.RAW(
                 """
                     This is a development build of the website. Some content and features may not be available or functional on all devices.
                     <br><br>
@@ -66,7 +66,11 @@ public class IndexPage extends Page {
                 new TypePage(context.sde.getTypes().get(2464)),
                 new TypePage(context.sde.getTypes().get(16213)),
                 new TypePage(context.sde.getTypes().get(33474))
-            )
+            ),
+            new TextBox(null, HTML.multi(
+                TEXT("Updated: "), context.sde.format_with_unit((double) (System.currentTimeMillis() / 1000), -2),
+                BR(), TEXT("Game version: " + context.dataSources.gameVersion())
+            ))
         );
     }
 
@@ -79,43 +83,5 @@ public class IndexPage extends Page {
     @Override
     public ResourceLocation getIcon(HtmlContext context) {
         return ResourceLocation.file("bookicon.png");
-    }
-
-    private static class IndexAbout extends Component {
-        private final String title;
-        private final HTML content;
-
-        public IndexAbout(String title, HTML content) {
-            super("index_about colour_theme_minor");
-            this.title = title;
-            this.content = content;
-        }
-
-        @Override
-        protected HTML[] getContent(HtmlContext context) {
-            return new HTML[]{
-                HEADER("font_header index_about_header").text(this.title),
-                SPAN("index_about_text font_text").content(this.content)
-            };
-        }
-
-        @Override
-        protected String getCSS() {
-            return """
-                .index_about {
-                    display: flex;
-                    flex-direction: column;
-                    padding: 1rem;
-                }
-                
-                .index_about_header {
-                    font-size: 1.5rem;
-                }
-                
-                .index_about_text {
-                    font-style: italic;
-                    font-size: 0.9rem;
-                }""";
-        }
     }
 }

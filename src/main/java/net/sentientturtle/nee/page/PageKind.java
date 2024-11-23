@@ -1,6 +1,7 @@
 package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTMLUtil;
+import net.sentientturtle.nee.Main;
 import net.sentientturtle.nee.data.SDEData;
 
 import java.util.Arrays;
@@ -47,6 +48,7 @@ public enum PageKind {
 //            .flatMap((Function<Stream<? extends Mappable>, Stream<? extends Mappable>>) stream -> stream)
 //            .map(MapPage::new)
     ),
+    DEV_RESOURCE(_ -> Stream.ofNullable(Main.SKIP_DEV_RESOURCES ? null : new DevResourcePage())),
     STATIC(_ -> Stream.of(new IndexPage(), new SearchResults(), new DynamicMapPage())) {
         @Override
         public String getPageFilePath(String pageName) {

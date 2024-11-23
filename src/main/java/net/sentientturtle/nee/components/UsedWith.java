@@ -21,7 +21,7 @@ public class UsedWith extends Component {
     private final Set<Integer> types;
 
     public UsedWith(String title, Set<Integer> groups, Set<Integer> types) {
-        super("used_width colour_theme_minor");
+        super("used_with colour_theme_minor");
         this.title = title;
         this.groups = groups;
         this.types = types;
@@ -40,9 +40,9 @@ public class UsedWith extends Component {
                 .map(entry -> {
                     Page page = entry.getPage();
                     ResourceLocation icon = page.getIcon(context);
-                    return DIV("used_width_entry").content(
-                        (icon != null) ? IMG(icon, null, 32).className("used_width_icon") : DIV("used_width_icon"),
-                        new PageLink(page).className("used_width_type font_header")
+                    return DIV("used_with_entry").content(
+                        (icon != null) ? IMG(icon, null, 32).className("used_with_icon") : DIV("used_with_icon"),
+                        new PageLink(page).className("used_with_type font_header")
                     );
                 })
         ).toArray(HTML[]::new);
@@ -51,28 +51,28 @@ public class UsedWith extends Component {
     @Override
     protected String getCSS() {
         return """
-            .used_width {
+            .used_with {
                 display: flex;
                 flex-direction: column;
                 padding: 0.5rem;
             }
             
-            .used_width > header {
+            .used_with > header {
                 margin-bottom: 0.5rem;
             }
             
-            .used_width_entry {
+            .used_with_entry {
                 width: 100%;
                 display: flex;
                 align-items: center;
             }
             
-            .used_width_icon {
+            .used_with_icon {
                 width: 2rem;
                 height: 2rem;
             }
             
-            .used_width_type {
+            .used_with_type {
                 margin-inline-start: 0.5rem;
             }""";
     }

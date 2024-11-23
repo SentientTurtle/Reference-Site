@@ -83,7 +83,8 @@ public abstract class Page implements Document, HTML {
             META().attribute("charset", "UTF-8"),
             META().attribute("name", "viewport").attribute("content", "width=device-width, initial-scale=1"),
             TITLE(this.title()),
-            LINK().attribute("rel", "stylesheet").attribute("href", context.pathTo("stylesheet.css")),
+            LINK().attribute("rel", "stylesheet").attribute("href", c -> c.pathTo("stylesheet.css")),
+            LINK().attribute("rel", "icon").attribute("href", c -> ResourceLocation.file("bookicon.png").getURI(c)),
             HTML.RAW("<script type='module' src='" + HTMLUtil.escapeAttributeValue(context.pathTo("script.js")) + "'></script>")
         );
 

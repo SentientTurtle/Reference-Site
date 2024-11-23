@@ -359,6 +359,8 @@ public abstract class SDEData {
         if (unitID == null) unitID = -1;
 
         switch (unitID) {
+            case -2:    // Datetime (unix)
+                return HTML.TEXT(dateFormat.format(new Date(((long) value) * 1000)) + " (EVE)");
             case -1:    // No unit
                 return HTML.TEXT(decimalFormat.format(value));
             case 1:     // Metre

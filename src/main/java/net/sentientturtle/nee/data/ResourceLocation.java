@@ -23,7 +23,6 @@ import java.util.*;
  */
 @SuppressWarnings("WeakerAccess")
 public class ResourceLocation {
-    // TODO: Migrate to path
     private static final Path OUTPUT_RES_FOLDER = Path.of("rsc");              // Destination resource folder relative to output
 
     private final ResourceData dataSource;
@@ -41,7 +40,11 @@ public class ResourceLocation {
 
     public static ResourceLocation typeIcon(int typeID, HtmlContext context) {
         if (Main.GENERATE_ICONS) {
-            return new ResourceLocation(new ResourceData.IconProvider64(typeID, false, true), "type_icons/" + typeID + ".png");
+            Type invType = context.sde.getTypes().get(typeID);
+            Group group = context.sde.getGroups().get(invType.groupID);
+            boolean isBPC = group.categoryID == 9 && context.sde.getMetaTypes().getOrDefault(typeID, 1) != 1;
+
+            return new ResourceLocation(new ResourceData.IconProvider64(typeID, isBPC, true), "type_icons/" + typeID + ".png");
         } else {
             Type invType = context.sde.getTypes().get(typeID);
             Group group = context.sde.getGroups().get(invType.groupID);
@@ -59,12 +62,12 @@ public class ResourceLocation {
 
     public static ResourceLocation typeRender(int typeID) {
         if (Main.GENERATE_ICONS) {
-            return new ResourceLocation(new ResourceData.IconProvider512(typeID), "type_renders/" + typeID + ".png");
+            return new ResourceLocation(new ResourceData.IconProvider512(typeID), "type_renders/" + typeID + ".jpg");
         } else {
             try {
                 return new ResourceLocation(
                     new ResourceData.Remote(new URI("https://images.evetech.net/types/" + typeID + "/render?size=512")),
-                    "type_renders/" + typeID + ".png"
+                    "type_renders/" + typeID + ".jpg"
                 );
             } catch (URISyntaxException e) {
                 return ExceptionUtil.sneakyThrow(e);   // Shouldn't happen as we construct the URL in this function, so we just re-throw
@@ -147,7 +150,7 @@ public class ResourceLocation {
                 try {
                     StringBuilder builder = new StringBuilder();
                     builder.append("data:")
-                        .append(MIME.getType((destinationPath).substring(destinationPath.lastIndexOf('.'))))
+                        .append(MIME.getType((destinationPath).substring(destinationPath.lastIndexOf('.'))))     // TODO: Move mime type into datasource?
                         .append(";base64,");
                     byte[] encode = Base64.getEncoder().encode(dataSource.getData(context.dataSources));    // Fail intentionally on NoData
                     builder.append(new String(encode));
@@ -220,7 +223,7 @@ public class ResourceLocation {
         record IconProvider512(int typeID) implements ResourceData {
             @Override
             public byte[] getData(DataSources sources) throws IOException {
-                return IconProvider.getTypeRender512(this.typeID, sources);
+                return IconProvider.getTypeRender512(this.typeID, sources, false);
             }
         }
 

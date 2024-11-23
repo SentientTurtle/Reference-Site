@@ -9,10 +9,7 @@ import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.util.ExceptionUtil;
 import org.jspecify.annotations.Nullable;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,10 +26,49 @@ public class IconProvider {
     public static void main(String[] args) throws IOException, SQLiteException {
         DataSources sources = Main.initialize(false);
 
-        int total = sources.SDEData().getTypes().size();
-        AtomicInteger processed = new AtomicInteger(0);
+        FileOutputStream types = new FileOutputStream(Main.OUTPUT_DIR.resolve("type_images.zip").toFile());
+        generateTypeIconExport(sources, types);
+        types.close();
 
-        ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(Main.OUTPUT_DIR.resolve("icon_export.zip").toFile()));
+        FileOutputStream renders = new FileOutputStream(Main.OUTPUT_DIR.resolve("render_images.zip").toFile());
+        generateTypeRenderExport(sources, renders);
+        renders.close();
+    }
+
+
+    public static void generateTypeRenderExport(DataSources sources, OutputStream outputStream) {
+        ZipOutputStream rendersOut = new ZipOutputStream(outputStream);
+        rendersOut.setLevel(Deflater.NO_COMPRESSION);
+
+        sources.SDEData().getTypes()
+            .values()
+            .parallelStream()
+            .filter(type -> IconProvider.hasRender(type, sources))
+            .forEach(type -> {
+                try {
+                    byte[] typeRender512 = getTypeRender512(type.typeID, sources, true);
+                    if (typeRender512 != null) {
+                        synchronized (rendersOut) {
+                            rendersOut.putNextEntry(new ZipEntry(type.typeID + ".png"));
+                            rendersOut.write(typeRender512);
+                            rendersOut.closeEntry();
+                        }
+                    }
+                } catch (Exception e) {
+                    ExceptionUtil.sneakyThrow(e);
+                }
+            });
+        try {
+            rendersOut.finish();
+        } catch (IOException e) {
+            ExceptionUtil.sneakyThrow(e);
+        }
+    }
+
+    public static void generateTypeIconExport(DataSources sources, OutputStream outputStream) {
+        ZipOutputStream iconsOut = new ZipOutputStream(outputStream);
+        iconsOut.setLevel(Deflater.NO_COMPRESSION);
+
         sources.SDEData().getTypes()
             .values()
             .parallelStream()
@@ -45,25 +81,40 @@ public class IconProvider {
                         false
                     );
                     if (typeIcon64 != null) {
-                        synchronized (zipOutputStream) {
-                            zipOutputStream.putNextEntry(new ZipEntry(type.typeID + "_64.png"));
-                            zipOutputStream.write(typeIcon64);
-                            zipOutputStream.closeEntry();
-                            System.out.println(processed.incrementAndGet() + "/" + total + "\t" + type);
+                        synchronized (iconsOut) {
+                            iconsOut.putNextEntry(new ZipEntry(type.typeID + "_64.png"));
+                            iconsOut.write(typeIcon64);
+                            iconsOut.closeEntry();
                         }
-                    } else {
-                        processed.incrementAndGet();
+                    }
+
+                    if (
+                        sources.SDEData().getGroups().get(type.groupID).categoryID == 9
+                        && !(type.groupID == 1888 || type.groupID == 1889 || type.groupID == 1890 || type.groupID == 4097)
+                    ) {
+                        typeIcon64 = getTypeIcon64(
+                            type.typeID,
+                            sources,
+                            true,
+                            false
+                        );
+                        if (typeIcon64 != null) {
+                            synchronized (iconsOut) {
+                                iconsOut.putNextEntry(new ZipEntry(type.typeID + "_64_bpc.png"));
+                                iconsOut.write(typeIcon64);
+                                iconsOut.closeEntry();
+                            }
+                        }
                     }
                 } catch (Exception e) {
-                    synchronized (zipOutputStream) {
-                        System.out.println("Error in " + type);
-                    }
-                    ExceptionUtil.sneakyThrow(e);
+                    throw new RuntimeException("Error in " + type, e);
                 }
             });
-
-
-        zipOutputStream.close();
+        try {
+            iconsOut.finish();
+        } catch (IOException e) {
+            ExceptionUtil.sneakyThrow(e);
+        }
     }
 
     // ConcurrentMap's support for parallel writes is required for icon generation parallelism to work!
@@ -85,7 +136,7 @@ public class IconProvider {
         }
     }
 
-    public static void writeIconCache() throws IOException {
+    public static void writeIconCache() {
         if (!CACHE_INVALID.get()) return;
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(Main.ICON_CACHE_FILE.toFile()))) {
@@ -99,6 +150,8 @@ public class IconProvider {
                     ExceptionUtil.sneakyThrow(e);
                 }
             });
+        } catch (IOException e) {
+            ExceptionUtil.sneakyThrow(e);
         }
     }
 
@@ -149,12 +202,17 @@ public class IconProvider {
 
         String cacheKey = null;
         ProcessBuilder imageMagickCall = null;
-        if (group.categoryID == 9) {    // Blueprint
+        if (group.categoryID == 9 || group.categoryID == 34) {    // Blueprint
             String backgroundResource;
             String overlayResource;
             Type outputType;
 
-            if (group.groupID == 1888 || group.groupID == 1889 || group.groupID == 1890 || group.groupID == 4097) { // Reactions
+            if (group.categoryID == 34) {   // Relics
+                backgroundResource = "res:/ui/texture/icons/relic.png";
+                overlayResource = "res:/ui/texture/icons/relic_overlay.png";
+
+                outputType = type;
+            } else if (group.groupID == 1888 || group.groupID == 1889 || group.groupID == 1890 || group.groupID == 4097) { // Reactions
                 backgroundResource = "res:/ui/texture/icons/reaction.png";
                 overlayResource = "res:/ui/texture/icons/bpo_overlay.png";
 
@@ -199,9 +257,10 @@ public class IconProvider {
                 if (dataSources.sharedCache().containsResource(graphicResource)) {
                     Path techOverlay = techOverlayPath(metaGroup, dataSources, useOldOverlay);
                     if (techOverlay == null) {
+                        // No need to cache
                         return dataSources.sharedCache().getBytes(graphicResource);    // TODO: BPC
                     } else {
-                        cacheKey = metaGroup + ";" + dataSources.sharedCache().getResourceHash(graphicResource);
+                        cacheKey = metaGroup + ";" + useOldOverlay + ";" + dataSources.sharedCache().getResourceHash(graphicResource);
                         imageMagickCall = new ProcessBuilder(
                             "magick",
                             dataSources.sharedCache().getPath(graphicResource).toString(),
@@ -220,6 +279,7 @@ public class IconProvider {
                 Path techOverlay = techOverlayPath(metaGroup, dataSources, useOldOverlay);
                 if (techOverlay != null) {
                     cacheKey = metaGroup
+                               + ";" + useOldOverlay
                                + ";" + dataSources.sharedCache().getResourceHash(backgroundResource)
                                + ";" + dataSources.sharedCache().getResourceHash(iconResource)
                                + ";" + dataSources.sharedCache().getResourceHash(overlayResource);
@@ -239,6 +299,7 @@ public class IconProvider {
                     );
                 } else {
                     cacheKey = metaGroup
+                               + ";" + useOldOverlay
                                + ";" + dataSources.sharedCache().getResourceHash(backgroundResource)
                                + ";" + dataSources.sharedCache().getResourceHash(iconResource)
                                + ";" + dataSources.sharedCache().getResourceHash(overlayResource);
@@ -280,7 +341,7 @@ public class IconProvider {
             }
             Path techOverlay = techOverlayPath(metaGroup, dataSources, useOldOverlay);
             if (techOverlay != null) {
-                cacheKey = metaGroup + ";" + dataSources.sharedCache().getResourceHash(iconResource);
+                cacheKey = metaGroup + ";" + useOldOverlay + ";" + dataSources.sharedCache().getResourceHash(iconResource);
                 imageMagickCall = new ProcessBuilder(
                     "magick",
                     dataSources.sharedCache().getPath(iconResource).toString(),
@@ -290,6 +351,7 @@ public class IconProvider {
                     "png:-"
                 );
             } else {
+                // No need to cache
                 return dataSources.sharedCache().getBytes(iconResource);
             }
         }
@@ -320,24 +382,33 @@ public class IconProvider {
         );
     }
 
-    public static boolean hasRender(int typeID, DataSources dataSources) {
-        Type type = dataSources.SDEData().getTypes().get(typeID);
-
-        String renderResource = null;
-        FSDData.Graphic graphic = dataSources.fsdData().graphics.get(type.graphicID != null ? type.graphicID : 0);
-        if (graphic != null && graphic.iconInfo() != null) {
-            if (graphic.iconInfo().folder().endsWith("/")) {
-                renderResource = graphic.iconInfo().folder() + type.graphicID + "_512.jpg";
-            } else {
-                renderResource = graphic.iconInfo().folder() + "/" + type.graphicID + "_512.jpg";
+    public static boolean hasRender(Type type, DataSources dataSources) {
+        int categoryID = dataSources.SDEData().getGroups().get(type.groupID).categoryID;
+        if (categoryID == 6         // Ship
+            || categoryID == 18     // Drone
+            || categoryID == 22     // Deployable
+            || categoryID == 24     // Starbase
+            || categoryID == 65     // Structure
+            || categoryID == 87     // Fighter
+        ) {
+            String renderResource = null;
+            FSDData.Graphic graphic = dataSources.fsdData().graphics.get(type.graphicID != null ? type.graphicID : 0);
+            if (graphic != null && graphic.iconInfo() != null) {
+                if (graphic.iconInfo().folder().endsWith("/")) {
+                    renderResource = graphic.iconInfo().folder() + type.graphicID + "_512.jpg";
+                } else {
+                    renderResource = graphic.iconInfo().folder() + "/" + type.graphicID + "_512.jpg";
+                }
             }
-        }
 
-        return (renderResource != null && dataSources.sharedCache().containsResource(renderResource));
+            return (renderResource != null && dataSources.sharedCache().containsResource(renderResource));
+        } else {
+            return false;
+        }
     }
 
 
-    public static @Nullable byte[] getTypeRender512(int typeID, DataSources dataSources) throws IOException {
+    public static @Nullable byte[] getTypeRender512(int typeID, DataSources dataSources, boolean convertToPNG) throws IOException {
         Type type = dataSources.SDEData().getTypes().get(typeID);
 
         String renderResource;
@@ -354,6 +425,8 @@ public class IconProvider {
 
         if (renderResource == null || !dataSources.sharedCache().containsResource(renderResource)) {
             return null;
+        } else if (!convertToPNG) {
+            return dataSources.sharedCache().getBytes(renderResource);
         } else {
             String cacheKey = dataSources.sharedCache().getResourceHash(renderResource);
             return CACHED_ICONS.computeIfAbsent(

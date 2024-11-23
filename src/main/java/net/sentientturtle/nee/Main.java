@@ -10,19 +10,16 @@ import net.sentientturtle.html.context.NoopHtmlContext;
 import net.sentientturtle.html.context.OutputStreamHtmlContext;
 import net.sentientturtle.html.context.StringBuilderHtmlContext;
 import net.sentientturtle.html.id.IDContext;
-import net.sentientturtle.nee.data.DataSources;
-import net.sentientturtle.nee.data.SDEData;
-import net.sentientturtle.nee.data.SQLiteSDEData;
+import net.sentientturtle.nee.data.*;
 import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.data.sharedcache.FSDData;
 import net.sentientturtle.nee.data.sharedcache.IconProvider;
 import net.sentientturtle.nee.page.PageKind;
 import net.sentientturtle.nee.data.sharedcache.SharedCacheReader;
-import net.sentientturtle.nee.data.ResourceLocation;
-import net.sentientturtle.nee.data.SDEUtils;
 import net.sentientturtle.util.ExceptionUtil;
 
 import java.io.*;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,9 +45,10 @@ public class Main {
     public static int COMPRESSION;  // No compression is moderately faster
     public static boolean GENERATE_ICONS;
     public static boolean SKIP_RESOURCES;
+    public static boolean SKIP_DEV_RESOURCES;
 
     // Website title as configurable variable in case a rename is needed; I don't feel like buying a domain name yet
-    public static final String WEBSITE_NAME = "Working Title Please Ignore";//"New Eden Encyclopedia";
+    public static final String WEBSITE_NAME = "Working Title"; //"New Eden Encyclopedia";
     public static final String WEBSITE_ABBREVIATION = "NEE";
 
     static {
@@ -58,6 +56,7 @@ public class Main {
     }
 
     private static DataSources initializedData = null;
+
     public static DataSources initialize(boolean patch) throws IOException, SQLiteException {
         if (initializedData != null) return initializedData;
         String propertyPath = System.getProperty("net.sentientturtle.nee.properties", "./nee.properties");
@@ -92,6 +91,7 @@ public class Main {
 
             GENERATE_ICONS = properties.getProperty("GENERATE_ICONS", "FALSE").equalsIgnoreCase("TRUE");
             SKIP_RESOURCES = properties.getProperty("SKIP_RESOURCES", "FALSE").equalsIgnoreCase("TRUE");
+            SKIP_DEV_RESOURCES = properties.getProperty("SKIP_DEV_RESOURCES", "FALSE").equalsIgnoreCase("TRUE");
         } else {
             properties.setProperty("SHARED_CACHE_PATH", "???");
             properties.setProperty("RESOURCE_FOLDER", "./rsc/");
@@ -99,6 +99,7 @@ public class Main {
             properties.setProperty("COMPRESSION", "FALSE");
             properties.setProperty("GENERATE_ICONS", "FALSE");
             properties.setProperty("SKIP_RESOURCES", "FALSE");
+            properties.setProperty("SKIP_DEV_RESOURCES", "FALSE");
             properties.setProperty("DELETE_THIS_KEY", "");
 
             properties.store(new FileWriter(propertyPath), "NEE Generator config");
@@ -142,18 +143,45 @@ public class Main {
                 }
             }
         }
-        System.out.println("Data initialized");
-        return (initializedData = new DataSources(SDEData, sharedCache, fsdData));
+        System.out.println("Loading icon cache...");
+        IconProvider.readIconCache();
+        Runtime.getRuntime().addShutdownHook(new Thread(IconProvider::writeIconCache));
+        System.out.println("\tIcon cache loaded");
+
+        String gameVersion;
+        {
+            String serverVersion;
+            try {
+                record GameStatus(int players, String server_version, String start_time) {
+                }
+                GameStatus gameStatus = new ObjectMapper().readValue(new URI("https://esi.evetech.net/latest/status").toURL(), GameStatus.class);
+                serverVersion = gameStatus.server_version;
+            } catch (Exception e) {
+                serverVersion = ExceptionUtil.sneakyThrow(e);
+            }
+
+            String installVersion = Files.lines(SHARED_CACHE_PATH.resolve("tq/start.ini"))
+                .filter(s -> s.startsWith("build = "))
+                .findFirst()
+                .get()
+                .substring("build = ".length());
+
+            if (serverVersion.equals(installVersion)) {
+                gameVersion = serverVersion;
+            } else {
+                throw new IllegalStateException("Mismatch between server (" + serverVersion + ") and install (" + installVersion + ") game versions!");
+            }
+        }
+
+        System.out.println("Data initialized, game version: " + gameVersion);
+        return (initializedData = new DataSources(SDEData, sharedCache, fsdData, gameVersion));
     }
 
     public static Path OUTPUT_DIR = Path.of("./output");
+
     public static void main(String[] args) throws SQLiteException, IOException {
         long startTime = System.nanoTime();
-        DataSources sources = Main.initialize(true);
-
-        System.out.println("Loading icon cache...");
-        IconProvider.readIconCache();
-        System.out.println("\tIcon cache loaded");
+        DataSources data = Main.initialize(true);
 
         Files.createDirectories(OUTPUT_DIR);
 
@@ -168,10 +196,10 @@ public class Main {
 
         System.out.println("Writing pages...");
         final AtomicInteger pageCount = new AtomicInteger(0);
-        PageKind.pageStream(sources.SDEData())
+        PageKind.pageStream(data.SDEData())
             .parallel()
             .forEach(page -> {
-                var context = new StringBuilderHtmlContext(page.getPageKind().getFolderDepth(), new IDContext(page.toString()), sources);
+                var context = new StringBuilderHtmlContext(page.getPageKind().getFolderDepth(), new IDContext(page.toString()), data);
 
                 try {
                     page.renderTo(context);
@@ -197,16 +225,16 @@ public class Main {
 
         System.out.println("Writing resources");
         final AtomicInteger resourceCount = new AtomicInteger(0);
-        if (!SKIP_RESOURCES)
+        if (!SKIP_RESOURCES) {
             dependencies.entrySet()
                 .parallelStream()
                 .forEach(entry -> {
                     try {
-                        byte[] data = entry.getValue().getData(sources);
+                        byte[] bytes = entry.getValue().getData(data);
 
                         synchronized (zipOutputStream) {
                             zipOutputStream.putNextEntry(new ZipEntry(entry.getKey().replace('\\', '/')));
-                            zipOutputStream.write(data);
+                            zipOutputStream.write(bytes);
                             zipOutputStream.closeEntry();
                         }
 
@@ -218,6 +246,7 @@ public class Main {
                         ExceptionUtil.sneakyThrow(e);
                     }
                 });
+        }
 
         zipOutputStream.putNextEntry(new ZipEntry("stylesheet.css"));
         for (String segment : css) {
@@ -231,14 +260,19 @@ public class Main {
             zipOutputStream.write("\n\n".getBytes(StandardCharsets.UTF_8));
         }
 
-        zipOutputStream.putNextEntry(new ZipEntry(
-            ResourceLocation.searchIndex().getURI(new NoopHtmlContext(0, new IDContext(""), sources)).replace('\\', '/')
-        ));
-        OutputStreamHtmlContext searchContext = new OutputStreamHtmlContext(0, new IDContext("searchindex"), sources, zipOutputStream);
-        ObjectMapper objectMapper = new ObjectMapper();
-        record IndexEntry(String index, String name, String path, String icon) {}
+        zipOutputStream.putNextEntry(new ZipEntry("favicon.ico"));
+        zipOutputStream.write(Files.readAllBytes(RES_FOLDER.resolve("favicon.ico")));
+        zipOutputStream.closeEntry();
 
-        List<IndexEntry> indexEntries = PageKind.pageStream(sources.SDEData())
+        zipOutputStream.putNextEntry(new ZipEntry(
+            ResourceLocation.searchIndex().getURI(new NoopHtmlContext(0, new IDContext(""), data)).replace('\\', '/')
+        ));
+        OutputStreamHtmlContext searchContext = new OutputStreamHtmlContext(0, new IDContext("searchindex"), data, zipOutputStream);
+        ObjectMapper objectMapper = new ObjectMapper();
+        record IndexEntry(String index, String name, String path, String icon) {
+        }
+
+        List<IndexEntry> indexEntries = PageKind.pageStream(data.SDEData())
             .map(page -> {
                 ResourceLocation pageIcon = page.getIcon(searchContext);
                 return new IndexEntry(
@@ -257,15 +291,30 @@ public class Main {
             ExceptionUtil.sneakyThrow(e);
         }
         searchContext.write("const searchindex = " + searchJson + ";\nexport default searchindex;");
+        zipOutputStream.closeEntry();
 
+        if (!SKIP_DEV_RESOURCES) {
+            System.out.println("Writing dev resources...");
+
+            DevResources.getResources(data)
+                .stream()
+                .flatMap(resourceGroup -> resourceGroup.resources().stream())
+                .forEach(resource -> {
+                    try {
+                        zipOutputStream.putNextEntry(new ZipEntry(resource.path().toString().replace('\\', '/')));
+                        resource.data().accept(data, zipOutputStream);
+                        zipOutputStream.closeEntry();
+                        System.out.println("\t" + resource.name());
+                    } catch (IOException e) {
+                        ExceptionUtil.sneakyThrow(e);
+                    }
+                });
+        }
+
+        System.out.println("Finalizing zip file...");
         zipOutputStream.close();
 
         System.out.println("Took: " + TimeUnit.SECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS) + " seconds.");
         System.out.println("Generated: " + pageCount.get() + " pages.");
-
-
-        System.out.println("Writing icon cache...");
-        IconProvider.writeIconCache();
-        System.out.println("All finished.");
     }
 }
