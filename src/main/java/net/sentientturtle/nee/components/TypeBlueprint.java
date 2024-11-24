@@ -70,7 +70,8 @@ public class TypeBlueprint extends Component {
             .forEach(key -> {
                 IndustryActivity activity = bpActivities.get(key);
 
-                if (context.sde.getMetaTypes().getOrDefault(activity.bpTypeID, 1) != 1 && (activity.activityID == 3 || activity.activityID == 4 || activity.activityID == 5)) {
+                int metaGroup = context.sde.getMetaTypes().getOrDefault(activity.bpTypeID, 1);
+                if (metaGroup != 1 && metaGroup != 54 && (activity.activityID == 3 || activity.activityID == 4 || activity.activityID == 5)) {
                     // Skip research & copying on Faction/T2/T3 blueprints, for which originals are generally unavailable
                     return;
                 }

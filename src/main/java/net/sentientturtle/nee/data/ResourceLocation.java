@@ -42,7 +42,8 @@ public class ResourceLocation {
         if (Main.GENERATE_ICONS) {
             Type invType = context.sde.getTypes().get(typeID);
             Group group = context.sde.getGroups().get(invType.groupID);
-            boolean isBPC = group.categoryID == 9 && context.sde.getMetaTypes().getOrDefault(typeID, 1) != 1;
+            int metaGroup = context.sde.getMetaTypes().getOrDefault(typeID, 1);
+            boolean isBPC = group.categoryID == 9 && metaGroup != 1 && metaGroup != 54;
 
             return new ResourceLocation(new ResourceData.IconProvider64(typeID, isBPC, true), "type_icons/" + typeID + ".png");
         } else {
