@@ -98,7 +98,8 @@ public class TypeBlueprint extends Component {
                 table.content(TR().content(TH().attribute("colspan", "3").text(activityName)));
 
                 if (activity.productMap.size() > 0) {
-                    table.content(TR().content(TH("type_blueprint_subheader").attribute("colspan", "3").text("Output")));   // TODO: Copy-this buttons
+                    String outputDisplayText = activity.productMap.size() > 1 ? "Output (select one)" : "Output";
+                    table.content(TR().content(TH("type_blueprint_subheader").attribute("colspan", "3").text(outputDisplayText)));   // TODO: Copy-this buttons
                     for (Map.Entry<Integer, Integer> entry : activity.productMap.entrySet()) {  // TODO: These should all be sorted, or perhaps pre-sort DataSupplier and remove sorting in components?
                         Element quantityTD = TD().content(context.sde.format_with_unit(entry.getValue(), -1));
                         Double probability = activity.probabilityMap.get(entry.getKey());
@@ -116,13 +117,17 @@ public class TypeBlueprint extends Component {
 
                 if (activity.materialMap.size() > 0) {
                     table.content(TR().content(TH("type_blueprint_subheader").attribute("colspan", "3").text("Input")));
-                    for (Map.Entry<Integer, Integer> entry : activity.materialMap.entrySet()) {
-                        table.content(TR().content(
-                            TD().content(IMG(ResourceLocation.typeIcon(entry.getKey(), context), null, 64).className("type_blueprint_icon")),
-                            TD().content(new PageLink(new TypePage(context.sde.getTypes().get(entry.getKey())))),
-                            TD().content(context.sde.format_with_unit(entry.getValue(), -1))
-                        ));
-                    }
+
+                    activity.materialMap.entrySet()
+                        .stream()
+                        .sorted(Comparator.<Map.Entry<Integer, Integer>>comparingInt(Map.Entry::getValue).reversed())
+                        .forEach(entry -> {
+                            table.content(TR().content(
+                                TD().content(IMG(ResourceLocation.typeIcon(entry.getKey(), context), null, 64).className("type_blueprint_icon")),
+                                TD().content(new PageLink(new TypePage(context.sde.getTypes().get(entry.getKey())))),
+                                TD().content(context.sde.format_with_unit(entry.getValue(), -1))
+                            ));
+                        });
                 }
 
                 if (activity.time > 0 && activity.activityID != 3 && activity.activityID != 4) {
@@ -179,13 +184,16 @@ public class TypeBlueprint extends Component {
             ));
 
             table.content(TR().content(TH("type_blueprint_subheader").attribute("colspan", "3").text("Input")));
-            for (Map.Entry<Integer, Integer> entry : schematic.inputs.entrySet()) {
-                table.content(TR().content(
-                    TD().content(IMG(ResourceLocation.typeIcon(entry.getKey(), context), null, 64).className("type_blueprint_icon")),
-                    TD().content(new PageLink(new TypePage(context.sde.getTypes().get(entry.getKey())))),
-                    TD().content(context.sde.format_with_unit(entry.getValue(), -1))
-                ));
-            }
+            schematic.inputs.entrySet()
+                .stream()
+                .sorted(Comparator.<Map.Entry<Integer, Integer>>comparingInt(Map.Entry::getValue).reversed())
+                .forEach(entry -> {
+                    table.content(TR().content(
+                        TD().content(IMG(ResourceLocation.typeIcon(entry.getKey(), context), null, 64).className("type_blueprint_icon")),
+                        TD().content(new PageLink(new TypePage(context.sde.getTypes().get(entry.getKey())))),
+                        TD().content(context.sde.format_with_unit(entry.getValue(), -1))
+                    ));
+                });
 
             table.content(TR().content(
                 TD().attribute("colspan", "2").text("Cycle time:"),
@@ -193,8 +201,16 @@ public class TypeBlueprint extends Component {
             ));
         }
 
+        int categoryID = context.sde.getGroups().get(type.groupID).categoryID;
+        String title = "Blueprint";
+        if (categoryID == 34) {
+            title = "Relic";
+        } else if (categoryID == 43) {
+            title = "Planetary Industry Schematic";
+        }
+
         return new HTML[]{
-            HEADER("font_header").text("Blueprint"),
+            HEADER("font_header").text(title),
             table
         };
     }

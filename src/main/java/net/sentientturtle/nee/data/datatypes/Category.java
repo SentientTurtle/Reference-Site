@@ -2,8 +2,8 @@ package net.sentientturtle.nee.data.datatypes;
 
 
 import net.sentientturtle.nee.page.CategoryPage;
+import net.sentientturtle.nee.page.Frame;
 import net.sentientturtle.nee.page.HasPage;
-import net.sentientturtle.nee.page.Page;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -18,7 +18,7 @@ public class Category implements HasPage {
      */
     @Nullable
     public final Integer iconID;
-    public final boolean published;
+    public boolean published;
 
     public Category(int categoryID, String name, @Nullable Integer iconID, boolean published) {
         this.categoryID = categoryID;
@@ -51,7 +51,7 @@ public class Category implements HasPage {
     }
 
     @Override
-    public @NonNull Page getPage() {
+    public @NonNull Frame getPage() {
         return new CategoryPage(this);
     }
 }

@@ -41,7 +41,7 @@ public abstract class AttributeList extends Component {
                 Element icon;
                 Integer iconID = attributeMap.get(entry.attributeID).iconID;
                 if (iconID != null) {
-                    icon = IMG(ResourceLocation.iconOfIconID(iconID, context), null, 32).className("attribute_list_icon");
+                    icon = IMG(ResourceLocation.ofIconID(iconID, context), null, 32).className("attribute_list_icon");
                 } else {
                     icon = DIV("attribute_list_icon");
                 }

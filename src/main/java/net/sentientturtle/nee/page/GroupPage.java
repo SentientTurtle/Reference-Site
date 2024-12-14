@@ -4,7 +4,7 @@ import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.ResourceLocation;
 import net.sentientturtle.nee.components.GroupList;
-import net.sentientturtle.nee.components.Title;
+import net.sentientturtle.nee.components.ItemTitle;
 import net.sentientturtle.nee.data.datatypes.Group;
 import org.jspecify.annotations.Nullable;
 
@@ -21,6 +21,11 @@ public class GroupPage extends Page {
     }
 
     @Override
+    public @Nullable String description() {
+        return null;
+    }
+
+    @Override
     public String filename() {
         return group.groupID + "-" + name();
     }
@@ -33,7 +38,7 @@ public class GroupPage extends Page {
     @Override
     protected HTML getContent(HtmlContext context) {
         return DIV("group_page_grid").content(
-            new Title(group.name, getIcon(context)),
+            new ItemTitle(group.name, getIcon(context)),
             new GroupList(group)
         );
     }
@@ -46,7 +51,7 @@ public class GroupPage extends Page {
     @Nullable
     @Override
     public ResourceLocation getIcon(HtmlContext context) { // TODO: Replace with icon of first type in group
-        return group.iconID != null ? ResourceLocation.iconOfIconID(group.iconID, context) : null;
+        return group.iconID != null ? ResourceLocation.ofIconID(group.iconID, context) : null;
     }
 
 }

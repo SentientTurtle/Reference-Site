@@ -3,19 +3,21 @@ package net.sentientturtle.nee.data.datatypes;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.ResourceLocation;
 import net.sentientturtle.nee.data.SDEData;
+import net.sentientturtle.nee.data.datatypes.singleton.Cluster;
+import net.sentientturtle.nee.page.MapPage;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
-import java.util.Set;
 import java.util.stream.Stream;
 
 /**
  * Data object representing EVE Online Regions
  */
 @SuppressWarnings("WeakerAccess")
-public class Region implements Mappable{
+public class Region implements MapItem {
     public final int regionID;
     public final String regionName;
     public final double x;
@@ -27,13 +29,11 @@ public class Region implements Mappable{
     public final double xMax;
     public final double yMax;
     public final double zMax;
-    /**
-     * Can be left null to indicate this Region does not belong to a faction
-     */
-    @Nullable
-    public final Integer factionID;
+    /// Can be left null to indicate this Region does not belong to a faction
+    public final @Nullable Integer factionID;
+    public final @Nullable Integer wormholeClassID;
 
-    public Region(int regionID, String regionName, double x, double y, double z, double xMin, double yMin, double zMin, double xMax, double yMax, double zMax, @Nullable Integer factionID) {
+    public Region(int regionID, String regionName, double x, double y, double z, double xMin, double yMin, double zMin, double xMax, double yMax, double zMax, @Nullable Integer factionID, @Nullable Integer wormholeClassID) {
         this.regionID = regionID;
         this.regionName = regionName;
         this.x = x;
@@ -46,6 +46,7 @@ public class Region implements Mappable{
         this.yMax = yMax;
         this.zMax = -zMin;
         this.factionID = factionID;
+        this.wormholeClassID = wormholeClassID;
     }
 
     @Override
@@ -53,41 +54,16 @@ public class Region implements Mappable{
         return regionID;
     }
 
-    @Override
-    public double x() {
-        return x;
-    }
-
-    @Override
-    public double y() {
-        return y;
-    }
-
-    @Override
-    public double z() {
-        return z;
-    }
-
-    @Override
-    public Stream<SolarSystem> getMapPoints(SDEData SDEData) {
-        return SDEData.getRegionSolarSystemMap().get(regionID).stream();
-    }
-
-    @Override
-    public Stream<Jump> getMapLines(SDEData SDEData) {
-        return SDEData.getRegionJumps().getOrDefault(this.regionID, Set.of()).stream();
-    }
-
     @Nullable
     @Override
-    public OptionalInt getFactionID() {
+    public OptionalInt getSovFactionID() {
         return factionID != null ? OptionalInt.of(factionID) : OptionalInt.empty();
     }
 
     @Override
     @Nullable
     public OptionalDouble getSecurity(SDEData SDEData) {
-        return getMapPoints(SDEData).mapToDouble(solarsystem -> solarsystem.security).average();
+        return SDEData.getRegionSolarSystemMap().get(regionID).stream().mapToDouble(solarsystem -> solarsystem.security).average();
     }
 
     @Override
@@ -95,14 +71,17 @@ public class Region implements Mappable{
         return "Constellations";
     }
 
-    @Override
-    public Stream<? extends Mappable> getConstituents(SDEData SDEData) {
-        return SDEData.getConstellations().stream().filter(constellation -> constellation.regionID == regionID);
-    }
-
-    @Override
-    public boolean hasRender() {
-        return true;
+    public Stream<MapItem.MapConstituent> getConstituents(SDEData sde) {
+        return sde.getRegionConstellationMap()
+            .get(this.regionID)
+            .stream()
+            .sorted(Comparator.comparing(c -> c.constellationName))
+            .map(constellation -> new MapItem.MapConstituent(
+                "constellation.png",
+                constellation.constellationName,
+                new MapPage(constellation),
+                0
+            ));
     }
 
     @Override
@@ -111,8 +90,15 @@ public class Region implements Mappable{
     }
 
     @Override
+    public @Nullable MapItem getParent(HtmlContext context) {
+        if (Cluster.KSPACE_REGIONS.contains(this.regionID)) return Cluster.K_SPACE;
+        if (Cluster.WSPACE_REGIONS.contains(this.regionID)) return Cluster.W_SPACE;
+        return null;
+    }
+
+    @Override
     public ResourceLocation getIcon(HtmlContext context) {
-        return ResourceLocation.iconOfIconID(2355, context);
+        return ResourceLocation.ofIconID(2355, context);
     }
 
     @Override

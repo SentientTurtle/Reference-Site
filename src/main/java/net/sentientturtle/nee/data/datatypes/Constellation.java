@@ -3,38 +3,50 @@ package net.sentientturtle.nee.data.datatypes;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.ResourceLocation;
 import net.sentientturtle.nee.data.SDEData;
+import net.sentientturtle.nee.page.MapPage;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Comparator;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
-import java.util.Set;
 import java.util.stream.Stream;
 
 /**
  * Data object representing EVE Online Constellations
  */
 @SuppressWarnings("WeakerAccess")
-public class Constellation implements Mappable {
+public class Constellation implements MapItem {
     public final int regionID;
     public final int constellationID;
     public final String constellationName;
     public final double x;
     public final double y;
     public final double z;
-    /**
-     * May be left null to indicate this constellation does not belong to a faction
-     */
-    @Nullable
-    public final Integer factionID;
+    public final double xMin;
+    public final double yMin;
+    public final double zMin;
+    public final double xMax;
+    public final double yMax;
+    public final double zMax;
+    /// May be left null to indicate this constellation does not belong to a faction
+    public final @Nullable Integer factionID;
+    public final @Nullable Integer wormholeClassID;
 
-    public Constellation(int regionID, int constellationID, String constellationName, double x, double y, double z, @Nullable Integer factionID) {
+    public Constellation(int regionID, int constellationID, String constellationName, double x, double y, double z, double xMin, double yMin, double zMin, double xMax, double yMax, double zMax, @Nullable Integer factionID, @Nullable Integer wormholeClassID) {
         this.regionID = regionID;
         this.constellationID = constellationID;
         this.constellationName = constellationName;
         this.x = x;
         this.y = y;
         this.z = z;
+        this.xMin = xMin;
+        this.yMin = yMin;
+        this.zMin = zMin;
+        this.xMax = xMax;
+        this.yMax = yMax;
+        this.zMax = zMax;
         this.factionID = factionID;
+        this.wormholeClassID = wormholeClassID;
     }
 
     @Override
@@ -42,42 +54,17 @@ public class Constellation implements Mappable {
         return constellationID;
     }
 
-    @Override
-    public double x() {
-        return x;
-    }
-
-    @Override
-    public double y() {
-        return y;
-    }
-
-    @Override
-    public double z() {
-        return z;
-    }
-
-    @Override
-    public Stream<SolarSystem> getMapPoints(SDEData SDEData) {
-        return SDEData.getConstellationSolarSystemMap().get(constellationID).stream();
-    }
-
-    @Override
-    public Stream<Jump> getMapLines(SDEData SDEData) {
-        return SDEData.getConstellationJumps().getOrDefault(this.constellationID, Set.of()).stream();
-    }
-
 
     @Override
     @Nullable
-    public OptionalInt getFactionID() {
+    public OptionalInt getSovFactionID() {
         return factionID != null ? OptionalInt.of(factionID) : OptionalInt.empty();
     }
 
     @Override
     @Nullable
     public OptionalDouble getSecurity(SDEData SDEData) {
-        return getMapPoints(SDEData).mapToDouble(solarsystem -> solarsystem.security).average();
+        return SDEData.getConstellationSolarSystemMap().get(constellationID).stream().mapToDouble(solarsystem -> solarsystem.security).average();
     }
 
     @Override
@@ -86,13 +73,17 @@ public class Constellation implements Mappable {
     }
 
     @Override
-    public Stream<SolarSystem> getConstituents(SDEData SDEData) {
-        return SDEData.getSolarSystems().stream().filter(solarSystem -> solarSystem.constellationID == this.constellationID);
-    }
-
-    @Override
-    public boolean hasRender() {
-        return true;
+    public Stream<MapItem.MapConstituent> getConstituents(SDEData sde) {
+        return sde.getConstellationSolarSystemMap()
+            .get(this.constellationID)
+            .stream()
+            .sorted(Comparator.comparing(s -> s.solarSystemName))
+            .map(system -> new MapItem.MapConstituent(
+                "solarsystem.png",
+                system.solarSystemName,
+                new MapPage(system),
+                0
+            ));
     }
 
     @Override
@@ -101,8 +92,13 @@ public class Constellation implements Mappable {
     }
 
     @Override
+    public @Nullable MapItem getParent(HtmlContext context) {
+        return context.sde.getRegions().get(this.regionID);
+    }
+
+    @Override
     public ResourceLocation getIcon(HtmlContext context) {
-        return ResourceLocation.iconOfIconID(2355, context);
+        return ResourceLocation.ofIconID(2355, context);
     }
 
     @Override

@@ -20,6 +20,11 @@ public class StructureTreePage extends Page {
     }
 
     @Override
+    public @Nullable String description() {
+        return null;
+    }
+
+    @Override
     public String filename() {
         return "structures";
     }

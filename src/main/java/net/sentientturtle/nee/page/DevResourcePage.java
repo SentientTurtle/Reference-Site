@@ -16,6 +16,11 @@ public class DevResourcePage extends Page {
     }
 
     @Override
+    public @Nullable String description() {
+        return "Assorted files and data to aid EVE Online 3rd party development";
+    }
+
+    @Override
     public String filename() {
         return "thirdpartydev";
     }

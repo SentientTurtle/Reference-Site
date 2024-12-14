@@ -45,7 +45,7 @@ public class TypeAttributes extends Component {
             table.content(row);
 
             if (attribute.iconID != null) {
-                row.content(TD("type_attributes_td type_attributes_icon").content(IMG(ResourceLocation.iconOfIconID(attribute.iconID, context), null, 32)));
+                row.content(TD("type_attributes_td type_attributes_icon").content(IMG(ResourceLocation.ofIconID(attribute.iconID, context), null, 32)));
             } else {
                 row.content(TD("type_attributes_td type_attributes_icon"));
             }

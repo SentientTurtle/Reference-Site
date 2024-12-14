@@ -3,11 +3,9 @@ package net.sentientturtle.nee.data;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.Main;
 import net.sentientturtle.nee.data.datatypes.Group;
-import net.sentientturtle.nee.data.datatypes.Mappable;
 import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.data.sharedcache.IconProvider;
 import net.sentientturtle.nee.util.MIME;
-import net.sentientturtle.nee.util.MapRenderer;
 import net.sentientturtle.util.ExceptionUtil;
 
 import java.io.IOException;
@@ -23,7 +21,7 @@ import java.util.*;
  */
 @SuppressWarnings("WeakerAccess")
 public class ResourceLocation {
-    private static final Path OUTPUT_RES_FOLDER = Path.of("rsc");              // Destination resource folder relative to output
+    public static final Path OUTPUT_RES_FOLDER = Path.of("rsc");              // Destination resource folder relative to output
 
     private final ResourceData dataSource;
     private final String destinationPath;
@@ -76,10 +74,6 @@ public class ResourceLocation {
         }
     }
 
-    public static ResourceLocation map(Mappable mappable) {
-        return new ResourceLocation(new ResourceData.MapRender(mappable), "maps/" + mappable.getName() + ".png");
-    }
-
     private static String sharedCacheDestination(String resource, HtmlContext context) {
         String hash = context.sharedCache.getResourceHash(resource);
         // If we have a file extension, append that to hash
@@ -100,13 +94,51 @@ public class ResourceLocation {
             }
     }
 
-    public static ResourceLocation iconOfIconID(int iconID, HtmlContext context) {
+    public static ResourceLocation ofIconID(int iconID, HtmlContext context) {
         String iconResource = context.sde.getEveIcons().get(iconID);
         if (context.sharedCache.containsResource(iconResource)) {
             return new ResourceLocation(new ResourceData.SharedCache(iconResource), sharedCacheDestination(iconResource, context));
         } else {
             throw new IllegalStateException("Missing sharedcache entry: " + iconResource);
         }
+    }
+
+    public static ResourceLocation factionLogo(int factionID) {
+        String resource = switch (factionID) {
+            case 500001 -> "res:/ui/texture/icons/19_128_1.png";
+            case 500002 -> "res:/ui/texture/icons/19_128_2.png";
+            case 500003 -> "res:/ui/texture/icons/19_128_4.png";
+            case 500004 -> "res:/ui/texture/icons/19_128_3.png";
+            case 500005 -> "res:/ui/texture/corps/39_128_3.png";
+            case 500006 -> "res:/ui/texture/corps/26_128_3.png";
+            case 500007 -> "res:/ui/texture/corps/44_128_4.png";
+            case 500008 -> "res:/ui/texture/corps/45_128_3.png";
+            case 500009 -> "res:/ui/texture/corps/27_128_2.png";
+            case 500010 -> "res:/ui/texture/corps/28_128_3.png";
+            case 500011 -> "res:/ui/texture/corps/45_128_2.png";
+            case 500012 -> "res:/ui/texture/corps/19_128_3.png";
+            case 500013 -> "res:/ui/texture/corps/evermore.png";
+            case 500014 -> "res:/ui/texture/corps/27_128_4.png";
+            case 500015 -> "res:/ui/texture/corps/44_128_3.png";
+            case 500016 -> "res:/ui/texture/corps/14_128_1.png";
+            case 500017 -> "res:/ui/texture/corps/36_128_2.png";
+            case 500018 -> "res:/ui/texture/corps/34_128_2.png";
+            case 500019 -> "res:/ui/texture/corps/44_128_2.png";
+            case 500020 -> "res:/ui/texture/corps/45_128_1.png";
+            case 500024 -> "res:/ui/texture/corps/48_128_1.png";
+            case 500025 -> "res:/ui/texture/corps/roguedronesgeneric.png";
+            case 500026 -> "res:/ui/texture/corps/triglaviancollective.png";
+            case 500027 -> "res:/ui/texture/corps/edencom.png";
+            case 500028 -> "res:/ui/texture/corps/air_laboratories_green.png";
+            case 500029 -> "res:/ui/texture/corps/deathlesscircle.png";
+
+
+            default -> throw new IllegalArgumentException("Unknown faction: " + factionID);
+        };
+        return new ResourceLocation(
+            new ResourceData.SharedCache(resource),
+            "faction_logos/" + factionID + ".png"
+        );
     }
 
     public static ResourceLocation iconOfCorpID(int corporationID) {
@@ -128,9 +160,13 @@ public class ResourceLocation {
     public String getURI(HtmlContext context) {
         return getURI(context, false);
     }
-
     /// Returns a URI to this resource, relative to specified context if {@code isAbsolute} is false, absolute from website root otherwise
     public String getURI(HtmlContext context, boolean isAbsolute) {
+        return getURI(context, isAbsolute, null);
+    }
+
+    /// Returns a URI to this resource, relative to specified context if {@code isAbsolute} is false, absolute from website root otherwise
+    public String getURI(HtmlContext context, boolean isAbsolute, String absolutePrefix) {
         switch (Main.REFERENCE_FORMAT) {
             case EXTERNAL:
                 if (dataSource instanceof ResourceData.Remote(URI uri)) {
@@ -142,10 +178,14 @@ public class ResourceLocation {
                 if (!(dataSource instanceof ResourceData.NoData)) {
                     context.addFileDependency(OUTPUT_RES_FOLDER.resolve(destinationPath).toString().replace("\\", "/"), dataSource);
                 }
-                if (isAbsolute) {
-                    return OUTPUT_RES_FOLDER.resolve(destinationPath).toString().replace("\\", "/");
+                if (absolutePrefix != null) {
+                    return absolutePrefix + OUTPUT_RES_FOLDER.resolve(destinationPath).toString().replace("\\", "/");
                 } else {
-                    return context.pathTo(OUTPUT_RES_FOLDER.resolve(destinationPath).toString().replace("\\", "/"));
+                    if (isAbsolute) {
+                        return OUTPUT_RES_FOLDER.resolve(destinationPath).toString().replace("\\", "/");
+                    } else {
+                        return context.pathTo(OUTPUT_RES_FOLDER.resolve(destinationPath).toString().replace("\\", "/"));
+                    }
                 }
             case DATA_URI:
                 try {
@@ -174,7 +214,7 @@ public class ResourceLocation {
         DATA_URI
     }
 
-    public sealed interface ResourceData {
+    public interface ResourceData {
         /// Retrieve the file contents of a resource, this is cached for {@link ResourceData.Remote} hosted files, to avoid needless burden on third party servers
         /// Must be thread-safe!
         byte[] getData(DataSources sources) throws IOException;
@@ -225,14 +265,6 @@ public class ResourceLocation {
             @Override
             public byte[] getData(DataSources sources) throws IOException {
                 return IconProvider.getTypeRender512(this.typeID, sources, false);
-            }
-        }
-
-        /// Map render (Deprecated and to be replaced with dynamic map)
-        record MapRender(Mappable mappable) implements ResourceData {
-            @Override
-            public byte[] getData(DataSources sources) throws IOException {
-                return MapRenderer.render(mappable, sources.SDEData());
             }
         }
 

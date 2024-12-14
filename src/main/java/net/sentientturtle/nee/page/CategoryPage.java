@@ -4,7 +4,7 @@ import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.ResourceLocation;
 import net.sentientturtle.nee.components.GroupList;
-import net.sentientturtle.nee.components.Title;
+import net.sentientturtle.nee.components.ItemTitle;
 import net.sentientturtle.nee.data.datatypes.Category;
 import org.jspecify.annotations.Nullable;
 
@@ -26,6 +26,11 @@ public class CategoryPage extends Page {
     }
 
     @Override
+    public @Nullable String description() {
+        return null;
+    }
+
+    @Override
     public String filename() {
         return category.categoryID + "-" + name();
     }
@@ -33,7 +38,7 @@ public class CategoryPage extends Page {
     @Override
     protected HTML getContent(HtmlContext context) {
         return DIV("category_page_grid").content(
-            new Title(category.name, getIcon(context)),
+            new ItemTitle(category.name, getIcon(context)),
             new GroupList(category)
         );
     }
@@ -46,7 +51,7 @@ public class CategoryPage extends Page {
     @Nullable
     @Override
     public ResourceLocation getIcon(HtmlContext context) {
-        return category.iconID != null ? ResourceLocation.iconOfIconID(category.iconID, context) : null;
+        return category.iconID != null ? ResourceLocation.ofIconID(category.iconID, context) : null;
     }
 
 }

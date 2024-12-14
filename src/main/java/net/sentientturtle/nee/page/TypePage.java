@@ -52,6 +52,11 @@ public class TypePage extends Page {
     }
 
     @Override
+    public @Nullable String description() {
+        return type.description;
+    }
+
+    @Override
     protected @Nullable String getCSS(HtmlContext context) {
         return """
             .type_page_column {
@@ -97,13 +102,13 @@ public class TypePage extends Page {
 
         if (hasRender) {
             left.content(
-                new Title(type.name, null),
+                new ItemTitle(type.name, null),
                 new TypeGroup(type),
                 new ItemRender(type)
             );
         } else {
             left.content(
-                new Title(type.name, getIcon(context)),
+                new ItemTitle(type.name, getIcon(context)),
                 new TypeGroup(type)
             );
         }
@@ -121,16 +126,16 @@ public class TypePage extends Page {
         Map<Integer, Attribute> attributes = dataSupplier.getAttributes();
         Map<Integer, Double> typeAttributes = dataSupplier.getTypeAttributes().getOrDefault(type.typeID, Map.of());
 
+        // Type is a ship or structure // TODO: CONTAINERS!
+        if (categoryID == 6 || categoryID == 22 || categoryID == 23 || categoryID == 40 || categoryID == 46 || categoryID == 65) {
+            if (type.capacity > 0.0 || typeAttributes.keySet().stream().map(attributes::get).anyMatch(attribute -> attribute != null && Objects.equals(attribute.categoryID, 40))) {
+                left.content(new ShipCargo(type));
+            }
+        }
+
         // Hide health for types that use damage attributes for other purposes, such as modules
         // Ship, Structure, Drone or Fighter
         if (categoryID == 6 || categoryID == 22 || categoryID == 23 || categoryID == 40 || categoryID == 46 || categoryID == 65 || categoryID == 18 || categoryID == 87) {
-            // Type is a ship or structure
-            if (categoryID == 6 || categoryID == 22 || categoryID == 23 || categoryID == 40 || categoryID == 46 || categoryID == 65) {
-                if (type.capacity > 0.0 || typeAttributes.keySet().stream().map(attributes::get).anyMatch(attribute -> attribute != null && Objects.equals(attribute.categoryID, 40))) {
-                    left.content(new ShipCargo(type));
-                }
-            }
-
             if (typeAttributes.getOrDefault(263, 0.0) > 0) {
                 mid.content(new ShipShield(type));
             }

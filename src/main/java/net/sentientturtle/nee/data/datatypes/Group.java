@@ -1,8 +1,8 @@
 package net.sentientturtle.nee.data.datatypes;
 
+import net.sentientturtle.nee.page.Frame;
 import net.sentientturtle.nee.page.GroupPage;
 import net.sentientturtle.nee.page.HasPage;
-import net.sentientturtle.nee.page.Page;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -53,7 +53,7 @@ public class Group implements HasPage {
     }
 
     @Override
-    public @NonNull Page getPage() {
+    public @NonNull Frame getPage() {
         return new GroupPage(this);
     }
 }

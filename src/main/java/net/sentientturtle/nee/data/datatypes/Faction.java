@@ -8,12 +8,12 @@ import org.jspecify.annotations.Nullable;
 public final class Faction {
     public final int factionID;
     public final String factionName;
-    public final @Nullable Integer corporationID;
+    public final int iconID;
 
-    public Faction(int factionID, String factionName, @Nullable Integer corporationID) {
+    public Faction(int factionID, String factionName, int iconID) {
         this.factionID = factionID;
         this.factionName = factionName;
-        this.corporationID = corporationID;
+        this.iconID = iconID;
     }
 
     @Override

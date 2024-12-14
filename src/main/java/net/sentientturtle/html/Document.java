@@ -2,11 +2,13 @@ package net.sentientturtle.html;
 
 import net.sentientturtle.nee.Main;
 import net.sentientturtle.nee.page.PageKind;
+import org.jspecify.annotations.Nullable;
 
 /// Top level interface for (HTML) Documents
 public interface Document {
     /// Document "name", does not have to be unique
     String name();
+    @Nullable String description();
     /// Document filename, without extension, must be unique
     String filename();
     PageKind getPageKind();

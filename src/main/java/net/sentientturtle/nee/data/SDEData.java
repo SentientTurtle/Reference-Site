@@ -90,14 +90,14 @@ public abstract class SDEData {
     // Map<TypeID, MetaGroupID>
     public abstract Map<Integer, Integer> getMetaTypes();
 
-    // List<SolarSystem>
-    public abstract List<SolarSystem> getSolarSystems();
+    // Map<SolarSystemID, SolarSystem>
+    public abstract Map<Integer, SolarSystem> getSolarSystems();
 
-    // List<Constellation>
-    public abstract List<Constellation> getConstellations();
+    // Map<ConstellationID, Constellation>
+    public abstract Map<Integer, Constellation> getConstellations();
 
-    // List<Region>
-    public abstract List<Region> getRegions();
+    // Map<RegionID, Region>
+    public abstract Map<Integer, Region> getRegions();
 
     // Map<SolarSystemID, Set<SolarSystemID>>
     public abstract Map<Integer, Set<Integer>> getOutJumps();
@@ -110,6 +110,12 @@ public abstract class SDEData {
 
     // Map<RegionID, Set<Jump>>
     public abstract Map<Integer, Set<Jump>> getRegionJumps();
+
+    // Map<SolarSystemID, Set<Celestial in solarsystem>>
+    public abstract Map<Integer, Set<Celestial>> getCelestials();
+
+    // Map<SolarSystemID, Set<Station in solarsystem>>
+    public abstract Map<Integer, Set<Station>> getStations();
 
     // Map<FactionID, Faction>
     public abstract Map<Integer, Faction> getFactions();
@@ -322,13 +328,13 @@ public abstract class SDEData {
 
         constellationSolarSystems = produceMap();
         regionSolarSystems = produceMap();
-        for (SolarSystem solarSystem : getSolarSystems()) {
+        for (SolarSystem solarSystem : getSolarSystems().values()) {
             constellationSolarSystems.computeIfAbsent(solarSystem.constellationID, this::produceList).add(solarSystem);
             regionSolarSystems.computeIfAbsent(solarSystem.regionID, this::produceList).add(solarSystem);
         }
 
         regionConstellations = produceMap();
-        for (Constellation constellation : getConstellations()) {
+        for (Constellation constellation : getConstellations().values()) {
             regionConstellations.computeIfAbsent(constellation.regionID, this::produceList).add(constellation);
         }
 
@@ -576,8 +582,12 @@ public abstract class SDEData {
             type.description = type.description.replace("// ", "//");
         }
 
-        // Wrong published status
-        Set<Integer> publishedGroups = Set.of(6);
+        Set<Integer> publishedGroups = Set.of(6, 15);
+
+        Set<Integer> publishedTypes = Set.of(30574, 30575, 30576, 30577, 30669, 30670);
+        for (Integer publishedType : publishedTypes) {
+            this.getTypes().get(publishedType).published = true;
+        }
 
         Set<Integer> unpublishedTypes = Set.of(
             3404,   // Legacy item, other items in this group are set unpublished
@@ -626,7 +636,7 @@ public abstract class SDEData {
             Group group = iterator.next();
             if (publishedGroups.contains(group.groupID)) group.published = true;
 
-            if (!group.published || !validGroups.contains(group.groupID)) {
+            if (!group.published && !validGroups.contains(group.groupID)) {
                 iterator.remove();
             } else {
                 validCategories.add(group.categoryID);
@@ -637,6 +647,9 @@ public abstract class SDEData {
 
         Map<Integer, Category> categories = this.getCategories();
         categories.keySet().retainAll(validCategories);
+
+        categories.get(3).published = true;
+
         categories.values().removeIf(category -> !category.published);
 
         // Remove unpublished types

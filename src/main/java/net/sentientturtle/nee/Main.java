@@ -46,6 +46,7 @@ public class Main {
     public static boolean GENERATE_ICONS;
     public static boolean SKIP_RESOURCES;
     public static boolean SKIP_DEV_RESOURCES;
+    public static String DEPLOYMENT_URL;
 
     // Website title as configurable variable in case a rename is needed; I don't feel like buying a domain name yet
     public static final String WEBSITE_NAME = "Working Title"; //"New Eden Encyclopedia";
@@ -74,6 +75,16 @@ public class Main {
                 SHARED_CACHE_PATH = Path.of(properties.getProperty("SHARED_CACHE_PATH"));
             } else {
                 System.out.println("Missing SHARED_CACHE_PATH property; Please configure properties in '" + propertyPath + "'");
+                System.exit(1);
+            }
+
+            if (properties.containsKey("DEPLOYMENT_URL")) {
+                DEPLOYMENT_URL = properties.getProperty("DEPLOYMENT_URL");
+                if (!DEPLOYMENT_URL.endsWith("/")) {
+                    DEPLOYMENT_URL = DEPLOYMENT_URL + "/";
+                }
+            } else {
+                System.out.println("Missing DEPLOYMENT_URL property; Please configure properties in '" + propertyPath + "'");
                 System.exit(1);
             }
 

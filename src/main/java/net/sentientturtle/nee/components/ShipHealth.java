@@ -30,7 +30,7 @@ public abstract class ShipHealth extends Component {
     protected HTML[] getContent(HtmlContext context) {
         var table = TABLE("ship_health_table font_text").content(
             TR().content(
-                TD("ship_health_icon").content(IMG(ResourceLocation.iconOfIconID(context.sde.getAttributes().get(getHpAttribute()).iconID, context), null, 32)),
+                TD("ship_health_icon").content(IMG(ResourceLocation.ofIconID(context.sde.getAttributes().get(getHpAttribute()).iconID, context), null, 32)),
                 TD().content(TEXT(healthKindName() + " Hitpoints: "), getHp(context.sde, getHpAttribute())),
                 TD()    // Intentionally blank column
             )
@@ -41,7 +41,7 @@ public abstract class ShipHealth extends Component {
         if (rechargeText != null) {
             table.content(
                 TR().content(
-                    TD("ship_health_icon").content(IMG(ResourceLocation.iconOfIconID(1392, context), null, 32)),
+                    TD("ship_health_icon").content(IMG(ResourceLocation.ofIconID(1392, context), null, 32)),
                     TD().content(rechargeText),
                     TD()    // Intentionally blank column
                 )
@@ -53,7 +53,7 @@ public abstract class ShipHealth extends Component {
         if (resists != null) {
             table.content(
                 TR().title("Electromagnetic Damage Resistance").content(
-                    TD("ship_health_icon").content(IMG(ResourceLocation.iconOfIconID(1388, context), null, 32)),
+                    TD("ship_health_icon").content(IMG(ResourceLocation.ofIconID(1388, context), null, 32)),
                     TD("ship_health_bar").content(DIV("ship_health_resist_bg").attribute("aria-label", "EM resis").content(
                         DIV("ship_health_em_resist")
                             .attribute("aria-label", "Electromagnetic Damage Resistance")
@@ -62,7 +62,7 @@ public abstract class ShipHealth extends Component {
                     TD("ship_health_text").content(context.sde.format_with_unit(resists.EM, context.sde.getAttributes().get(267).unitID))
                 ),
                 TR().title("Thermal Damage Resistance").content(
-                    TD("ship_health_icon").content(IMG(ResourceLocation.iconOfIconID(1386, context), null, 32)),
+                    TD("ship_health_icon").content(IMG(ResourceLocation.ofIconID(1386, context), null, 32)),
                     TD("ship_health_bar").content(DIV("ship_health_resist_bg").content(
                         DIV("ship_health_th_resist")
                             .attribute("aria-label", "Thermal Damage Resistance")
@@ -71,7 +71,7 @@ public abstract class ShipHealth extends Component {
                     TD("ship_health_text").content(context.sde.format_with_unit(resists.TH, context.sde.getAttributes().get(270).unitID))
                 ),
                 TR().title("Kinetic Damage Resistance").content(
-                    TD("ship_health_icon").content(IMG(ResourceLocation.iconOfIconID(1385, context), null, 32)),
+                    TD("ship_health_icon").content(IMG(ResourceLocation.ofIconID(1385, context), null, 32)),
                     TD("ship_health_bar").content(DIV("ship_health_resist_bg").content(
                         DIV("ship_health_ki_resist")
                             .attribute("aria-label", "Kinetic Damage Resistance")
@@ -80,7 +80,7 @@ public abstract class ShipHealth extends Component {
                     TD("ship_health_text").content(context.sde.format_with_unit(resists.KI, context.sde.getAttributes().get(269).unitID))
                 ),
                 TR().title("Explosive Damage Resistance").content(
-                    TD("ship_health_icon").content(IMG(ResourceLocation.iconOfIconID(1387, context), null, 32)),
+                    TD("ship_health_icon").content(IMG(ResourceLocation.ofIconID(1387, context), null, 32)),
                     TD("ship_health_bar").content(DIV("ship_health_resist_bg").content(
                         DIV("ship_health_ex_resist")
                             .attribute("aria-label", "Explosive Damage Resistance")

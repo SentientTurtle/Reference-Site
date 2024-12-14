@@ -6,7 +6,7 @@ import net.sentientturtle.html.Component;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.components.ItemDescription;
 import net.sentientturtle.nee.components.ItemTree;
-import net.sentientturtle.nee.components.Title;
+import net.sentientturtle.nee.components.ItemTitle;
 import net.sentientturtle.nee.data.SDEData;
 import net.sentientturtle.nee.data.datatypes.MarketGroup;
 import net.sentientturtle.nee.data.datatypes.Type;
@@ -33,6 +33,11 @@ public class MarketGroupPage extends Page {
     @Override
     public String name() {
         return marketGroup.name;
+    }
+
+    @Override
+    public @Nullable String description() {
+        return marketGroup.description;
     }
 
     @Override
@@ -129,7 +134,7 @@ public class MarketGroupPage extends Page {
             });
         }
 
-        container.content(new Title(marketGroup.name, null));
+        container.content(new ItemTitle(marketGroup.name, null));
 
         if (marketGroup.description != null && marketGroup.description.trim().length() > 0) {
             container.content(new ItemDescription(TEXT(marketGroup.description)));

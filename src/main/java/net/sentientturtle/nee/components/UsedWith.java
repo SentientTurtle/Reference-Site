@@ -5,7 +5,7 @@ import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.datatypes.Type;
-import net.sentientturtle.nee.page.Page;
+import net.sentientturtle.nee.page.Frame;
 import net.sentientturtle.nee.data.ResourceLocation;
 
 import java.util.Objects;
@@ -38,7 +38,7 @@ public class UsedWith extends Component {
                         .sorted(Type.comparator(context.sde))
                 )
                 .map(entry -> {
-                    Page page = entry.getPage();
+                    Frame page = entry.getPage();
                     ResourceLocation icon = page.getIcon(context);
                     return DIV("used_with_entry").content(
                         (icon != null) ? IMG(icon, null, 32).className("used_with_icon") : DIV("used_with_icon"),

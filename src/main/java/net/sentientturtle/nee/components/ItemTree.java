@@ -6,8 +6,8 @@ import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.Component;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.datatypes.Type;
+import net.sentientturtle.nee.page.Frame;
 import net.sentientturtle.nee.page.HasPage;
-import net.sentientturtle.nee.page.Page;
 import net.sentientturtle.nee.data.ResourceLocation;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -50,7 +50,7 @@ public class ItemTree extends Component {
 
                 Element shipContainer = DIV("item_tree_row");
                 for (HasPage hasPage : group.pages) {
-                    Page page = hasPage.getPage();
+                    Frame page = hasPage.getPage();
                     ResourceLocation icon = page.getIcon(context);
                     if (icon != null) {
                         shipContainer.content(DIV("item_tree_entry colour_theme").content(

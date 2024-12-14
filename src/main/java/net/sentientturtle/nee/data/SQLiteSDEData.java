@@ -33,20 +33,22 @@ public class SQLiteSDEData extends SDEData {
     private final Map<Integer, Set<Integer>> variants;
     private final Map<Integer, Integer> parentTypes;
     private final Map<Integer, Integer> metaTypes;
-    private final List<SolarSystem> solarSystems;   // TODO: Turn into map
-    private final List<Constellation> constellations;
-    private final List<Region> regions;
+    private final Map<Integer, SolarSystem> solarSystems;
+    private final Map<Integer, Constellation> constellations;
+    private final Map<Integer, Region> regions;
     private final Map<Integer, Set<Integer>> outJumps;
     private final Map<Integer, Set<Integer>> inJumps;
     private final Map<Integer, Set<Jump>> constellationJumps;
     private final Map<Integer, Set<Jump>> regionJumps;
+    private final Map<Integer, Set<Celestial>> celestials;
+    private final Map<Integer, Set<Station>> stations;
     private final Map<Integer, Faction> factions;
     private final Map<Integer, MarketGroup> marketGroups;
 
     public SQLiteSDEData(SQLiteConnection connection, boolean patch) throws SQLiteException {
         if (!connection.isOpen()) connection.open();
 
-        categories = produceMap();
+        categories = this.produceMap();
         SQLiteStatement st = connection.prepare("""
             SELECT
               categoryID,
@@ -71,7 +73,7 @@ public class SQLiteSDEData extends SDEData {
         }
         st.dispose();
 
-        groups = produceMap();
+        groups = this.produceMap();
         st = connection.prepare("""
             SELECT
               groupID,
@@ -98,7 +100,7 @@ public class SQLiteSDEData extends SDEData {
         }
         st.dispose();
 
-        types = produceMap();
+        types = this.produceMap();
         st = connection.prepare("""
             SELECT
               typeID,
@@ -136,7 +138,7 @@ public class SQLiteSDEData extends SDEData {
         }
         st.dispose();
 
-        typeTraits = produceMap();
+        typeTraits = this.produceMap();
         st = connection.prepare("""
             SELECT
               typeID,
@@ -154,7 +156,7 @@ public class SQLiteSDEData extends SDEData {
         }
         st.dispose();
 
-        typeAttributes = produceMap();
+        typeAttributes = this.produceMap();
         st = connection.prepare("SELECT typeID, attributeID, valueFloat, valueInt FROM dgmTypeAttributes");
         while (st.step()) {
             assert !st.columnNull(0) && !st.columnNull(1) && !(st.columnNull(2) && st.columnNull(3));
@@ -163,14 +165,14 @@ public class SQLiteSDEData extends SDEData {
         }
         st.dispose();
 
-        typeEffects = produceMap();
+        typeEffects = this.produceMap();
         st = connection.prepare("SELECT typeID, effectID FROM dgmTypeEffects");
         while (st.step()) {
             assert !st.columnNull(0) && !st.columnNull(1);
             typeEffects.computeIfAbsent(st.columnInt(0), this::produceSet).add(st.columnInt(1));
         }
 
-        attributes = produceMap();
+        attributes = this.produceMap();
         st = connection.prepare("SELECT attributeID, categoryID, attributeName, displayName, unitID, iconID, published, highIsGood FROM dgmAttributeTypes ORDER BY attributeID");
         while (st.step()) {
             assert !st.columnNull(0) && !st.columnNull(6) && !st.columnNull(7);
@@ -191,7 +193,7 @@ public class SQLiteSDEData extends SDEData {
         }
         st.dispose();
 
-        effects = produceMap();
+        effects = this.produceMap();
         st = connection.prepare("SELECT effectID, effectName FROM dgmEffects ORDER BY effectID");
         while (st.step()) {
             assert !st.columnNull(0) && !st.columnNull(1);
@@ -200,7 +202,7 @@ public class SQLiteSDEData extends SDEData {
         }
         st.dispose();
 
-        eveIcons = produceMap();
+        eveIcons = this.produceMap();
         st = connection.prepare("SELECT iconID, iconFile FROM eveIcons");
         while (st.step()) {
             assert !st.columnNull(0) && !st.columnNull(1);
@@ -208,7 +210,7 @@ public class SQLiteSDEData extends SDEData {
         }
         st.dispose();
 
-        industryActivityTypes = produceMap();
+        industryActivityTypes = this.produceMap();
         st = connection.prepare("SELECT activityID, activityName, published FROM ramActivities");
         while (st.step()) {
             assert !st.columnNull(0) && !st.columnNull(1) && !st.columnNull(2);
@@ -217,7 +219,7 @@ public class SQLiteSDEData extends SDEData {
         }
         st.dispose();
 
-        bpActivities = produceMap();
+        bpActivities = this.produceMap();
         st = connection.prepare("SELECT industryActivity.typeID, industryActivity.activityID, industryActivity.time FROM industryActivity");
         while (st.step()) {
             assert !st.columnNull(0) && !st.columnNull(1) && !st.columnNull(2);
@@ -293,7 +295,7 @@ public class SQLiteSDEData extends SDEData {
         }
         st.dispose();
 
-        reprocessingMaterials = produceMap();
+        reprocessingMaterials = this.produceMap();
         st = connection.prepare("SELECT typeID, materialTypeID, quantity FROM invTypeMaterials");
         while (st.step()) {
             assert !st.columnNull(0) && !st.columnNull(1) && !st.columnNull(2);
@@ -301,7 +303,7 @@ public class SQLiteSDEData extends SDEData {
         }
         st.dispose();
 
-        planetSchematics = produceMap();
+        planetSchematics = this.produceMap();
         st = connection.prepare("SELECT planetSchematics.schematicID, cycleTime, typeID, quantity FROM planetSchematics JOIN planetSchematicsTypeMap ON planetSchematics.schematicID = planetSchematicsTypeMap.schematicID WHERE isInput = 0");
         while (st.step()) {
             assert !st.columnNull(0) && !st.columnNull(1) && !st.columnNull(2) && !st.columnNull(3);
@@ -317,7 +319,7 @@ public class SQLiteSDEData extends SDEData {
         }
         st.dispose();
 
-        metaGroups = produceMap();
+        metaGroups = this.produceMap();
         st = connection.prepare("SELECT metaGroupID, metaGroupName FROM invMetaGroups ORDER BY metaGroupID");
         while (st.step()) {
             assert !st.columnNull(0) && !st.columnNull(1);
@@ -325,9 +327,9 @@ public class SQLiteSDEData extends SDEData {
         }
         st.dispose();
 
-        variants = produceMap();
-        parentTypes = produceMap();
-        metaTypes = produceMap();
+        variants = this.produceMap();
+        parentTypes = this.produceMap();
+        metaTypes = this.produceMap();
         st = connection.prepare("SELECT typeID, parentTypeID, metaGroupID FROM invMetaTypes ORDER BY parentTypeID");    // Order by parentTypeID so we encounter rows without parent type first
         while (st.step()) {
             assert !st.columnNull(0) && !st.columnNull(2);
@@ -350,7 +352,7 @@ public class SQLiteSDEData extends SDEData {
         st.dispose();
         variants.values().removeIf(s -> s.size() == 1);
 
-        solarSystems = produceList();
+        solarSystems = this.produceMap();
         st = connection.prepare("""
             SELECT
               regionID,
@@ -362,8 +364,12 @@ public class SQLiteSDEData extends SDEData {
               z,
               security,
               factionID,
-              sunTypeID
+              sunTypeID,
+              coalesce(systemClasses.wormholeClassID, constellationClasses.wormholeClassID, regionClasses.wormholeClassID) AS wormholeClassID
             FROM mapSolarSystems
+            LEFT JOIN mapLocationWormholeClasses AS systemClasses ON systemClasses.locationID = solarSystemID
+            LEFT JOIN mapLocationWormholeClasses AS constellationClasses ON constellationClasses.locationID = constellationID
+            LEFT JOIN mapLocationWormholeClasses AS regionClasses ON regionClasses.locationID = regionID
             """);
         while (st.step()) {
             assert !st.columnNull(0)
@@ -374,7 +380,9 @@ public class SQLiteSDEData extends SDEData {
                    && !st.columnNull(5)
                    && !st.columnNull(6)
                    && !st.columnNull(7);
-            solarSystems.add(new SolarSystem(
+            solarSystems.put(
+                st.columnInt(2),
+                new SolarSystem(
                     st.columnInt(0),
                     st.columnInt(1),
                     st.columnInt(2),
@@ -384,13 +392,27 @@ public class SQLiteSDEData extends SDEData {
                     st.columnDouble(6),
                     st.columnDouble(7),
                     st.columnNull(8) ? null : st.columnInt(8),
-                    st.columnNull(9) ? null : st.columnInt(9)
+                    st.columnNull(9) ? null : st.columnInt(9),
+                    st.columnNull(10) ? null : st.columnInt(10)
             ));
         }
         st.dispose();
 
-        constellations = produceList();
-        st = connection.prepare("SELECT regionID, constellationID, constellationName, x, y, z, factionID FROM mapConstellations");
+        constellations = this.produceMap();
+        st = connection.prepare("""
+            SELECT
+            	regionID,
+            	constellationID,
+            	constellationName,
+            	x, y, z,
+            	xMin, yMin, zMin,
+            	xMax, yMax, zMax,
+            	factionID,
+            	coalesce(constellationClasses.wormholeClassID, regionClasses.wormholeClassID) AS wormholeClassID
+            FROM mapConstellations
+            LEFT JOIN mapLocationWormholeClasses AS constellationClasses ON constellationClasses.locationID = constellationID
+            LEFT JOIN mapLocationWormholeClasses AS regionClasses ON regionClasses.locationID = regionID
+            """);
         while (st.step()) {
             assert !st.columnNull(0)
                    && !st.columnNull(1)
@@ -398,32 +420,15 @@ public class SQLiteSDEData extends SDEData {
                    && !st.columnNull(3)
                    && !st.columnNull(4)
                    && !st.columnNull(5);
-            constellations.add(new Constellation(
+            constellations.put(
+                st.columnInt(1),
+                new Constellation(
                     st.columnInt(0),
                     st.columnInt(1),
                     st.columnString(2),
                     st.columnDouble(3),
                     st.columnDouble(4),
                     st.columnDouble(5),
-                    st.columnNull(6) ? null : st.columnInt(6)
-            ));
-        }
-        st.dispose();
-
-        regions = produceList();
-        st = connection.prepare("SELECT regionID, regionName, x, y, z, factionID, xMin, yMin, zMin, xMax, yMax, zMax FROM mapRegions");
-        while (st.step()) {
-            assert !st.columnNull(0)
-                   && !st.columnNull(1)
-                   && !st.columnNull(2)
-                   && !st.columnNull(3)
-                   && !st.columnNull(4);
-            regions.add(new Region(
-                    st.columnInt(0),
-                    st.columnString(1),
-                    st.columnDouble(2),
-                    st.columnDouble(3),
-                    st.columnDouble(4),
 
                     st.columnDouble(6),
                     st.columnDouble(7),
@@ -432,7 +437,49 @@ public class SQLiteSDEData extends SDEData {
                     st.columnDouble(10),
                     st.columnDouble(11),
 
-                    st.columnNull(5) ? null : st.columnInt(5)
+                    st.columnNull(12) ? null : st.columnInt(12),
+                    st.columnNull(13) ? null : st.columnInt(13)
+            ));
+        }
+        st.dispose();
+
+        regions = this.produceMap();
+        st = connection.prepare("""
+            SELECT
+            	regionID,
+            	regionName,
+            	x, y, z,
+            	xMin, yMin, zMin,
+            	xMax, yMax, zMax,
+            	factionID,
+            	regionClasses.wormholeClassID
+            FROM mapRegions
+            LEFT JOIN mapLocationWormholeClasses AS regionClasses ON regionClasses.locationID = regionID
+            """);
+        while (st.step()) {
+            assert !st.columnNull(0)
+                   && !st.columnNull(1)
+                   && !st.columnNull(2)
+                   && !st.columnNull(3)
+                   && !st.columnNull(4);
+            regions.put(
+                st.columnInt(0),
+                new Region(
+                    st.columnInt(0),
+                    st.columnString(1),
+                    st.columnDouble(2),
+                    st.columnDouble(3),
+                    st.columnDouble(4),
+
+                    st.columnDouble(5),
+                    st.columnDouble(6),
+                    st.columnDouble(7),
+                    st.columnDouble(8),
+                    st.columnDouble(9),
+                    st.columnDouble(10),
+
+                    st.columnNull(11) ? null : st.columnInt(11),
+                    st.columnNull(12) ? null : st.columnInt(12)
             ));
         }
         st.dispose();
@@ -465,9 +512,49 @@ public class SQLiteSDEData extends SDEData {
         }
         st.dispose();
 
+        celestials = this.produceMap();
+        st = connection.prepare("SELECT itemID, typeID, groupID, solarsystemID, itemName, celestialIndex, orbitIndex FROM mapDenormalize WHERE solarSystemID IS NOT NULL AND groupID IS NOT 10 AND groupID IS NOT 15");
+        while (st.step()) {
+            assert !st.columnNull(0) && !st.columnNull(1) && !st.columnNull(2) && !st.columnNull(3) && !st.columnNull(4);
+            celestials.computeIfAbsent(st.columnInt(3), this::produceSet)
+                .add(new Celestial(
+                    st.columnInt(0),
+                    st.columnInt(1),
+                    st.columnInt(2),
+                    st.columnString(4),
+                    st.columnNull(5) ? null : st.columnInt(5),
+                    st.columnNull(6) ? null : st.columnInt(6)
+                ));
+        }
+        st.dispose();
 
-        factions = produceMap();
-        st = connection.prepare("SELECT factionID, factionName, corporationID from chrFactions ORDER BY factionID");
+        stations = this.produceMap();
+        Map<Integer, EnumSet<Station.Service>> operationServices = this.produceMap();
+        st = connection.prepare("SELECT operationID, serviceID FROM staOperationServices");
+        while (st.step()) {
+            assert !st.columnNull(0) && !st.columnNull(1);
+            Station.Service service = Station.Service.fromServiceID(st.columnInt(1));
+            if (service != null) {
+                operationServices.computeIfAbsent(st.columnInt(0), _ -> EnumSet.noneOf(Station.Service.class))
+                    .add(service);
+            }
+        }
+        st.dispose();
+        st = connection.prepare("SELECT stationID, operationID, stationTypeID, solarSystemID, stationName FROM staStations");
+        while (st.step()) {
+            assert !st.columnNull(0) && !st.columnNull(1) && !st.columnNull(2) && !st.columnNull(3) && !st.columnNull(4);
+            stations.computeIfAbsent(st.columnInt(3), this::produceSet)
+                .add(new Station(
+                    st.columnInt(0),
+                    st.columnInt(2),
+                    st.columnString(4),
+                    operationServices.getOrDefault(st.columnInt(1), EnumSet.noneOf(Station.Service.class))
+                ));
+        }
+        st.dispose();
+
+        factions = this.produceMap();
+        st = connection.prepare("SELECT factionID, factionName, iconID from chrFactions ORDER BY factionID");
         while (st.step()) {
             assert !st.columnNull(0) && !st.columnNull(1);
             int factionID = st.columnInt(0);
@@ -476,13 +563,13 @@ public class SQLiteSDEData extends SDEData {
                     new Faction(
                             factionID,
                             st.columnString(1),
-                            st.columnNull(2) ? null : st.columnInt(2)
+                            st.columnInt(2)
                     )
             );
         }
         st.dispose();
 
-        marketGroups = produceMap();
+        marketGroups = this.produceMap();
         st = connection.prepare("SELECT marketGroupID, parentGroupID, marketGroupName, description FROM invMarketGroups ORDER BY marketGroupID");
         while (st.step()) {
             assert !st.columnNull(0) && !st.columnNull(2);
@@ -590,17 +677,17 @@ public class SQLiteSDEData extends SDEData {
     }
 
     @Override
-    public List<SolarSystem> getSolarSystems() {
+    public Map<Integer, SolarSystem> getSolarSystems() {
         return solarSystems;
     }
 
     @Override
-    public List<Constellation> getConstellations() {
+    public Map<Integer, Constellation> getConstellations() {
         return constellations;
     }
 
     @Override
-    public List<Region> getRegions() {
+    public Map<Integer, Region> getRegions() {
         return regions;
     }
 
@@ -622,6 +709,15 @@ public class SQLiteSDEData extends SDEData {
     @Override
     public Map<Integer, Set<Jump>> getRegionJumps() {
         return regionJumps;
+    }
+
+    @Override
+    public Map<Integer, Set<Celestial>> getCelestials() {
+        return celestials;
+    }
+
+    public Map<Integer, Set<Station>> getStations() {
+        return stations;
     }
 
     @Override

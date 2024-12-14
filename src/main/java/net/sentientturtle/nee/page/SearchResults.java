@@ -2,7 +2,7 @@ package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.nee.components.Title;
+import net.sentientturtle.nee.components.ItemTitle;
 import net.sentientturtle.nee.data.ResourceLocation;
 import org.jspecify.annotations.Nullable;
 
@@ -15,6 +15,11 @@ public class SearchResults extends Page {
     @Override
     public String name() {
         return "Search Results";
+    }
+
+    @Override
+    public @Nullable String description() {
+        return null;
     }
 
     @Override
@@ -42,7 +47,7 @@ public class SearchResults extends Page {
     @Override
     protected HTML getContent(HtmlContext context) {
         return DIV("search_results_grid").content(
-            new Title("Search results:", null),
+            new ItemTitle("Search results:", null),
             TABLE().id(context.ids.tryID("search_results_table"))
                 .content(TR().content(TD().text("Loading...")))   // This table is replaced on update
         );
@@ -70,7 +75,7 @@ public class SearchResults extends Page {
                     
                     var query = (getURLParameter('search') ?? "").toLowerCase();
                     
-                    document.getElementsByClassName('title_text')[0].innerHTML = 'Search results: ' + query;
+                    document.getElementsByClassName('item_title_text')[0].innerHTML = 'Search results: ' + query;
                     document.getElementById('search_input').value = escapeHtml(query)
                     
                     if (query.length >= 3) {

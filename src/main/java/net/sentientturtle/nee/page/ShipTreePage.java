@@ -23,6 +23,11 @@ public class ShipTreePage extends Page {
     }
 
     @Override
+    public @Nullable String description() {
+        return SHIP_COUNT + " ships";
+    }
+
+    @Override
     public String filename() {
         return "shiptree";
     }
@@ -34,7 +39,7 @@ public class ShipTreePage extends Page {
 
     @Override
     public @Nullable ResourceLocation getIcon(HtmlContext context) {
-        return ResourceLocation.iconOfIconID(1443, context);
+        return ResourceLocation.ofIconID(1443, context);
     }
 
     @Override
@@ -136,7 +141,7 @@ public class ShipTreePage extends Page {
         {883}                                         // Capital Industrial Ships
     };
 
-    private static final String[] GROUP_NAMES = new String[] {
+    private static final String[] GROUP_NAMES = new String[]{
         "Sub-frigate",
         "Frigate",
         "Destroyer",
@@ -153,7 +158,9 @@ public class ShipTreePage extends Page {
         "Capital Ship"
     };
 
-    static { assert GROUP_ORDER.length == GROUP_NAMES.length; }
+    static {
+        assert GROUP_ORDER.length == GROUP_NAMES.length;
+    }
 
     private Element getTree(HtmlContext context, Set<Integer> shipTypes, String factionName, String themeName, int... ships) {
         // Same structure as GROUP_ORDER, with each group being a list of ships in that group
@@ -325,11 +332,11 @@ public class ShipTreePage extends Page {
                 getTree(context, shipTypeIDs, "Deathless Circle", "deathless", DEATHLESS_SHIPS)
             ),
             new TabBox.Tab(
-                IMG(ResourceLocation.iconOfIconID(21065, context), "Alliance Tournament Prizes", 64).title("Alliance Tournament").className("ship_tree_icon"),
+                IMG(ResourceLocation.ofIconID(21065, context), "Alliance Tournament Prizes", 64).title("Alliance Tournament").className("ship_tree_icon"),
                 getTree(context, shipTypeIDs, "Alliance Tournament Prizes", "theme", TOURNAMENT_SHIPS)
             ),
             new TabBox.Tab(
-                IMG(ResourceLocation.iconOfIconID(1443, context), "Special Ships", 64).title("Special Ships").className("ship_tree_icon"),
+                IMG(ResourceLocation.ofIconID(1443, context), "Special Ships", 64).title("Special Ships").className("ship_tree_icon"),
                 getTree(context, shipTypeIDs, "Special Ships", "theme", SPECIAL_SHIPS)
             )
         ));
@@ -713,34 +720,34 @@ public class ShipTreePage extends Page {
     private static final int[] DEATHLESS_SHIPS = new int[]{85086, 85087};
 
     private static final int[] TOURNAMENT_SHIPS = new int[]{
-        32788,
-        32790,
-        33673,
-        33675,
-        60764,
-        60765,
+        2834,
+        2836,
+        3516,
+        3518,
+        26840,
+        26842,
         32207,
         32209,
+        32788,
+        32790,
         33395,
         33397,
-        74141,
-        74316,
-        3518,
+        33673,
+        33675,
         35779,
         35781,
         42245,
         42246,
-        2834,
-        2836,
         45530,
         45531,
-        77726,
-        78414,
         48635,
         48636,
-        3516,
-        26840,
-        26842,
+        60764,
+        60765,
+        74141,
+        74316,
+        77726,
+        78414,
         85062,
         85229,
         85236
@@ -772,4 +779,23 @@ public class ShipTreePage extends Page {
         33083,
         21097
     };
+
+    private static int SHIP_COUNT = AMARR_SHIPS.length
+                                    + CALDARI_SHIPS.length
+                                    + GALLENTE_SHIPS.length
+                                    + MINMATAR_SHIPS.length
+                                    + ORE_SHIPS.length
+                                    + GURISTAS_SHIPS.length
+                                    + SANSHA_SHIPS.length
+                                    + BLOODRAIDER_SHIPS.length
+                                    + ANGELCARTEL_SHIPS.length
+                                    + SERPENTIS_SHIPS.length
+                                    + SOE_SHIPS.length
+                                    + TRIGLAVIAN_SHIPS.length
+                                    + EDENCOM_SHIPS.length
+                                    + CONCORD_SHIPS.length
+                                    + SOCT_SHIPS.length
+                                    + DEATHLESS_SHIPS.length
+                                    + TOURNAMENT_SHIPS.length
+                                    + SPECIAL_SHIPS.length;
 }

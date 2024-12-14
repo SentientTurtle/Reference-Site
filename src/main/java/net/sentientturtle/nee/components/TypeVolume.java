@@ -35,12 +35,12 @@ public class TypeVolume extends Component {
                 TABLE("type_volume_table font_text").content(
                     TR().content(
                         TD().content(SPAN("type_volume_span").title("Volume").content(
-                            IMG(ResourceLocation.iconOfIconID(67, context), null, 32).className("type_volume_icon"),
+                            IMG(ResourceLocation.ofIconID(67, context), null, 32).className("type_volume_icon"),
                             TEXT("Volume: "),
                             context.sde.format_with_unit(volume, 9)
                         )),
                         TD().content(SPAN("type_volume_span").title("Packaged").content(
-                            IMG(ResourceLocation.iconOfIconID(67, context), null, 32).className("type_volume_icon"),
+                            IMG(ResourceLocation.ofIconID(67, context), null, 32).className("type_volume_icon"),
                             TEXT("Packaged Volume: "),
                             context.sde.format_with_unit(PACKAGED_VOLUMES.get(type.typeID), 9)
                         ))
@@ -48,7 +48,7 @@ public class TypeVolume extends Component {
                     mass > 0.0 ?
                         TR().content(
                             TD().content(SPAN("type_volume_span").content(
-                                IMG(ResourceLocation.iconOfIconID(76, context), null, 32).title("Mass").className("type_volume_icon"),
+                                IMG(ResourceLocation.ofIconID(76, context), null, 32).title("Mass").className("type_volume_icon"),
                                 TEXT("Mass: "),
                                 context.sde.format_with_unit(mass, 2)
                             ))
@@ -61,13 +61,13 @@ public class TypeVolume extends Component {
                 TABLE("type_volume_table font_text").content(
                     TR().content(
                         TD().content(SPAN("type_volume_span").content(
-                            IMG(ResourceLocation.iconOfIconID(67, context), null, 32).title("Volume").className("type_volume_icon"),
+                            IMG(ResourceLocation.ofIconID(67, context), null, 32).title("Volume").className("type_volume_icon"),
                             TEXT("Volume: "),
                             context.sde.format_with_unit(volume, 9)
                         )),
                         mass > 0.0 ?
                             TD().content(SPAN("type_volume_span").title("Mass").content(
-                                IMG(ResourceLocation.iconOfIconID(76, context), null, 32).className("type_volume_icon"),
+                                IMG(ResourceLocation.ofIconID(76, context), null, 32).className("type_volume_icon"),
                                 TEXT("Mass: "),
                                 context.sde.format_with_unit(mass, 2)
                             ))

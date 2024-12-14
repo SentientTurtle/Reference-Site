@@ -437,7 +437,7 @@ public class ItemStats extends Component {
                                 .title(attr.displayName != null ? attr.displayName : attr.attributeName)
                                 .attribute("aria-label", attr.displayName != null ? attr.displayName : attr.attributeName)
                                 .content(
-                                    iconID != null ? IMG(ResourceLocation.iconOfIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
+                                    iconID != null ? IMG(ResourceLocation.ofIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
                                     context.sde.format_with_unit(attributeValue, attr.unitID)
                                 );
                         })
@@ -533,7 +533,7 @@ public class ItemStats extends Component {
 
                 table.content(TR().content(
                     TD().content(SPAN("item_stats_span").title(name).content(
-                            iconID != null ? IMG(ResourceLocation.iconOfIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
+                            iconID != null ? IMG(ResourceLocation.ofIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
                             TEXT(name + ":")
                         )
                     ),
@@ -549,7 +549,7 @@ public class ItemStats extends Component {
             Integer iconID = context.sde.getTypes().get((int) (double) fuelType).iconID;
             table.content(TR().content(
                 TD().content(SPAN("item_stats_span").title("Fuel required").content(
-                        iconID != null ? IMG(ResourceLocation.iconOfIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
+                        iconID != null ? IMG(ResourceLocation.ofIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
                         TEXT("Fuel required:")
                     )
                 ),
@@ -594,7 +594,7 @@ public class ItemStats extends Component {
 
                     mutationsTable.content(TR().content(
                         TD().content(SPAN("item_stats_span").title(name).content(
-                                iconID != null ? IMG(ResourceLocation.iconOfIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
+                                iconID != null ? IMG(ResourceLocation.ofIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
                                 TEXT(name + ":")
                             )
                         ),

@@ -1,8 +1,8 @@
 package net.sentientturtle.nee.data.datatypes;
 
 import net.sentientturtle.nee.data.SDEData;
+import net.sentientturtle.nee.page.Frame;
 import net.sentientturtle.nee.page.HasPage;
-import net.sentientturtle.nee.page.Page;
 import net.sentientturtle.nee.page.TypePage;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -110,7 +110,7 @@ public class Type implements HasPage {
     }
 
     @Override
-    public @NonNull Page getPage() {
+    public @NonNull Frame getPage() {
         return new TypePage(this);
     }
 

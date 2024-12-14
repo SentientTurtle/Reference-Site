@@ -1,12 +1,16 @@
 package net.sentientturtle.html;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.id.ID;
 import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.util.ExceptionUtil;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Objects;
 
 /// Top level interface for HTML elements
@@ -172,6 +176,13 @@ public interface HTML {
             .className(className);
     }
 
+    /// {@code <img>}
+    ///
+    /// 'Placeholder' img tag
+    static Element IMG() {
+        return new Element("img", true);
+    }
+
     /// {@code <img src='[src]' alt='[alt]'>}
     ///
     /// Alt nullable; Icons paired right next to the text name can leave this null
@@ -221,6 +232,19 @@ public interface HTML {
         return new Element("script")
             .attribute("type", "module")
             .content(HTML.RAW(scriptContent));
+    }
+
+    record ImportMap(Map<String, String> imports) {}
+
+    /// {@code <script type='importMap'>[importMap]</script> }
+    static Element SCRIPT_IMPORTMAP(ImportMap importMap) {
+        try {
+            return new Element("script")
+                .attribute("type", "importmap")
+                .content(HTML.RAW(new ObjectMapper().writeValueAsString(importMap)));
+        } catch (JsonProcessingException e) {
+            return ExceptionUtil.sneakyThrow(e);
+        }
     }
 
     /// {@code <span></span> }

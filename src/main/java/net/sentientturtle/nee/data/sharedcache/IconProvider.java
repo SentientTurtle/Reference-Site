@@ -10,13 +10,15 @@ import net.sentientturtle.util.ExceptionUtil;
 import org.jspecify.annotations.Nullable;
 
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -195,6 +197,13 @@ public class IconProvider {
         }
     }
 
+    private static boolean useIconInsteadOfGraphic(int groupID) {
+        return groupID == 4168 || groupID == 711
+               || groupID == 12 || groupID == 340 || groupID == 448 || groupID == 649;
+    }
+
+    private static final Semaphore imageServiceSemaphore = new Semaphore(1);
+
     public static @Nullable byte[] getTypeIcon64(int typeID, DataSources dataSources, boolean isBPC, boolean useOldOverlay) throws IOException {
         Type type = dataSources.SDEData().getTypes().get(typeID);
         Group group = dataSources.SDEData().getGroups().get(type.groupID);
@@ -246,7 +255,7 @@ public class IconProvider {
             }
 
             FSDData.Graphic graphic = dataSources.fsdData().graphics.get(outputType.graphicID != null ? outputType.graphicID : 0);
-            if (imageMagickCall == null && graphic != null && graphic.iconInfo() != null) {
+            if (imageMagickCall == null && graphic != null && graphic.iconInfo() != null && !useIconInsteadOfGraphic(outputType.groupID) && !useIconInsteadOfGraphic(type.groupID)) {
                 String graphicResource;
                 if (graphic.iconInfo().folder().endsWith("/")) {
                     graphicResource = graphic.iconInfo().folder() + outputType.graphicID + (isBPC ? "_64_bpc.png" : "_64_bp.png");
@@ -270,6 +279,26 @@ public class IconProvider {
                             "png:-"
                         );
                     }
+                } else if (outputType.iconID == null) {
+                    System.out.println("\tMissing BP graphic, falling back to image server!: " + type);
+                    String bpType = isBPC ? "bpc" : "bp";
+                    // use image-service specific caching so these will be invalid should the missing graphics return
+                    cacheKey = "IMAGESERV;" + bpType + ";" + type.typeID;
+                        return CACHED_ICONS.computeIfAbsent(cacheKey, _ -> {
+                            System.out.println("\t\tconnecting to Image Service...");
+                            try {
+                                imageServiceSemaphore.acquire();
+                            } catch (InterruptedException e) {
+                                ExceptionUtil.sneakyThrow(new IOException("Interrupted while waiting on image service semaphore!", e));
+                            }
+                            try (InputStream inputStream = new URI("https://images.evetech.net/types/" + type.typeID + "/" + bpType).toURL().openStream()) {
+                                return inputStream.readAllBytes();
+                            } catch (IOException | URISyntaxException e) {
+                                return ExceptionUtil.sneakyThrow(e);
+                            } finally {
+                                imageServiceSemaphore.release();
+                            }
+                        });
                 }
             }
 
@@ -323,7 +352,7 @@ public class IconProvider {
         } else {    // Regular item
             String iconResource = null;
             FSDData.Graphic graphic = dataSources.fsdData().graphics.get(type.graphicID != null ? type.graphicID : 0);
-            if (graphic != null && graphic.iconInfo() != null) {
+            if (graphic != null && graphic.iconInfo() != null && !useIconInsteadOfGraphic(type.groupID)) {
                 if (graphic.iconInfo().folder().endsWith("/")) {
                     iconResource = graphic.iconInfo().folder() + type.graphicID + "_64.png";
                 } else {

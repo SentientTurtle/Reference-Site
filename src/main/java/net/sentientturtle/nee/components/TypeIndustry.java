@@ -48,7 +48,7 @@ public class TypeIndustry extends Component {
 
             reprocessingSources.stream()
                 .map(context.sde.getTypes()::get)
-                .sorted(typeComparator)
+                .sorted(Comparator.<Type>comparingInt(type -> type.groupID).thenComparing(typeComparator))
                 .forEach(type -> {
                     table.content(TR().content(
                         TD().content(IMG(ResourceLocation.typeIcon(type.typeID, context), null, 64).className("type_industry_icon")),

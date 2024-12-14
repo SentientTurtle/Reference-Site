@@ -17,6 +17,11 @@ public class IndexPage extends Page {
         return Main.WEBSITE_NAME;
     }
 
+    @Override
+    public @Nullable String description() {
+        return "An automatic wiki for EVE Online.";
+    }
+
     @Override   // Override; Remove prefix on index page
     public String title() {
         return this.name();

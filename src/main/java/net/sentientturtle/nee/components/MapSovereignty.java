@@ -5,35 +5,37 @@ import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.Component;
 import net.sentientturtle.nee.data.ResourceLocation;
 import net.sentientturtle.nee.data.datatypes.Faction;
-import net.sentientturtle.nee.data.datatypes.Mappable;
+import net.sentientturtle.nee.data.datatypes.MapItem;
 
 import java.util.OptionalInt;
 
 import static net.sentientturtle.html.HTML.*;
 
 /**
- * Displays sovereignty ownership of a {@link Mappable} object
+ * Displays sovereignty ownership of a {@link MapItem} object
  */
 public class MapSovereignty extends Component {
-    private final Mappable mappable;
+    private final MapItem mapItem;
+    private final String fallBackText;
+    private final ResourceLocation fallBackIcon;
 
-    public MapSovereignty(Mappable mappable) {
+    public MapSovereignty(MapItem mapItem, String fallBackText, ResourceLocation fallBackIcon) {
         super("map_sovereignty colour_theme_minor");
-        this.mappable = mappable;
+        this.mapItem = mapItem;
+        this.fallBackText = fallBackText;
+        this.fallBackIcon = fallBackIcon;
     }
 
     @Override
     protected HTML[] getContent(HtmlContext context) {
-        OptionalInt factionID = mappable.getFactionID();
-        assert factionID.isPresent();
-        Faction faction = context.sde.getFactions().get(factionID.getAsInt());
-        Integer corporationID = faction.corporationID;
+        OptionalInt factionID = mapItem.getSovFactionID();
+        if (factionID.isPresent()) {
+            Faction faction = context.sde.getFactions().get(factionID.getAsInt());
 
-        if (corporationID != null) {
             return new HTML[]{
                 DIV("font_header").text("Sovereignty"),
                 DIV("map_sovereignty_faction").content(
-                    IMG(ResourceLocation.iconOfCorpID(corporationID), null, 64).className("map_sovereignty_icon"),
+                    IMG(ResourceLocation.factionLogo(faction.factionID), null, 64).className("map_sovereignty_icon"),
                     TEXT_BOLD(faction.factionName).className("font_header map_sovereignty_text")
                 )
             };
@@ -41,7 +43,8 @@ public class MapSovereignty extends Component {
             return new HTML[]{
                 DIV("font_header").text("Sovereignty"),
                 DIV("map_sovereignty_faction").content(
-                    TEXT_BOLD(faction.factionName).className("font_header map_sovereignty_text")
+                    IMG(fallBackIcon, null, 64).className("map_sovereignty_icon"),
+                    TEXT_BOLD(fallBackText).className("font_header map_sovereignty_text")
                 )
             };
         }
@@ -66,7 +69,6 @@ public class MapSovereignty extends Component {
                 }
                 
                 .map_sovereignty_text {
-                  font-size: 1.5rem;
                   margin-left: 1rem;
                 }""";
     }
