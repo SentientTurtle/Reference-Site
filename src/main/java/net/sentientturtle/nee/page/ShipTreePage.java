@@ -780,22 +780,22 @@ public class ShipTreePage extends Page {
         21097
     };
 
-    private static int SHIP_COUNT = AMARR_SHIPS.length
-                                    + CALDARI_SHIPS.length
-                                    + GALLENTE_SHIPS.length
-                                    + MINMATAR_SHIPS.length
-                                    + ORE_SHIPS.length
-                                    + GURISTAS_SHIPS.length
-                                    + SANSHA_SHIPS.length
-                                    + BLOODRAIDER_SHIPS.length
-                                    + ANGELCARTEL_SHIPS.length
-                                    + SERPENTIS_SHIPS.length
-                                    + SOE_SHIPS.length
-                                    + TRIGLAVIAN_SHIPS.length
-                                    + EDENCOM_SHIPS.length
-                                    + CONCORD_SHIPS.length
-                                    + SOCT_SHIPS.length
-                                    + DEATHLESS_SHIPS.length
-                                    + TOURNAMENT_SHIPS.length
-                                    + SPECIAL_SHIPS.length;
+    private static final int SHIP_COUNT = AMARR_SHIPS.length
+                                          + CALDARI_SHIPS.length
+                                          + GALLENTE_SHIPS.length
+                                          + MINMATAR_SHIPS.length
+                                          + ORE_SHIPS.length
+                                          + GURISTAS_SHIPS.length
+                                          + SANSHA_SHIPS.length
+                                          + BLOODRAIDER_SHIPS.length
+                                          + ANGELCARTEL_SHIPS.length
+                                          + SERPENTIS_SHIPS.length
+                                          + SOE_SHIPS.length
+                                          + TRIGLAVIAN_SHIPS.length
+                                          + EDENCOM_SHIPS.length
+                                          + CONCORD_SHIPS.length
+                                          + SOCT_SHIPS.length
+                                          + DEATHLESS_SHIPS.length
+                                          + TOURNAMENT_SHIPS.length
+                                          + SPECIAL_SHIPS.length;
 }

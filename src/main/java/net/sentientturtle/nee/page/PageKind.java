@@ -1,10 +1,11 @@
 package net.sentientturtle.nee.page;
 
+import net.sentientturtle.html.Frame;
 import net.sentientturtle.html.HTMLUtil;
 import net.sentientturtle.nee.Main;
 import net.sentientturtle.nee.data.SDEData;
 import net.sentientturtle.nee.data.datatypes.MapItem;
-import net.sentientturtle.nee.data.datatypes.singleton.Cluster;
+import net.sentientturtle.nee.data.datatypes.Cluster;
 
 import java.util.Arrays;
 import java.util.function.Function;

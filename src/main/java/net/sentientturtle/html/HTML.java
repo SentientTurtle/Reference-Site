@@ -3,9 +3,9 @@ package net.sentientturtle.html;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.html.id.ID;
+import net.sentientturtle.html.context.ID;
 import net.sentientturtle.nee.data.ResourceLocation;
-import net.sentientturtle.util.ExceptionUtil;
+import net.sentientturtle.nee.util.ExceptionUtil;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -16,65 +16,32 @@ import java.util.Objects;
 /// Top level interface for HTML elements
 ///
 /// Also serves as container for common HTML element factory methods
-public interface HTML {
+///
+/// All (direct) implementations should override toString() and direct users to {@link #renderTo(HtmlContext)}
+public sealed interface HTML permits Element, HTML.EmptyHTML, HTML.MultiHTML, HTML.RawHTML, HTML.RepeatHTML, HTML.TextHTML, Frame {
     /// Empty HTML object, equivalent to a zero-length string in the generated HTML
     static HTML empty() {
         return new EmptyHTML();
     }
 
-    // TODO: Re-evaluate and remove?
     /// Multiple sequential HTML items, escape hatch
     static HTML multi(HTML... items) {
         if (items.length == 0) return HTML.empty();
-        return new HTML() {
-            @Override
-            public String toString() {
-                throw new UnsupportedOperationException("Elements do not support toString; use HTML#renderTo instead");
-            }
-
-            @Override
-            public void renderTo(HtmlContext context) throws RenderingException, IOException {
-                for (HTML items : items) {
-                    items.renderTo(context);
-                }
-            }
-        };
+        return new MultiHTML(items);
     }
 
     /// Repeats the given HTML item {@code count} times
     static HTML repeat(int count, HTML item) {
         if (count < 0) throw new IllegalArgumentException("HTML Repeat count must be >= 0");
         if (count == 0) return empty();
-        return new HTML() {
-            @Override
-            public String toString() {
-                throw new UnsupportedOperationException("Elements do not support toString; use HTML#renderTo instead");
-            }
-
-            @Override
-            public void renderTo(HtmlContext context) throws RenderingException, IOException {
-                for (int i = 0; i < count; i++) {
-                    item.renderTo(context);
-                }
-            }
-        };
+        return new RepeatHTML(count, item);
     }
 
     /// Escape hatch for raw html
     ///
     /// CAUTION: HTML String must be escaped and valid!
     static HTML RAW(String html) {
-        return new HTML() {
-            @Override
-            public String toString() {
-                throw new UnsupportedOperationException("Elements do not support toString; use HTML#renderTo instead");
-            }
-
-            @Override
-            public void renderTo(HtmlContext ctx) throws IOException {
-                ctx.write(html);
-            }
-        };
+        return new RawHTML(html);
     }
 
     /// Creates a new document root, returning the {@code <html>} element
@@ -86,17 +53,7 @@ public interface HTML {
     /// Provides HTML text escaping
     static HTML TEXT(@NonNull String textContent) {
         Objects.requireNonNull(textContent);
-        return new HTML() {
-            @Override
-            public String toString() {
-                throw new UnsupportedOperationException("Elements do not support toString; use HTML#renderTo instead");
-            }
-
-            @Override
-            public void renderTo(HtmlContext ctx) throws IOException {
-                ctx.write(HTMLUtil.escapeText(textContent));
-            }
-        };
+        return new TextHTML(textContent);
     }
 
     /// {@code <b></b>}
@@ -318,7 +275,26 @@ public interface HTML {
     void renderTo(HtmlContext context) throws RenderingException, IOException;
 
     /// Class for zero-length "non-item"
-    class EmptyHTML implements HTML {
+    final class EmptyHTML implements HTML {
+        @Override
+        public String toString() {
+            throw new UnsupportedOperationException("Elements do not support toString; use HTML#renderTo instead");
+        }
+
+        @Override
+        public void renderTo(HtmlContext context) {
+            // Intentionally nothing
+        }
+    }
+
+    // Single-purpose implementations, not inlined so that HTML can be sealed
+    final class MultiHTML implements HTML {
+        private final HTML[] items;
+
+        public MultiHTML(HTML... items) {
+            this.items = items;
+        }
+
         @Override
         public String toString() {
             throw new UnsupportedOperationException("Elements do not support toString; use HTML#renderTo instead");
@@ -326,7 +302,67 @@ public interface HTML {
 
         @Override
         public void renderTo(HtmlContext context) throws RenderingException, IOException {
-            return; // Intentionally nothing
+            for (HTML items : items) {
+                items.renderTo(context);
+            }
+        }
+    }
+
+    final class RepeatHTML implements HTML {
+        private final int count;
+        private final HTML item;
+
+        public RepeatHTML(int count, HTML item) {
+            this.count = count;
+            this.item = item;
+        }
+
+        @Override
+        public String toString() {
+            throw new UnsupportedOperationException("Elements do not support toString; use HTML#renderTo instead");
+        }
+
+        @Override
+        public void renderTo(HtmlContext context) throws RenderingException, IOException {
+            for (int i = 0; i < count; i++) {
+                item.renderTo(context);
+            }
+        }
+    }
+
+    final class RawHTML implements HTML {
+        private final String html;
+
+        public RawHTML(String html) {
+            this.html = html;
+        }
+
+        @Override
+        public String toString() {
+            throw new UnsupportedOperationException("Elements do not support toString; use HTML#renderTo instead");
+        }
+
+        @Override
+        public void renderTo(HtmlContext ctx) throws IOException {
+            ctx.write(html);
+        }
+    }
+
+    final class TextHTML implements HTML {
+        private final @NonNull String textContent;
+
+        public TextHTML(@NonNull String textContent) {
+            this.textContent = textContent;
+        }
+
+        @Override
+        public String toString() {
+            throw new UnsupportedOperationException("Elements do not support toString; use HTML#renderTo instead");
+        }
+
+        @Override
+        public void renderTo(HtmlContext ctx) throws IOException {
+            ctx.write(HTMLUtil.escapeText(textContent));
         }
     }
 }

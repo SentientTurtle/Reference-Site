@@ -1,24 +1,26 @@
-package net.sentientturtle.nee.page;
+package net.sentientturtle.html;
 
-import net.sentientturtle.html.*;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.Main;
 import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.page.PageKind;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
 import static net.sentientturtle.html.HTML.*;
 
-public abstract class Frame implements Document, HTML {
+/// HTML Website "page" without header/footer/sidebar; For use in iframes
+public abstract non-sealed class Frame implements Document, HTML {
     /**
      * @return The {@link PageKind} of this page
      */
     public abstract PageKind getPageKind();
 
-    /**
-     * @return The icon for this page
-     */
+    ///  @return Page description (shown in opengraph metadata)
+    public abstract @Nullable String description();
+
+    /// @return The icon for this page
     public abstract @Nullable ResourceLocation getIcon(HtmlContext context);
 
     protected @Nullable String getCSS(HtmlContext context) {
@@ -31,12 +33,12 @@ public abstract class Frame implements Document, HTML {
 
     protected abstract HTML getContent(HtmlContext context);
 
+    /// Elements cannot be rendered to HTML without a {@link HtmlContext} and so do not support toString();
+    ///
+    /// Use {@link #renderTo(HtmlContext)} instead
     @Override
     public String toString() {
-        return "Page{" +
-               "title=" + this.name() +
-               ", type=" + this.getPageKind() +
-               '}';
+        throw new UnsupportedOperationException("Elements do not support toString; use HTML#renderTo instead");
     }
 
     @Override
@@ -571,7 +573,7 @@ public abstract class Frame implements Document, HTML {
         button:hover {
             border: 1px solid var(--colour-theme-highlight-border);
             background-color: var(--colour-theme-highlight-bg);
-            cursor: pointer; 
+            cursor: pointer;
         }
         
         select {

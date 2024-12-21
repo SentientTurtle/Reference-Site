@@ -8,8 +8,8 @@ import net.sentientturtle.nee.data.ResourceLocation;
 import net.sentientturtle.nee.data.datatypes.Constellation;
 import net.sentientturtle.nee.data.datatypes.Region;
 import net.sentientturtle.nee.data.datatypes.SolarSystem;
-import net.sentientturtle.nee.data.datatypes.singleton.Cluster;
-import net.sentientturtle.util.ExceptionUtil;
+import net.sentientturtle.nee.data.datatypes.Cluster;
+import net.sentientturtle.nee.util.ExceptionUtil;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
@@ -204,7 +204,7 @@ public class DynamicMapPage extends Page {
                 }
             }
         });
-        record RSystem(String solarSystemName, double x, double y, double z, double security, @Nullable String whclass) {};
+        record RSystem(String solarSystemName, double x, double y, double z, double security, @Nullable String whclass) {}
 
         HashMap<String, RSystem> NEC = new HashMap<>();
         ArrayList<int[]> NEC_jumps = new ArrayList<>();
@@ -229,8 +229,8 @@ public class DynamicMapPage extends Page {
                     new RSystem(
                         s.solarSystemName,
                         s.x - 7.70416391716947e+18,
-                        s.y, // - 1.53937198079579e+18,
-                        s.z - -9.51905586204134e+18,
+                        s.y, // y intentionally not offset
+                        s.z - (-9.51905586204134e+18),
                         s.security,
                         getWhClassName(s.wormholeClassID)
                     ));
@@ -347,14 +347,14 @@ public class DynamicMapPage extends Page {
                 systemKillsBytes = inputStream.readAllBytes();
             }
 
-            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/NEC.json").toString(), _ -> NEC_bytes);
-            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/NEC_jumps.json").toString(), _ -> NEC_jumps_bytes);
-            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/anoikis.json").toString(), _ -> anoikisBytes);
-            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/pochven.json").toString(), _ -> pochvenBytes);
-            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/pochven_jumps.json").toString(), _ -> pochvenJumpsBytes);
-            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/selection.json").toString(), _ -> selectionBytes);
-            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/system_jumps.json").toString(), _ -> systemJumpsBytes);
-            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/system_kills.json").toString(), _ -> systemKillsBytes);
+            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/NEC.json"), _ -> NEC_bytes);
+            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/NEC_jumps.json"), _ -> NEC_jumps_bytes);
+            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/anoikis.json"), _ -> anoikisBytes);
+            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/pochven.json"), _ -> pochvenBytes);
+            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/pochven_jumps.json"), _ -> pochvenJumpsBytes);
+            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/selection.json"), _ -> selectionBytes);
+            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/system_jumps.json"), _ -> systemJumpsBytes);
+            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/system_kills.json"), _ -> systemKillsBytes);
         } catch (IOException | URISyntaxException e) {
             ExceptionUtil.sneakyThrow(e);
         }

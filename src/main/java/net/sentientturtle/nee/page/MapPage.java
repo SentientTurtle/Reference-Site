@@ -1,5 +1,6 @@
 package net.sentientturtle.nee.page;
 
+import net.sentientturtle.html.Frame;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.ResourceLocation;

@@ -8,8 +8,9 @@ import java.util.Collections;
 
 /// Top level class for reusable HTML "components"
 ///
-/// Components consist of a DIV with some user-specified content
+/// Components consist of a DIV with some subclass-specified content & style
 public abstract class Component extends Element {
+    /// @param className Unique className for this component
     protected Component(String className) {
         super("div");
         this.className(className);

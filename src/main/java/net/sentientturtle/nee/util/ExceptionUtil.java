@@ -1,4 +1,4 @@
-package net.sentientturtle.util;
+package net.sentientturtle.nee.util;
 
 public class ExceptionUtil {
     @SuppressWarnings("unchecked")

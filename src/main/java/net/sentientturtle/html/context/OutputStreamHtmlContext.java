@@ -1,6 +1,5 @@
 package net.sentientturtle.html.context;
 
-import net.sentientturtle.html.id.IDContext;
 import net.sentientturtle.nee.data.DataSources;
 
 import java.io.IOException;
@@ -11,8 +10,8 @@ import java.nio.charset.StandardCharsets;
 public class OutputStreamHtmlContext extends HtmlContext {
     private final OutputStream out;
 
-    public OutputStreamHtmlContext(int folderDepth, IDContext ids, DataSources dataSources, OutputStream out) {
-        super(folderDepth, ids, dataSources);
+    public OutputStreamHtmlContext(int folderDepth, DataSources dataSources, OutputStream out) {
+        super(folderDepth, dataSources);
         this.out = out;
     }
 

@@ -3,7 +3,7 @@ package net.sentientturtle.nee.components;
 import net.sentientturtle.html.Component;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.html.id.ID;
+import net.sentientturtle.html.context.ID;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
@@ -33,7 +33,7 @@ public class TabBox extends Component {
     protected HTML[] getContent(HtmlContext context) {
         ID[][] ids = new ID[this.content.size()][];
         for (int i = 0; i < ids.length; i++) {
-            ids[i] = context.ids.nextWithPrefixes("tab_box_button:", "tab_box_container:");
+            ids[i] = context.nextIDsWithPrefixes("tab_box_button:", "tab_box_container:");
         }
 
         var bar = DIV("tab_box_bar");
@@ -105,7 +105,7 @@ public class TabBox extends Component {
     }
 
     @Override
-    protected @Nullable String getScript() {    // TODO: Persistence when returning to a page with tab-box seems unreliable
+    protected @Nullable String getScript() {
         return """
             for (const button of document.getElementsByClassName("tab_box_button")) {
                 button.onclick = function (event) {

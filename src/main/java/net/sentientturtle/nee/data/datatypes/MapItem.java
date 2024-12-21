@@ -1,8 +1,7 @@
 package net.sentientturtle.nee.data.datatypes;
 
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.nee.data.datatypes.singleton.Cluster;
-import net.sentientturtle.nee.page.Frame;
+import net.sentientturtle.html.Frame;
 import net.sentientturtle.nee.page.HasPage;
 import net.sentientturtle.nee.page.MapPage;
 import net.sentientturtle.nee.data.ResourceLocation;

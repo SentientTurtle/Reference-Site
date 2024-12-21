@@ -4,16 +4,16 @@ import net.sentientturtle.nee.Main;
 import net.sentientturtle.nee.page.PageKind;
 import org.jspecify.annotations.Nullable;
 
-/// Top level interface for (HTML) Documents
+/// Top level interface for HTML Documents
 public interface Document {
-    /// Document "name", does not have to be unique
+    /// Document name, does not have to be unique
     String name();
-    @Nullable String description();
     /// Document filename, without extension, must be unique
     String filename();
+    /// PageKind enum for this document
     PageKind getPageKind();
 
-    /// Document, as used in {@code <title>}
+    /// Document title, as used in {@code <title>}
     default String title() {
         return Main.WEBSITE_ABBREVIATION + " - " + this.name();
     }

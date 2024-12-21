@@ -9,14 +9,13 @@ import net.sentientturtle.html.RenderingException;
 import net.sentientturtle.html.context.NoopHtmlContext;
 import net.sentientturtle.html.context.OutputStreamHtmlContext;
 import net.sentientturtle.html.context.StringBuilderHtmlContext;
-import net.sentientturtle.html.id.IDContext;
 import net.sentientturtle.nee.data.*;
 import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.data.sharedcache.FSDData;
 import net.sentientturtle.nee.data.sharedcache.IconProvider;
 import net.sentientturtle.nee.page.PageKind;
 import net.sentientturtle.nee.data.sharedcache.SharedCacheReader;
-import net.sentientturtle.util.ExceptionUtil;
+import net.sentientturtle.nee.util.ExceptionUtil;
 
 import java.io.*;
 import java.net.URI;
@@ -28,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -171,11 +171,13 @@ public class Main {
                 serverVersion = ExceptionUtil.sneakyThrow(e);
             }
 
-            String installVersion = Files.lines(SHARED_CACHE_PATH.resolve("tq/start.ini"))
-                .filter(s -> s.startsWith("build = "))
-                .findFirst()
-                .get()
-                .substring("build = ".length());
+            String installVersion;
+            try (Stream<String> lines = Files.lines(SHARED_CACHE_PATH.resolve("tq/start.ini"))) {
+                installVersion = lines.filter(s -> s.startsWith("build = "))
+                    .findFirst()
+                    .get()
+                    .substring("build = ".length());
+            }
 
             if (serverVersion.equals(installVersion)) {
                 gameVersion = serverVersion;
@@ -203,14 +205,14 @@ public class Main {
         Set<String> css = Collections.synchronizedSet(new LinkedHashSet<>());
         Set<String> js = Collections.synchronizedSet(new LinkedHashSet<>());
 
-        ConcurrentHashMap<String, ResourceLocation.ResourceData> dependencies = new ConcurrentHashMap<>();
+        ConcurrentHashMap<Path, ResourceLocation.ResourceData> dependencies = new ConcurrentHashMap<>();
 
         System.out.println("Writing pages...");
         final AtomicInteger pageCount = new AtomicInteger(0);
         PageKind.pageStream(data.SDEData())
             .parallel()
             .forEach(page -> {
-                var context = new StringBuilderHtmlContext(page.getPageKind().getFolderDepth(), new IDContext(page.toString()), data);
+                var context = new StringBuilderHtmlContext(page.getPageKind().getFolderDepth(), data);
 
                 try {
                     page.renderTo(context);
@@ -244,7 +246,7 @@ public class Main {
                         byte[] bytes = entry.getValue().getData(data);
 
                         synchronized (zipOutputStream) {
-                            zipOutputStream.putNextEntry(new ZipEntry(entry.getKey().replace('\\', '/')));
+                            zipOutputStream.putNextEntry(new ZipEntry(entry.getKey().toString().replace('\\', '/')));
                             zipOutputStream.write(bytes);
                             zipOutputStream.closeEntry();
                         }
@@ -276,9 +278,9 @@ public class Main {
         zipOutputStream.closeEntry();
 
         zipOutputStream.putNextEntry(new ZipEntry(
-            ResourceLocation.searchIndex().getURI(new NoopHtmlContext(0, new IDContext(""), data)).replace('\\', '/')
+            ResourceLocation.searchIndex().getURI(new NoopHtmlContext(0, data)).replace('\\', '/')
         ));
-        OutputStreamHtmlContext searchContext = new OutputStreamHtmlContext(0, new IDContext("searchindex"), data, zipOutputStream);
+        OutputStreamHtmlContext searchContext = new OutputStreamHtmlContext(0, data, zipOutputStream);
         ObjectMapper objectMapper = new ObjectMapper();
         record IndexEntry(String index, String name, String path, String icon) {
         }

@@ -5,7 +5,7 @@ import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.datatypes.Type;
-import net.sentientturtle.nee.page.Frame;
+import net.sentientturtle.html.Frame;
 import net.sentientturtle.nee.data.ResourceLocation;
 
 import java.util.Objects;

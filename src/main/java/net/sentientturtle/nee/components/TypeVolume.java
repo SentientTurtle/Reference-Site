@@ -576,6 +576,8 @@ public class TypeVolume extends Component {
         PACKAGED_VOLUMES.put(33879, 5000.0);
         PACKAGED_VOLUMES.put(33881, 5000.0);
         PACKAGED_VOLUMES.put(33883, 5000.0);
+        PACKAGED_VOLUMES.put(85086, 15000.0);
+        PACKAGED_VOLUMES.put(85087, 5000.0);
         PACKAGED_VOLUMES.put(11365, 2500.0);
         PACKAGED_VOLUMES.put(11371, 2500.0);
         PACKAGED_VOLUMES.put(72812, 15000.0);

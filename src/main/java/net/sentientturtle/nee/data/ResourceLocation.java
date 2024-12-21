@@ -6,7 +6,7 @@ import net.sentientturtle.nee.data.datatypes.Group;
 import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.data.sharedcache.IconProvider;
 import net.sentientturtle.nee.util.MIME;
-import net.sentientturtle.util.ExceptionUtil;
+import net.sentientturtle.nee.util.ExceptionUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,15 +17,17 @@ import java.nio.file.Path;
 import java.util.*;
 
 /**
- * Object for various resources, which can be linked to or included inline
+ * Object for various web file "resources" such as images/scripts/etc, which can be linked to or included inline
  */
 @SuppressWarnings("WeakerAccess")
 public class ResourceLocation {
-    public static final Path OUTPUT_RES_FOLDER = Path.of("rsc");              // Destination resource folder relative to output
-
+    public static final Path OUTPUT_RES_FOLDER = Path.of("rsc");              // Destination resource folder relative to website output folder
     private final ResourceData dataSource;
     private final String destinationPath;
 
+    /// Instances of ResourceLocation are created through the factory methods
+    ///
+    /// (See: Static methods)
     private ResourceLocation(ResourceData resourceData, String destinationPath) {
         this.dataSource = resourceData;
         this.destinationPath = destinationPath;
@@ -36,6 +38,7 @@ public class ResourceLocation {
         return new ResourceLocation(new ResourceData.File(Main.RES_FOLDER.resolve(path)), path);
     }
 
+    /// ResourceLocation for an item-type icon (64x64 PNG file)
     public static ResourceLocation typeIcon(int typeID, HtmlContext context) {
         if (Main.GENERATE_ICONS) {
             Type invType = context.sde.getTypes().get(typeID);
@@ -59,6 +62,7 @@ public class ResourceLocation {
         }
     }
 
+    /// ResourceLocation for an item-type render (512x512 JPG file)
     public static ResourceLocation typeRender(int typeID) {
         if (Main.GENERATE_ICONS) {
             return new ResourceLocation(new ResourceData.IconProvider512(typeID), "type_renders/" + typeID + ".jpg");
@@ -74,7 +78,7 @@ public class ResourceLocation {
         }
     }
 
-    private static String sharedCacheDestination(String resource, HtmlContext context) {
+    private static String sharedCacheFile(String resource, HtmlContext context) {
         String hash = context.sharedCache.getResourceHash(resource);
         // If we have a file extension, append that to hash
         // This is required to make Data URI logic below figure out the mime type of the sharedcache resource
@@ -86,23 +90,26 @@ public class ResourceLocation {
         }
     }
 
+    /// ResourceLocation for a file from the Shared Cache (Unknown/Variable file type, usually PNG images)
     public static ResourceLocation fromSharedCache(String resource, HtmlContext context) {
             if (context.sharedCache.containsResource(resource)) {
-                return new ResourceLocation(new ResourceData.SharedCache(resource), sharedCacheDestination(resource, context));
+                return new ResourceLocation(new ResourceData.SharedCache(resource), sharedCacheFile(resource, context));
             } else {
                 throw new IllegalStateException("Missing sharedcache entry: " + resource);
             }
     }
 
+    /// ResourceLocation for an iconID-specified icon (Variable size PNG file)
     public static ResourceLocation ofIconID(int iconID, HtmlContext context) {
         String iconResource = context.sde.getEveIcons().get(iconID);
         if (context.sharedCache.containsResource(iconResource)) {
-            return new ResourceLocation(new ResourceData.SharedCache(iconResource), sharedCacheDestination(iconResource, context));
+            return new ResourceLocation(new ResourceData.SharedCache(iconResource), sharedCacheFile(iconResource, context));
         } else {
             throw new IllegalStateException("Missing sharedcache entry: " + iconResource);
         }
     }
 
+    /// ResourceLocation for an EVE faction's logo icon (128x128 PNG file)
     public static ResourceLocation factionLogo(int factionID) {
         String resource = switch (factionID) {
             case 500001 -> "res:/ui/texture/icons/19_128_1.png";
@@ -141,10 +148,11 @@ public class ResourceLocation {
         );
     }
 
+    /// ResourceLocation for an EVE player corporation logo; Is a remote link to the EVE Online Image Service. (64x64 PNG file)
     public static ResourceLocation iconOfCorpID(int corporationID) {
         try {
             return new ResourceLocation(
-                new ResourceData.Remote(new URI("https://imageserver.eveonline.com/corporations/" + corporationID + "/logo?size=64")),
+                new ResourceData.Remote(new URI("https://imageserver.eveonline.com/corporations/" + corporationID + "/logo?size=64")),  // TODO: This is still the old URL, fix or remove
                 "corp_icons/" + corporationID + ".png"
             );
         } catch (URISyntaxException e) {
@@ -152,6 +160,7 @@ public class ResourceLocation {
         }
     }
 
+    /// ResourceLocation for the search index data-script file
     public static ResourceLocation searchIndex() {
         return new ResourceLocation(new ResourceData.NoData(), "searchindex.js");
     }
@@ -176,7 +185,7 @@ public class ResourceLocation {
                 }
             case INTERNAL:
                 if (!(dataSource instanceof ResourceData.NoData)) {
-                    context.addFileDependency(OUTPUT_RES_FOLDER.resolve(destinationPath).toString().replace("\\", "/"), dataSource);
+                    context.addFileDependency(OUTPUT_RES_FOLDER.resolve(destinationPath), dataSource);
                 }
                 if (absolutePrefix != null) {
                     return absolutePrefix + OUTPUT_RES_FOLDER.resolve(destinationPath).toString().replace("\\", "/");
@@ -191,7 +200,7 @@ public class ResourceLocation {
                 try {
                     StringBuilder builder = new StringBuilder();
                     builder.append("data:")
-                        .append(MIME.getType((destinationPath).substring(destinationPath.lastIndexOf('.'))))     // TODO: Move mime type into datasource?
+                        .append(MIME.getType((destinationPath).substring(destinationPath.lastIndexOf('.'))))     // TODO: Move mime type into datasource
                         .append(";base64,");
                     byte[] encode = Base64.getEncoder().encode(dataSource.getData(context.dataSources));    // Fail intentionally on NoData
                     builder.append(new String(encode));

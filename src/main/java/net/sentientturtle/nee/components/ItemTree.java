@@ -6,7 +6,7 @@ import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.Component;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.datatypes.Type;
-import net.sentientturtle.nee.page.Frame;
+import net.sentientturtle.html.Frame;
 import net.sentientturtle.nee.page.HasPage;
 import net.sentientturtle.nee.data.ResourceLocation;
 import org.jspecify.annotations.NonNull;
@@ -38,7 +38,7 @@ public class ItemTree extends Component {
         for (Entry entry : this.entries) {
             html.add(
                 DIV("item_tree_header_border eve_clip_top colour_theme_border_bg")
-                    .content(DIV("item_tree_header font_header eve_clip_top colour_theme_bg", context.ids.tryID("item-tree-" + entry.name)).content(entry.header))
+                    .content(DIV("item_tree_header font_header eve_clip_top colour_theme_bg", context.tryID("item-tree-" + entry.name)).content(entry.header))
             );
 
             var entryContainer = DIV("item_tree_row");

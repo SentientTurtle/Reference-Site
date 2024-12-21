@@ -6,7 +6,7 @@ import net.sentientturtle.nee.data.DataSources;
 import net.sentientturtle.nee.data.datatypes.Group;
 import net.sentientturtle.nee.data.datatypes.IndustryActivity;
 import net.sentientturtle.nee.data.datatypes.Type;
-import net.sentientturtle.util.ExceptionUtil;
+import net.sentientturtle.nee.util.ExceptionUtil;
 import org.jspecify.annotations.Nullable;
 
 import java.io.*;
@@ -24,7 +24,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+/// Icon generation utility class
 public class IconProvider {
+    /// Entrypoint for generating Icon Export
     public static void main(String[] args) throws IOException, SQLiteException {
         DataSources sources = Main.initialize(false);
 
@@ -36,7 +38,6 @@ public class IconProvider {
         generateTypeRenderExport(sources, renders);
         renders.close();
     }
-
 
     public static void generateTypeRenderExport(DataSources sources, OutputStream outputStream) {
         ZipOutputStream rendersOut = new ZipOutputStream(outputStream);
@@ -267,7 +268,7 @@ public class IconProvider {
                     Path techOverlay = techOverlayPath(metaGroup, dataSources, useOldOverlay);
                     if (techOverlay == null) {
                         // No need to cache
-                        return dataSources.sharedCache().getBytes(graphicResource);    // TODO: BPC
+                        return dataSources.sharedCache().getBytes(graphicResource);
                     } else {
                         cacheKey = metaGroup + ";" + useOldOverlay + ";" + dataSources.sharedCache().getResourceHash(graphicResource);
                         imageMagickCall = new ProcessBuilder(

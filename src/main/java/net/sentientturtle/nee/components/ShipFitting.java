@@ -120,7 +120,7 @@ public class ShipFitting extends Component {
             ));
         }
         if (showCapacitor) {
-            // TODO: Max sustained load
+            // TODO: Max sustained load, also on shields
             stat_table.content(TR().content(
                 TD().content(
                     SPAN("ship_fitting_span").content(

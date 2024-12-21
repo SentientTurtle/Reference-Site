@@ -1,7 +1,7 @@
 package net.sentientturtle.html;
 
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.html.id.ID;
+import net.sentientturtle.html.context.ID;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 /// Common element types are instantiated through factory methods in {@link HTML}, such as {@link HTML#DIV()}
 ///
 /// Subclasses may instantiate this type directly
-public class Element implements HTML {
+public non-sealed class Element implements HTML {
     private final String tagName;
     private final boolean isVoid;
     private String className;
@@ -136,6 +136,7 @@ public class Element implements HTML {
         return content.isEmpty();
     }
 
+    /// Renders HTML of this element
     @Override
     public void renderTo(HtmlContext context) throws RenderingException, IOException {
         if (className.length() > 0) {
@@ -176,7 +177,7 @@ public class Element implements HTML {
         throw new UnsupportedOperationException("Elements do not support toString; use HTML#renderTo instead");
     }
 
-    /// Special-case element for HTML5 document roots; Provides the {@code <html>} element and a DOCTYPE header
+    /// Special-case element for HTML5 document roots; Represents the {@code <html>} element and the DOCTYPE header during rendering
     static class Html5Root extends Element {
         public Html5Root(String lang) {
             super("html");

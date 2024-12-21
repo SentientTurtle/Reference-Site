@@ -48,7 +48,7 @@ public class SearchResults extends Page {
     protected HTML getContent(HtmlContext context) {
         return DIV("search_results_grid").content(
             new ItemTitle("Search results:", null),
-            TABLE().id(context.ids.tryID("search_results_table"))
+            TABLE().id(context.tryID("search_results_table"))
                 .content(TR().content(TD().text("Loading...")))   // This table is replaced on update
         );
     }

@@ -1,5 +1,6 @@
 package net.sentientturtle.nee.data.sharedcache;
 
+import net.sentientturtle.nee.util.ExceptionUtil;
 import org.jspecify.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
@@ -11,9 +12,11 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-import static net.sentientturtle.util.ExceptionUtil.sneakyThrow;
+import static net.sentientturtle.nee.util.ExceptionUtil.sneakyThrow;
 
 /// Reader for the EVE Online game files; Referred to as "Shared Cache"
+///
+/// Resources are specified by a shared-cache specific path; e.g. "res:/ui/texture/icons/7_64_15.png", referred to as `resource` in this project
 public class SharedCacheReader {
     private final HashMap<String, Path> cacheIndex;
     private final HashMap<String, String> resourceHashes;
@@ -21,19 +24,24 @@ public class SharedCacheReader {
     private final Path cacheFolder;
     private final Path resFiles;
 
+    /**
+     * Initializes SharedCacheReader
+     * @param cacheFolder Path to the cache data folder; Usually the `SharedCache` folder within the game install folder
+     * @throws IOException If an IO error occurs parsing the cache index file
+     */
     public SharedCacheReader(Path cacheFolder) throws IOException {
         this.cacheFolder = cacheFolder;
         this.resFiles = cacheFolder.resolve("ResFiles");
 
         Path indexFile = cacheFolder.resolve("tq/resfileindex.txt");
-        if (!Files.exists(indexFile)) throw new IllegalArgumentException("No cache index file in cache folder " + cacheFolder);
+        if (!Files.exists(indexFile)) throw new IOException("No cache index file in cache folder " + cacheFolder);
 
         this.cacheIndex = new HashMap<>();
         this.resourceHashes = new HashMap<>();
         try (Stream<String> lines = Files.lines(indexFile)) {
             lines.forEach(line -> {
                 String[] split = line.split(",");
-                if (split.length < 5) throw new IllegalStateException("Invalid index file format!");
+                if (split.length < 5) ExceptionUtil.sneakyThrow(new IOException("Invalid index file format!"));
 
                 String resource = split[0].replace('\\', '/');
                 String location = split[1];

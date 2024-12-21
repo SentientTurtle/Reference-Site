@@ -14,11 +14,11 @@ import static net.sentientturtle.html.HTML.*;
 /**
  * Sensor stats of a ship {@link Type}
  */
-public class ShipSensors extends Component {    // TODO: Maybe rename TypeSensors as drones/structures also have sensor stats
+public class TypeSensors extends Component {
     private final Type type;
 
-    public ShipSensors(Type type) {
-        super("ship_sensors colour_theme_minor");
+    public TypeSensors(Type type) {
+        super("type_sensors colour_theme_minor");
         this.type = type;
     }
 
@@ -26,23 +26,23 @@ public class ShipSensors extends Component {    // TODO: Maybe rename TypeSensor
     protected HTML[] getContent(HtmlContext context) {
         Map<Integer, Attribute> attributeMap = context.sde.getAttributes();
         Map<Integer, Double> typeAttributes = context.sde.getTypeAttributes().get(type.typeID);
-        var table = TABLE("ship_sensors_table font_text");
+        var table = TABLE("type_sensors_table font_text");
 
         double targetingRange = typeAttributes.getOrDefault(76, 0.0);
         if (targetingRange > 0.0) {
             table.content(
                 TR().content(
                     TD().content(
-                        SPAN("ship_sensors_span").title("Targeting Range").content(
-                            IMG(ResourceLocation.ofIconID(attributeMap.get(76).iconID, context), null, 32).className("ship_sensors_icon"),
+                        SPAN("type_sensors_span").title("Targeting Range").content(
+                            IMG(ResourceLocation.ofIconID(attributeMap.get(76).iconID, context), null, 32).className("type_sensors_icon"),
                             TEXT("Targeting Range: "),
                             context.sde.format_with_unit(targetingRange > 1000.0 ? targetingRange / 1000.0 : targetingRange, -1),
                             TEXT(targetingRange > 1000.0 ? " km" : " m")
                         )
                     ),
                     TD().content(
-                        SPAN("ship_sensors_span").title("Scan Resolution").content(
-                            IMG(ResourceLocation.ofIconID(attributeMap.get(564).iconID, context), null, 32).className("ship_sensors_icon"),
+                        SPAN("type_sensors_span").title("Scan Resolution").content(
+                            IMG(ResourceLocation.ofIconID(attributeMap.get(564).iconID, context), null, 32).className("type_sensors_icon"),
                             TEXT("Scan Resolution: "),
                             context.sde.format_with_unit(typeAttributes.getOrDefault(564, 0.0), attributeMap.get(564).unitID)
                         )
@@ -50,8 +50,8 @@ public class ShipSensors extends Component {    // TODO: Maybe rename TypeSensor
                 ),
                 TR().content(
                     TD().content(
-                        SPAN("ship_sensors_span").title("Maximum Targets").content(
-                            IMG(ResourceLocation.ofIconID(attributeMap.get(192).iconID, context), null, 32).className("ship_sensors_icon"),
+                        SPAN("type_sensors_span").title("Maximum Targets").content(
+                            IMG(ResourceLocation.ofIconID(attributeMap.get(192).iconID, context), null, 32).className("type_sensors_icon"),
                             TEXT("Maximum Targets: "),
                             context.sde.format_with_unit(typeAttributes.getOrDefault(192, 0.0), attributeMap.get(192).unitID)
                         )
@@ -99,14 +99,14 @@ public class ShipSensors extends Component {    // TODO: Maybe rename TypeSensor
         if (sensorType != null) {
             table.content(TR().content(
                 TD().content(
-                    SPAN("ship_sensors_span").title("Sensor Type").content(
-                        IMG(ResourceLocation.ofIconID(attributeMap.get(sensorAttribute).iconID, context), null, 32).className("ship_sensors_icon"),
+                    SPAN("type_sensors_span").title("Sensor Type").content(
+                        IMG(ResourceLocation.ofIconID(attributeMap.get(sensorAttribute).iconID, context), null, 32).className("type_sensors_icon"),
                         TEXT("Sensor Type: " + sensorType)
                     )
                 ),
                 TD().content(
-                    SPAN("ship_sensors_span").title("Sensor Strength").content(
-                        IMG(ResourceLocation.ofIconID(attributeMap.get(sensorAttribute).iconID, context), null, 32).className("ship_sensors_icon"),
+                    SPAN("type_sensors_span").title("Sensor Strength").content(
+                        IMG(ResourceLocation.ofIconID(attributeMap.get(sensorAttribute).iconID, context), null, 32).className("type_sensors_icon"),
                         TEXT("Sensor Strength: "),
                         context.sde.format_with_unit(sensorStrength, attributeMap.get(sensorAttribute).unitID)
                     )
@@ -124,27 +124,27 @@ public class ShipSensors extends Component {    // TODO: Maybe rename TypeSensor
     @Override
     protected String getCSS() {
         return """
-            .ship_sensors {
+            .type_sensors {
               padding: 0.5rem;
             }
             
-            .ship_sensors_table {
+            .type_sensors_table {
                 width: 100%;
                 border-collapse: collapse;
                 margin-top: 0.5rem;
             }
             
-            .ship_sensors_table tr:not(:first-child) {
+            .type_sensors_table tr:not(:first-child) {
                 border-top: var(--border-size) solid var(--colour-theme-minor-border);
             }
             
-            .ship_sensors_span {
+            .type_sensors_span {
                 display: flex;
                 align-items: center;
                 gap: 0.25rem;
             }
             
-            .ship_sensors_icon {
+            .type_sensors_icon {
                 width: 2rem;
                 height: 2rem;
             }""";

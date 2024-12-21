@@ -68,7 +68,6 @@ public class MarketGroupPage extends Page {
             """;
     }
 
-    // TODO: Ingame items are grouped by tier
     @Override
     protected HTML getContent(HtmlContext context) {
         boolean hasItems;

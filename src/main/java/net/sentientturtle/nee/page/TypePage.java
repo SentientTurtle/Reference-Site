@@ -163,7 +163,7 @@ public class TypePage extends Page {
             if (typeAttributes.getOrDefault(76, 0.0) > 0
                 || typeAttributes.getOrDefault(208, 0.0) > 0 || typeAttributes.getOrDefault(209, 0.0) > 0
                 || typeAttributes.getOrDefault(210, 0.0) > 0 || typeAttributes.getOrDefault(211, 0.0) > 0)
-                mid.content(new ShipSensors(type));
+                mid.content(new TypeSensors(type));
 
             if (categoryID == 6 || categoryID == 22 || categoryID == 23 || categoryID == 40 || categoryID == 46) {
                 if (typeAttributes.getOrDefault(2217, 0.0) > 0         // Light fighter slots

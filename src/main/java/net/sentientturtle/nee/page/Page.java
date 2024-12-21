@@ -15,10 +15,10 @@ import static net.sentientturtle.html.HTML.*;
 @SuppressWarnings("WeakerAccess")
 public abstract class Page extends Frame {
     private HTML getHeader(HtmlContext context) {
-        return DIV().id(context.ids.tryID("header")).content(
+        return DIV().id(context.tryID("header")).content(
             SPAN("header_span").content(
                 IMG(ResourceLocation.file("bookicon.png"), null, 64).className("header_icon"),
-                TEXT_BOLD().className("font_header").id(context.ids.tryID("header_text")).content(new PageLink(new IndexPage()))
+                TEXT_BOLD().className("font_header").id(context.tryID("header_text")).content(new PageLink(new IndexPage()))
             ),
             SPAN("header_span header_search").content(
                 HTML.RAW("<form class='font_header' action='" + context.pathTo(new SearchResults()) + "'>" +
@@ -29,7 +29,7 @@ public abstract class Page extends Frame {
     }
 
     private static HTML getFooter(HtmlContext context) {
-        return DIV().id(context.ids.tryID("footer")).content(
+        return DIV().id(context.tryID("footer")).content(
             DIV("footer_text font_text").text(
                 "EVE Online and the EVE logo are the registered trademarks of CCP hf.\n" +
                 "All rights are reserved worldwide.\n" +
@@ -76,8 +76,8 @@ public abstract class Page extends Frame {
             head,
             BODY().className("body_grid").content(
                 getHeader(context),
-                new Sidebar().id(context.ids.tryID("sidebar")),
-                DIV().id(context.ids.tryID("content"))
+                new Sidebar().id(context.tryID("sidebar")),
+                DIV().id(context.tryID("content"))
                     .content(getContent(context)),
                 Page.getFooter(context)
             )

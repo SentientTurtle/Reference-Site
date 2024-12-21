@@ -15,7 +15,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Datasource for EVE Online Data.
+ * Datasource for EVE Online Static-Data-Export Data.
  * <br>
  * Implementors must call {@link SDEData#patch()} and then {@link SDEData#loadViews()} after initializing the abstract collections in this type
  *
@@ -361,7 +361,7 @@ public abstract class SDEData {
      * @param unitID UnitID of the unit to format the value with
      * @return Value formatted as a String with the specified unit
      */
-    public HTML format_with_unit(double value, @Nullable Integer unitID) {  // TODO: Apply to-break to text?
+    public HTML format_with_unit(double value, @Nullable Integer unitID) {  // TODO: Apply no-break to text
         if (unitID == null) unitID = -1;
 
         switch (unitID) {

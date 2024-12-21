@@ -7,7 +7,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sentientturtle.nee.Main;
-import net.sentientturtle.util.ExceptionUtil;
+import net.sentientturtle.nee.util.ExceptionUtil;
 
 import java.io.IOException;
 import java.lang.foreign.*;
@@ -97,9 +97,10 @@ public class FSDData {
 
     // This approach is dumb, but avoids the need for a fragile python 2.7 environment & synchronizing with manually-copied resources
     // It is also quite funny to have cursed python environments
-    private static boolean hasRanPython = false; // Because of a bug or Python limitation, we can't re-initialize Python, so this method only permits being ran one
+    private static boolean hasRanPython = false; // Because of a bug or Python limitation, we can't re-initialize Python, so this method only permits being ran once
 
-    private static List<String> runPython(String pythonLibrary, List<String> scripts) {
+    // TODO: Configure FFI permission
+    private static synchronized List<String> runPython(String pythonLibrary, List<String> scripts) {
         if (hasRanPython) throw new IllegalStateException("Cannot run python twice!");
         hasRanPython = true;
 
@@ -127,7 +128,6 @@ public class FSDData {
                 ).invoke(arena.allocateFrom(script));
 
                 if (ret != 0) throw new IllegalStateException("A python error occurred!");
-
                 if (main.address() == 0) throw new NullPointerException("Null pointer returned from python");
 
                 MemorySegment outObject = (MemorySegment) linker.downcallHandle(

@@ -1,7 +1,7 @@
 package net.sentientturtle.nee.util;
 
 /**
- * Utility class for quickly converting bytearrays to hexadecimal strings and back.
+ * Utility class for converting bytearrays to hexadecimal strings and back.
  */
 public class Hex {
     private final static char[] charArray = "0123456789ABCDEF".toCharArray();

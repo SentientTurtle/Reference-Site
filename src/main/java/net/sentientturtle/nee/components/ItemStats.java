@@ -376,7 +376,7 @@ public class ItemStats extends Component {
 
         // Overload Bonuses
         1935, 1936, 1937, 1205, 1206, 1208, 1210, 1222, 1223, 1225, 1230, 1213,
-        1074    // Banned in empire space (TODO: Change to special-case with no value, as it's boolean?)
+        1074    // Banned in empire space
     };
 
     private static final Set<Integer> SUSTAIN_ATTRIBUTES = Set.of(68, 77, 83, 84, 90, 97);
@@ -431,7 +431,7 @@ public class ItemStats extends Component {
                         Arrays.stream(attributes).mapToObj(id -> {
                             Attribute attr = context.sde.getAttributes().get(id);
                             Integer iconID = attr.iconID;
-                            Double attributeValue = typeAttributes.getOrDefault(id, attr.defaultValue());   // TODO: Replace all getOrDefault(attributeID, 0.0) with getOrDefault attribute.defaultValue()!!!!
+                            Double attributeValue = typeAttributes.getOrDefault(id, attr.defaultValue());
 
                             return SPAN("item_stats_span")
                                 .title(attr.displayName != null ? attr.displayName : attr.attributeName)
@@ -461,7 +461,7 @@ public class ItemStats extends Component {
         tryRow(context, table, "Damage", 114, 118, 117, 116);
         tryRow(context, table, "Damage Resistance Bonus", 984, 987, 986, 985);
         tryRow(context, table, "Damage Resistance Bonus", 994, 997, 996, 995);  // TODO: Ingame this is named "Passive Resistance Bonus", maybe change?
-        tryRow(context, table, "Shield Damage Resistance", 271, 274, 273, 272); // TODO: Use a health window?
+        tryRow(context, table, "Shield Damage Resistance", 271, 274, 273, 272);
         showHullHP |= tryRow(context, table, "Armor Damage Resistance", 267, 270, 269, 268);
         showHullHP |= tryRow(context, table, "Hull Damage Resistance", 974, 977, 976, 975);
         showHullHP |= tryRow(context, table, "Hull Damage Resistance", 113, 110, 109, 111);
@@ -626,7 +626,7 @@ public class ItemStats extends Component {
                     case "ShowNormal" -> valueTD.content(context.sde.format_with_unit(buffAmount, 124));
                     case "ShowInverted" -> valueTD.content(context.sde.format_with_unit(-buffAmount, 124));
                     default -> throw new RuntimeException("Unknown warfare buff display : " + warfareBuff.showOutputValueInUI() + " for buff: " + warfareBuffID);
-                };
+                }
 
                 String name = context.fsdData.localizationStrings.get(warfareBuff.displayNameID());
 
