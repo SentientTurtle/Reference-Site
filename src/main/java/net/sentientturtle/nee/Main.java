@@ -11,6 +11,7 @@ import net.sentientturtle.html.context.OutputStreamHtmlContext;
 import net.sentientturtle.html.context.StringBuilderHtmlContext;
 import net.sentientturtle.nee.data.*;
 import net.sentientturtle.nee.data.datatypes.Type;
+import net.sentientturtle.nee.data.sde.*;
 import net.sentientturtle.nee.data.sharedcache.FSDData;
 import net.sentientturtle.nee.data.sharedcache.IconProvider;
 import net.sentientturtle.nee.page.PageKind;
@@ -90,7 +91,7 @@ public class Main {
 
             RES_FOLDER = Path.of(properties.getProperty("RESOURCE_FOLDER", "./rsc/"));
             TEMP_DIR = RES_FOLDER.resolve("temp");
-            SDE_FILE = RES_FOLDER.resolve("sqlite-latest.sqlite");
+            SDE_FILE = RES_FOLDER.resolve("sde.zip");
             ICON_CACHE_FILE = RES_FOLDER.resolve("iconcache.zip");
             UPDATE_SDE = properties.getProperty("UPDATE_SDE", "TRUE").equalsIgnoreCase("TRUE");
 
@@ -119,17 +120,18 @@ public class Main {
             System.exit(-1);
         }
 
-        if (UPDATE_SDE) SDEUtils.updateSDE(SDE_FILE.toFile());
-
-        System.out.println("Loading SDE...");
-        SDEData SDEData = new SQLiteSDEData(new SQLiteConnection(SDE_FILE.toFile()), patch);
-        System.out.println("\tSDE loaded!");
         System.out.println("Initializing shared cache...");
         SharedCacheReader sharedCache = new SharedCacheReader(SHARED_CACHE_PATH);
         System.out.println("\tConnected to shared cache!");
         System.out.println("Connecting to Python FSD data...");
         FSDData fsdData = new FSDData(sharedCache);
         System.out.println("\tFSD data loaded!");
+
+        if (UPDATE_SDE) SDEUtils.updateSDE(SDE_FILE.toFile());
+
+        System.out.println("Loading SDE...");
+        SDEData SDEData = new YamlSDEData(new YAMLDataExportReader(SDE_FILE), fsdData.localizationStrings, patch);
+        System.out.println("\tSDE loaded!");
         // Patch FSD into SDE data
         {
             Map<Integer, Set<Integer>> mutaplasmidMap = SDEData.produceMap();

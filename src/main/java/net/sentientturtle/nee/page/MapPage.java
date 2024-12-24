@@ -11,6 +11,7 @@ import net.sentientturtle.nee.data.datatypes.Station;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Set;
 
 import static net.sentientturtle.html.HTML.DIV;
@@ -100,7 +101,9 @@ public class MapPage extends Frame {
             }
         }
 
-        grid.content(new MapList(mapItem));
+        if (mapItem.getConstituents(context.sde).findAny().isPresent()) {
+            grid.content(new MapList(mapItem));
+        }
 
         return grid;
     }

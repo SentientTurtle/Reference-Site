@@ -1,6 +1,6 @@
 package net.sentientturtle.nee.data.datatypes;
 
-import net.sentientturtle.nee.data.SDEData;
+import net.sentientturtle.nee.data.sde.SDEData;
 import net.sentientturtle.html.Frame;
 import net.sentientturtle.nee.page.HasPage;
 import net.sentientturtle.nee.page.TypePage;

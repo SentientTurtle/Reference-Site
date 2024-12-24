@@ -1,4 +1,4 @@
-package net.sentientturtle.nee.data;
+package net.sentientturtle.nee.data.sde;
 
 import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteException;
@@ -22,24 +22,20 @@ public class SQLiteSDEData extends SDEData {
     private final Map<Integer, Type> types;
     private final Map<Integer, Map<Integer, Double>> typeAttributes;
     private final Map<Integer, Set<Integer>> typeEffects;
-    private final Map<Integer, Map<Integer, List<TypeTraitBonus>>> typeTraits;
+    private final Map<Integer, TypeTraits> typeTraits;
 
     private final Map<Integer, String> eveIcons;
-    private final Map<Integer, IndustryActivityType> industryActivityTypes;
-    private final Map<Integer, Map<Integer, IndustryActivity>> bpActivities;
+    private final Map<Integer, EnumMap<IndustryActivityType, IndustryActivity>> bpActivities;
     private final Map<Integer, Map<Integer, Integer>> reprocessingMaterials;
     private final Map<Integer, PlanetSchematic> planetSchematics;
     private final Map<Integer, MetaGroup> metaGroups;
     private final Map<Integer, Set<Integer>> variants;
-    private final Map<Integer, Integer> parentTypes;
     private final Map<Integer, Integer> metaTypes;
     private final Map<Integer, SolarSystem> solarSystems;
     private final Map<Integer, Constellation> constellations;
     private final Map<Integer, Region> regions;
     private final Map<Integer, Set<Integer>> outJumps;
     private final Map<Integer, Set<Integer>> inJumps;
-    private final Map<Integer, Set<Jump>> constellationJumps;
-    private final Map<Integer, Set<Jump>> regionJumps;
     private final Map<Integer, Set<Celestial>> celestials;
     private final Map<Integer, Set<Station>> stations;
     private final Map<Integer, Faction> factions;
@@ -150,9 +146,16 @@ public class SQLiteSDEData extends SDEData {
             """);
         while (st.step()) {
             assert !st.columnNull(0) && !st.columnNull(1) && !st.columnNull(3);
-            typeTraits.computeIfAbsent(st.columnInt(0), this::produceMap)
-                    .computeIfAbsent(st.columnInt(1), this::produceList)
-                    .add(new TypeTraitBonus(st.columnNull(2) ? null : st.columnDouble(2), st.columnString(3), st.columnNull(4) ? null : st.columnInt(4)));
+            TypeTraits traits = typeTraits.computeIfAbsent(st.columnInt(0), _ -> new TypeTraits(this.produceList(), this.produceList(), this.produceMap()));
+
+            TypeTraits.Bonus bonus = new TypeTraits.Bonus(st.columnNull(2) ? null : st.columnDouble(2), st.columnString(3), st.columnNull(4) ? null : st.columnInt(4));
+
+            int skillID = st.columnInt(1);
+            switch (skillID) {
+                case -1 -> traits.roleBonuses().add(bonus);
+                case -2 -> traits.miscBonuses().add(bonus);
+                default -> traits.skillBonuses().computeIfAbsent(skillID, this::produceList).add(bonus);
+            }
         }
         st.dispose();
 
@@ -210,35 +213,36 @@ public class SQLiteSDEData extends SDEData {
         }
         st.dispose();
 
-        industryActivityTypes = this.produceMap();
-        st = connection.prepare("SELECT activityID, activityName, published FROM ramActivities");
-        while (st.step()) {
-            assert !st.columnNull(0) && !st.columnNull(1) && !st.columnNull(2);
-            int activityID = st.columnInt(0);
-            industryActivityTypes.put(activityID, new IndustryActivityType(activityID, st.columnString(1), st.columnInt(2) == 1));
-        }
-        st.dispose();
-
         bpActivities = this.produceMap();
         st = connection.prepare("SELECT industryActivity.typeID, industryActivity.activityID, industryActivity.time FROM industryActivity");
         while (st.step()) {
             assert !st.columnNull(0) && !st.columnNull(1) && !st.columnNull(2);
 
             int bpTypeID = st.columnInt(0);
-            int activityID = st.columnInt(1);
 
-            bpActivities.computeIfAbsent(bpTypeID, this::produceMap)
+            int activityID = st.columnInt(1);
+            IndustryActivityType activityType = switch (activityID) {
+                case 1 -> IndustryActivityType.MANUFACTURING;
+                case 3 -> IndustryActivityType.RESEARCH_TIME;
+                case 4 -> IndustryActivityType.RESEARCH_MATERIAL;
+                case 5 -> IndustryActivityType.COPYING;
+                case 8 -> IndustryActivityType.INVENTION;
+                case 11 -> IndustryActivityType.REACTIONS;
+                default -> throw new IllegalStateException("Unknown activityType: " + activityID);
+            };
+
+            bpActivities.computeIfAbsent(bpTypeID, _ -> new EnumMap<>(IndustryActivityType.class))
                     .put(
-                            activityID,
-                            new IndustryActivity(
-                                    bpTypeID,
-                                    activityID,
-                                    st.columnInt(2),
-                                    this.produceMap(),
-                                    this.produceMap(),
-                                    this.produceMap(),
-                                    this.produceMap()
-                            )
+                        activityType,
+                        new IndustryActivity(
+                                bpTypeID,
+                                activityType,
+                                st.columnInt(2),
+                                this.produceMap(),
+                                this.produceMap(),
+                                this.produceMap(),
+                                this.produceMap()
+                        )
                     );
         }
         st.dispose();
@@ -249,8 +253,17 @@ public class SQLiteSDEData extends SDEData {
 
             int typeID = st.columnInt(0);
             int activityID = st.columnInt(1);
-            IndustryActivity activity = bpActivities.get(typeID).get(activityID);
-            if (activity == null) throw new IllegalStateException("ActivityMaterials defined for non-extant activity: " + typeID + ":" + activityID);
+            IndustryActivityType activityType = switch (activityID) {
+                case 1 -> IndustryActivityType.MANUFACTURING;
+                case 3 -> IndustryActivityType.RESEARCH_TIME;
+                case 4 -> IndustryActivityType.RESEARCH_MATERIAL;
+                case 5 -> IndustryActivityType.COPYING;
+                case 8 -> IndustryActivityType.INVENTION;
+                case 11 -> IndustryActivityType.REACTIONS;
+                default -> throw new IllegalStateException("Unknown activityType: " + activityID);
+            };
+            IndustryActivity activity = bpActivities.get(typeID).get(activityType);
+            if (activity == null) throw new IllegalStateException("ActivityMaterials defined for non-extant activity: " + typeID + ":" + activityType);
 
             activity.materialMap.put(st.columnInt(2), st.columnInt(3));
         }
@@ -262,8 +275,17 @@ public class SQLiteSDEData extends SDEData {
 
             int typeID = st.columnInt(0);
             int activityID = st.columnInt(1);
-            IndustryActivity activity = bpActivities.get(typeID).get(activityID);
-            if (activity == null) throw new IllegalStateException("ActivityProbability defined for non-extant activity: " + typeID + ":" + activityID);
+            IndustryActivityType activityType = switch (activityID) {
+                case 1 -> IndustryActivityType.MANUFACTURING;
+                case 3 -> IndustryActivityType.RESEARCH_TIME;
+                case 4 -> IndustryActivityType.RESEARCH_MATERIAL;
+                case 5 -> IndustryActivityType.COPYING;
+                case 8 -> IndustryActivityType.INVENTION;
+                case 11 -> IndustryActivityType.REACTIONS;
+                default -> throw new IllegalStateException("Unknown activityType: " + activityID);
+            };
+            IndustryActivity activity = bpActivities.get(typeID).get(activityType);
+            if (activity == null) throw new IllegalStateException("ActivityProbability defined for non-extant activity: " + typeID + ":" + activityType);
 
             activity.probabilityMap.put(st.columnInt(2), st.columnDouble(3));
         }
@@ -275,8 +297,17 @@ public class SQLiteSDEData extends SDEData {
 
             int typeID = st.columnInt(0);
             int activityID = st.columnInt(1);
-            IndustryActivity activity = bpActivities.get(typeID).get(activityID);
-            if (activity == null) throw new IllegalStateException("ActivityProduct defined for non-extant activity: " + typeID + ":" + activityID);
+            IndustryActivityType activityType = switch (activityID) {
+                case 1 -> IndustryActivityType.MANUFACTURING;
+                case 3 -> IndustryActivityType.RESEARCH_TIME;
+                case 4 -> IndustryActivityType.RESEARCH_MATERIAL;
+                case 5 -> IndustryActivityType.COPYING;
+                case 8 -> IndustryActivityType.INVENTION;
+                case 11 -> IndustryActivityType.REACTIONS;
+                default -> throw new IllegalStateException("Unknown activityType: " + activityID);
+            };
+            IndustryActivity activity = bpActivities.get(typeID).get(activityType);
+            if (activity == null) throw new IllegalStateException("ActivityProduct defined for non-extant activity: " + typeID + ":" + activityType);
 
             activity.productMap.put(st.columnInt(2), st.columnInt(3));
         }
@@ -288,8 +319,17 @@ public class SQLiteSDEData extends SDEData {
 
             int typeID = st.columnInt(0);
             int activityID = st.columnInt(1);
-            IndustryActivity activity = bpActivities.get(typeID).get(activityID);
-            if (activity == null) throw new IllegalStateException("ActivitySkill defined for non-extant activity: " + typeID + ":" + activityID);
+            IndustryActivityType activityType = switch (activityID) {
+                case 1 -> IndustryActivityType.MANUFACTURING;
+                case 3 -> IndustryActivityType.RESEARCH_TIME;
+                case 4 -> IndustryActivityType.RESEARCH_MATERIAL;
+                case 5 -> IndustryActivityType.COPYING;
+                case 8 -> IndustryActivityType.INVENTION;
+                case 11 -> IndustryActivityType.REACTIONS;
+                default -> throw new IllegalStateException("Unknown activityType: " + activityID);
+            };
+            IndustryActivity activity = bpActivities.get(typeID).get(activityType);
+            if (activity == null) throw new IllegalStateException("ActivitySkill defined for non-extant activity: " + typeID + ":" + activityType);
 
             activity.skillMap.put(st.columnInt(2), st.columnInt(3));
         }
@@ -328,7 +368,6 @@ public class SQLiteSDEData extends SDEData {
         st.dispose();
 
         variants = this.produceMap();
-        parentTypes = this.produceMap();
         metaTypes = this.produceMap();
         st = connection.prepare("SELECT typeID, parentTypeID, metaGroupID FROM invMetaTypes ORDER BY parentTypeID");    // Order by parentTypeID so we encounter rows without parent type first
         while (st.step()) {
@@ -339,7 +378,6 @@ public class SQLiteSDEData extends SDEData {
             int metaGroupID = st.columnInt(2);
 
             if (parentTypeID != null) {
-                parentTypes.put(typeID, parentTypeID);
                 Set<Integer> parentVariants = variants.computeIfAbsent(parentTypeID, this::produceSet);
                 parentVariants.add(parentTypeID);
                 parentVariants.add(typeID);
@@ -484,9 +522,6 @@ public class SQLiteSDEData extends SDEData {
         }
         st.dispose();
 
-
-        constellationJumps = this.produceMap();
-        regionJumps = this.produceMap();
         outJumps = this.produceMap();
         inJumps = this.produceMap();
         st = connection.prepare("SELECT fromSolarSystemID, toSolarSystemID, fromConstellationID, toConstellationID, fromRegionID, toRegionID FROM mapSolarSystemJumps");
@@ -496,19 +531,6 @@ public class SQLiteSDEData extends SDEData {
             int to = st.columnInt(1);
             outJumps.computeIfAbsent(from, this::produceSet).add(to);
             inJumps.computeIfAbsent(from, this::produceSet).add(from);
-
-            Jump jump;
-            if (from > to) {
-                jump = new Jump(to, from);
-            } else {
-                jump = new Jump(from ,to);
-            }
-            if (st.columnInt(2) == st.columnInt(3)) {
-                constellationJumps.computeIfAbsent(st.columnInt(2), this::produceSet).add(jump);
-            }
-            if (st.columnInt(4) == st.columnInt(5)) {
-                regionJumps.computeIfAbsent(st.columnInt(4), this::produceSet).add(jump);
-            }
         }
         st.dispose();
 
@@ -533,7 +555,20 @@ public class SQLiteSDEData extends SDEData {
         st = connection.prepare("SELECT operationID, serviceID FROM staOperationServices");
         while (st.step()) {
             assert !st.columnNull(0) && !st.columnNull(1);
-            Station.Service service = Station.Service.fromServiceID(st.columnInt(1));
+            int serviceID = st.columnInt(1);
+            if (Integer.bitCount(serviceID) != 1) throw new IllegalArgumentException("ServiceID must be a single set bit flag!");
+            Station.Service service = switch (serviceID) {
+                case 16 -> Station.Service.REPROCESSING;
+                case 64 -> Station.Service.MARKET;
+                case 512 -> Station.Service.CLONEBAY;
+                case 4096 -> Station.Service.REPAIRSHOP;
+                case 8192 -> Station.Service.INDUSTRY;
+                case 65536 -> Station.Service.FITTING;
+                case 1048576 -> Station.Service.INSURANCE;
+                case 16777216 -> Station.Service.LPSTORE;
+                case 33554432 -> Station.Service.MILITIAOFFICE;
+                default -> null;
+            };
             if (service != null) {
                 operationServices.computeIfAbsent(st.columnInt(0), _ -> EnumSet.noneOf(Station.Service.class))
                     .add(service);
@@ -627,7 +662,7 @@ public class SQLiteSDEData extends SDEData {
     }
 
     @Override
-    public Map<Integer, Map<Integer, List<TypeTraitBonus>>> getTypeTraits() {
+    public Map<Integer, TypeTraits> getTypeTraits() {
         return typeTraits;
     }
 
@@ -637,12 +672,7 @@ public class SQLiteSDEData extends SDEData {
     }
 
     @Override
-    public Map<Integer, IndustryActivityType> getIndustryActivityTypes() {
-        return industryActivityTypes;
-    }
-
-    @Override
-    public Map<Integer, Map<Integer, IndustryActivity>> getBpActivities() {
+    public Map<Integer, EnumMap<IndustryActivityType, IndustryActivity>> getBpActivities() {
         return bpActivities;
     }
 
@@ -664,11 +694,6 @@ public class SQLiteSDEData extends SDEData {
     @Override
     public Map<Integer, Set<Integer>> getVariants() {
         return variants;
-    }
-
-    @Override
-    public Map<Integer, Integer> getParentTypes() {
-        return parentTypes;
     }
 
     @Override
@@ -699,16 +724,6 @@ public class SQLiteSDEData extends SDEData {
     @Override
     public Map<Integer, Set<Integer>> getInJumps() {
         return inJumps;
-    }
-
-    @Override
-    public Map<Integer, Set<Jump>> getConstellationJumps() {
-        return constellationJumps;
-    }
-
-    @Override
-    public Map<Integer, Set<Jump>> getRegionJumps() {
-        return regionJumps;
     }
 
     @Override

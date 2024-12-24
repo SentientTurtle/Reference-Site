@@ -6,12 +6,14 @@ import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.datatypes.IndustryActivity;
+import net.sentientturtle.nee.data.datatypes.IndustryActivityType;
 import net.sentientturtle.nee.data.datatypes.PlanetSchematic;
 import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.page.TypePage;
 import net.sentientturtle.nee.data.ResourceLocation;
 
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -57,45 +59,40 @@ public class TypeBlueprint extends Component {
         var table = TABLE("type_blueprint_table font_header");
 
         AtomicBoolean isFirst = new AtomicBoolean(true);
-        Map<Integer, IndustryActivity> bpActivities = context.sde.getBpActivities().getOrDefault(type.typeID, Map.of());
+        Map<IndustryActivityType, IndustryActivity> bpActivities = context.sde.getBpActivities().getOrDefault(type.typeID, new EnumMap<>(IndustryActivityType.class));
         bpActivities.keySet().stream()
             .sorted(Comparator.comparingInt(value -> switch (value) {   // Sort in custom order
-                case 1 -> 1;
-                case 8 -> 2;
-                case 5 -> 3;
-                case 3 -> 4;
-                case 4 -> 5;
-                default -> value;
+                case IndustryActivityType.MANUFACTURING -> 1;
+                case IndustryActivityType.INVENTION -> 2;
+                case IndustryActivityType.COPYING -> 3;
+                case IndustryActivityType.RESEARCH_TIME -> 4;
+                case IndustryActivityType.RESEARCH_MATERIAL -> 5;
+                case IndustryActivityType.REACTIONS -> 6;
             }))
             .forEach(key -> {
                 IndustryActivity activity = bpActivities.get(key);
 
                 int metaGroup = context.sde.getMetaTypes().getOrDefault(activity.bpTypeID, 1);
-                if (metaGroup != 1 && metaGroup != 54 && (activity.activityID == 3 || activity.activityID == 4 || activity.activityID == 5)) {
+                if (metaGroup != 1 && metaGroup != 54 && (
+                    activity.activityType == IndustryActivityType.RESEARCH_TIME
+                    || activity.activityType == IndustryActivityType.RESEARCH_MATERIAL
+                    || activity.activityType == IndustryActivityType.COPYING
+                )) {
                     // Skip research & copying on Faction/T2/T3 blueprints, for which originals are generally unavailable
                     return;
                 }
 
-                if (activity.activityID == 4) {
+                if (activity.activityType == IndustryActivityType.RESEARCH_MATERIAL) {
                     // Time & Material efficiency are merged
                     return;
                 }
-
-                String activityName = switch (activity.activityID) {
-                    case 1 -> "Manufacturing";
-                    case 3 -> "Efficiency Research";
-                    case 5 -> "Blueprint Copying";
-                    case 8 -> "Invention";
-                    case 11 -> "Reactions";
-                    default -> throw new IllegalStateException("Unknown activityID: " + activity.activityID);
-                };
 
                 if (isFirst.get()) {
                     isFirst.set(false);
                 } else {
                     table.content(TR("type_blueprint_spacer"));
                 }
-                table.content(TR().content(TH().attribute("colspan", "3").text(activityName)));
+                table.content(TR().content(TH().attribute("colspan", "3").text(activity.activityType.activityName)));
 
                 if (activity.productMap.size() > 0) {
                     String outputDisplayText = activity.productMap.size() > 1 ? "Output (select one)" : "Output";
@@ -130,7 +127,7 @@ public class TypeBlueprint extends Component {
                         });
                 }
 
-                if (activity.time > 0 && activity.activityID != 3 && activity.activityID != 4) {
+                if (activity.time > 0 && activity.activityType != IndustryActivityType.RESEARCH_TIME && activity.activityType != IndustryActivityType.RESEARCH_MATERIAL) {
                     table.content(TR().content(
                         TD().attribute("colspan", "2").text("Duration:"),
                         TD().content(context.sde.format_with_unit(activity.time, 3))

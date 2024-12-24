@@ -5,7 +5,7 @@ import net.sentientturtle.html.Frame;
 import net.sentientturtle.nee.page.HasPage;
 import net.sentientturtle.nee.page.MapPage;
 import net.sentientturtle.nee.data.ResourceLocation;
-import net.sentientturtle.nee.data.SDEData;
+import net.sentientturtle.nee.data.sde.SDEData;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 

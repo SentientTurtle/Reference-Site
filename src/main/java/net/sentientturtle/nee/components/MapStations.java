@@ -67,6 +67,7 @@ public class MapStations extends Component {
                 .map_stations_services {
                     display: flex;
                     flex-direction: row;
+                    flex-wrap: wrap;
                 }
                 
                 .map_stations_icon {

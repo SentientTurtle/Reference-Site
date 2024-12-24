@@ -5,6 +5,7 @@ import net.sentientturtle.nee.Main;
 import net.sentientturtle.nee.data.DataSources;
 import net.sentientturtle.nee.data.datatypes.Group;
 import net.sentientturtle.nee.data.datatypes.IndustryActivity;
+import net.sentientturtle.nee.data.datatypes.IndustryActivityType;
 import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.util.ExceptionUtil;
 import org.jspecify.annotations.Nullable;
@@ -226,7 +227,7 @@ public class IconProvider {
                 backgroundResource = "res:/ui/texture/icons/reaction.png";
                 overlayResource = "res:/ui/texture/icons/bpo_overlay.png";
 
-                Set<Integer> outputs = dataSources.SDEData().getBpActivities().get(typeID).get(11).productMap.keySet();
+                Set<Integer> outputs = dataSources.SDEData().getBpActivities().get(typeID).get(IndustryActivityType.REACTIONS).productMap.keySet();
                 if (outputs.size() > 1) throw new IllegalStateException("Reaction with multiple outputs: " + type);
                 outputType = dataSources.SDEData().getTypes().get(outputs.iterator().next());
             } else { // Blueprints
@@ -238,7 +239,7 @@ public class IconProvider {
                     overlayResource = "res:/ui/texture/icons/bpo_overlay.png";
                 }
 
-                IndustryActivity activity = dataSources.SDEData().getBpActivities().containsKey(typeID) ? dataSources.SDEData().getBpActivities().get(typeID).get(1) : null;
+                IndustryActivity activity = dataSources.SDEData().getBpActivities().containsKey(typeID) ? dataSources.SDEData().getBpActivities().get(typeID).get(IndustryActivityType.MANUFACTURING) : null;
                 if (activity != null) {
                     Set<Integer> outputs = activity.productMap.keySet();
                     if (outputs.size() > 0) {

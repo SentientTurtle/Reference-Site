@@ -1,7 +1,7 @@
 package net.sentientturtle.nee.components;
 
 import net.sentientturtle.html.HTML;
-import net.sentientturtle.nee.data.SDEData;
+import net.sentientturtle.nee.data.sde.SDEData;
 import net.sentientturtle.nee.data.datatypes.Type;
 
 import static net.sentientturtle.html.HTML.TEXT;

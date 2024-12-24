@@ -118,10 +118,10 @@ public class TypePage extends Page {
         }
 
         if (type.description != null && type.description.length() > 0)
-            left.content(new ItemDescription(EVEText.escape(type.description, context.sde)));
+            left.content(new ItemDescription(EVEText.escape(type.description, context.sde, false)));    // TODO: Maybe retain style
 
-        if (!dataSupplier.getTypeTraits().getOrDefault(type.typeID, Map.of()).isEmpty())
-            left.content(new TypeTraits(type));
+        if (dataSupplier.getTypeTraits().get(type.typeID) != null)
+            left.content(new TypeTraitInfo(type));
 
         Map<Integer, Attribute> attributes = dataSupplier.getAttributes();
         Map<Integer, Double> typeAttributes = dataSupplier.getTypeAttributes().getOrDefault(type.typeID, Map.of());

@@ -2,7 +2,7 @@ package net.sentientturtle.html.context;
 
 import net.sentientturtle.html.Document;
 import net.sentientturtle.nee.data.DataSources;
-import net.sentientturtle.nee.data.SDEData;
+import net.sentientturtle.nee.data.sde.SDEData;
 import net.sentientturtle.nee.data.sharedcache.FSDData;
 import net.sentientturtle.nee.data.sharedcache.SharedCacheReader;
 import net.sentientturtle.nee.data.ResourceLocation;

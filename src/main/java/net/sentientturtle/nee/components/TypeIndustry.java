@@ -42,7 +42,7 @@ public class TypeIndustry extends Component {
                 table.content(TR().content(
                     TD().content(IMG(ResourceLocation.typeIcon(activity.bpTypeID, context), null, 64).className("type_industry_icon")),
                     TD().content(new PageLink(new TypePage(context.sde.getTypes().get(activity.bpTypeID)))),
-                    TD().content(TEXT(context.sde.getIndustryActivityTypes().get(activity.activityID).activityName))
+                    TD().content(TEXT(activity.activityType.activityName))
                 ));
             }
 
@@ -82,7 +82,7 @@ public class TypeIndustry extends Component {
                 table.content(TR().content(
                     TD().content(IMG(ResourceLocation.typeIcon(activity.bpTypeID, context), null, 64).className("type_industry_icon")),
                     TD().content(new PageLink(new TypePage(context.sde.getTypes().get(activity.bpTypeID)))),
-                    TD().content(TEXT(context.sde.getIndustryActivityTypes().get(activity.activityID).activityName))
+                    TD().content(TEXT(activity.activityType.activityName))
                 ));
             });
         }

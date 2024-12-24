@@ -1,13 +1,14 @@
 package net.sentientturtle.nee.data.datatypes;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Data object to represent EVE Online Industry Activities
  */
 public final class IndustryActivity {
     public final int bpTypeID;
-    public final int activityID;
+    public final IndustryActivityType activityType;
     public final int time;
     public final Map<Integer, Integer> materialMap;
     public final Map<Integer, Integer> productMap;
@@ -19,7 +20,7 @@ public final class IndustryActivity {
      */
     public IndustryActivity(
         int bpTypeID,
-        int activityID,
+        IndustryActivityType activityType,
         int time,
         Map<Integer, Integer> materialMap,
         Map<Integer, Integer> productMap,
@@ -27,7 +28,7 @@ public final class IndustryActivity {
         Map<Integer, Integer> skillMap
     ) {
         this.bpTypeID = bpTypeID;
-        this.activityID = activityID;
+        this.activityType = activityType;
         this.time = time;
         this.materialMap = materialMap;
         this.productMap = productMap;
@@ -39,7 +40,7 @@ public final class IndustryActivity {
     public String toString() {
         return "IndustryActivity{" +
                "bpTypeID=" + bpTypeID +
-               ", activityID=" + activityID +
+               ", activity=" + activityType +
                '}';
     }
 
@@ -49,7 +50,7 @@ public final class IndustryActivity {
         if (this == o) return true;
         if (o instanceof IndustryActivity that) {
             return bpTypeID == that.bpTypeID &&
-                   activityID == that.activityID;
+                   activityType == that.activityType;
         } else {
             return false;
         }
@@ -57,7 +58,7 @@ public final class IndustryActivity {
 
     @Override
     public int hashCode() {
-        return bpTypeID + (31 * activityID);
+        return Objects.hash(bpTypeID, activityType.hashCode());
     }
 
 }

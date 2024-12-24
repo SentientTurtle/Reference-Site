@@ -1,6 +1,6 @@
 package net.sentientturtle.nee.components;
 
-import net.sentientturtle.nee.data.SDEData;
+import net.sentientturtle.nee.data.sde.SDEData;
 import net.sentientturtle.nee.data.datatypes.Type;
 
 /**

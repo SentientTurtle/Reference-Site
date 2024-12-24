@@ -7,7 +7,7 @@ import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.components.ItemDescription;
 import net.sentientturtle.nee.components.ItemTree;
 import net.sentientturtle.nee.components.ItemTitle;
-import net.sentientturtle.nee.data.SDEData;
+import net.sentientturtle.nee.data.sde.SDEData;
 import net.sentientturtle.nee.data.datatypes.MarketGroup;
 import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.data.ResourceLocation;

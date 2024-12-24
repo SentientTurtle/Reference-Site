@@ -38,38 +38,6 @@ public class Station {
             this.displayName = displayName;
             this.iconResource = iconResource;
         }
-
-        public static Station.@Nullable Service fromServiceID(int serviceID) {
-            if (Integer.bitCount(serviceID) != 1) throw new IllegalArgumentException("ServiceID must be a single set bit flag!");
-
-            return switch (serviceID) {
-                case 16 -> Service.REPROCESSING;
-                case 64 -> Service.MARKET;
-                case 512 -> Service.CLONEBAY;
-                case 4096 -> Service.REPAIRSHOP;
-                case 8192 -> Service.INDUSTRY;
-                case 1048576 -> Service.INSURANCE;
-                default -> null;
-
-//                case 1 -> throw new IllegalArgumentException("Unsupported service: Bounty Missions");
-//                case 2 -> throw new IllegalArgumentException("Unsupported service: Assassination Missions");
-//                case 4 -> throw new IllegalArgumentException("Unsupported service: Courier Missions");
-//                case 8 -> throw new IllegalArgumentException("Unsupported service: Interbus");
-//                case 32 -> throw new IllegalArgumentException("Unsupported service: Refinery");
-//                case 128 -> throw new IllegalArgumentException("Unsupported service: Black Market");
-//                case 256 -> throw new IllegalArgumentException("Unsupported service: Stock Exchange");
-//                case 1024 -> throw new IllegalArgumentException("Unsupported service: Surgery");
-//                case 2048 -> throw new IllegalArgumentException("Unsupported service: DNA Therapy");
-//                case 16384 -> throw new IllegalArgumentException("Unsupported service: Laboratory");
-//                case 32768 -> throw new IllegalArgumentException("Unsupported service: Gambling");
-//                case 131072 -> throw new IllegalArgumentException("Unsupported service: Paintshop");
-//                case 262144 -> throw new IllegalArgumentException("Unsupported service: News");
-//                case 524288 -> throw new IllegalArgumentException("Unsupported service: Storage");
-//                case 2097152 -> throw new IllegalArgumentException("Unsupported service: Docking"); // For use in citadels?
-//                case 4194304 -> throw new IllegalArgumentException("Unsupported service: Office Rental"); // For use in citadels?
-//                default -> throw new IllegalArgumentException("Unknown service ID: " + serviceID);
-            };
-        }
     }
 
     @Override

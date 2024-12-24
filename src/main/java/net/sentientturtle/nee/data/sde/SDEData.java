@@ -1,4 +1,4 @@
-package net.sentientturtle.nee.data;
+package net.sentientturtle.nee.data.sde;
 
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.PageLink;
@@ -39,87 +39,76 @@ public abstract class SDEData {
 
     // Data
 
-    // Map<CategoryID, Category>
+    /// Map<CategoryID, Category>
     public abstract Map<Integer, Category> getCategories();
 
-    // Map<GroupID, Group>
+    /// Map<GroupID, Group>
     public abstract Map<Integer, Group> getGroups();
 
-    // Map<TypeID, Type>
+    /// Map<TypeID, Type>
     public abstract Map<Integer, Type> getTypes();
 
-    // Map<TypeID, Map<SkillID, List<TypeTraitBonus>>>, with special values for SkillID {-1, -2}
-    public abstract Map<Integer, Map<Integer, List<TypeTraitBonus>>> getTypeTraits();
+    /// Map<TypeID, TypeTrait>, with special values for SkillID {-1, -2}
+    public abstract Map<Integer, TypeTraits> getTypeTraits();
 
-    // Map<AttributeID, Attribute>
+    /// Map<AttributeID, Attribute>
     public abstract Map<Integer, Attribute> getAttributes();
 
-    // Map<TypeID, Map<AttributeID, AttributeValue>>
+    /// Map<TypeID, Map<AttributeID, AttributeValue>>
     public abstract Map<Integer, Map<Integer, Double>> getTypeAttributes();
 
-    // Map<EffectID, Effect>
+    /// Map<EffectID, Effect>
     public abstract Map<Integer, Effect> getEffects();
 
-    // Map<TypeID, Set<EffectID>>
+    /// Map<TypeID, Set<EffectID>>
     public abstract Map<Integer, Set<Integer>> getTypeEffects();
 
-    // Map<IconID, IconFile>
+    /// Map<IconID, IconFile>
     public abstract Map<Integer, String> getEveIcons();
 
-    // Map<ActivityID, IndustryActivityType>
-    public abstract Map<Integer, IndustryActivityType> getIndustryActivityTypes();
+    /// Map<Blueprint TypeID, Map<IndustryActivityType, IndustryActivity using blueprint>>
+    public abstract Map<Integer, EnumMap<IndustryActivityType, IndustryActivity>> getBpActivities();
 
-    // Map<Blueprint TypeID, Set<IndustryActivity using blueprint>>
-    public abstract Map<Integer, Map<Integer, IndustryActivity>> getBpActivities();
-
-    // Map<TypeID, Map<Material TypeID, quantity>>
+    /// Map<TypeID, Map<Material TypeID, quantity>>
     public abstract Map<Integer, Map<Integer, Integer>> getReprocessingMaterials();
 
-    // Map<SchematicID, PlanetSchematic>
+    /// Map<SchematicID, PlanetSchematic>
     public abstract Map<Integer, PlanetSchematic> getPlanetSchematics();
 
-    // Map<MetaGroupID, MetaGroup>
+    /// Map<MetaGroupID, MetaGroup>
     public abstract Map<Integer, MetaGroup> getMetaGroups();
 
-    // Map<TypeID, Set<TypeID>>
+    /// Map<TypeID, Set<TypeID>>
     public abstract Map<Integer, Set<Integer>> getVariants();
 
-    // Map<TypeID, parent TypeID>
-    public abstract Map<Integer, Integer> getParentTypes();
-
-    // Map<TypeID, MetaGroupID>
+    /// Map<TypeID, MetaGroupID>
     public abstract Map<Integer, Integer> getMetaTypes();
 
-    // Map<SolarSystemID, SolarSystem>
+    /// Map<SolarSystemID, SolarSystem>
     public abstract Map<Integer, SolarSystem> getSolarSystems();
 
-    // Map<ConstellationID, Constellation>
+    /// Map<ConstellationID, Constellation>
     public abstract Map<Integer, Constellation> getConstellations();
 
-    // Map<RegionID, Region>
+    /// Map<RegionID, Region>
     public abstract Map<Integer, Region> getRegions();
 
-    // Map<SolarSystemID, Set<SolarSystemID>>
+    /// Map<SolarSystemID, Set<SolarSystemID>>
     public abstract Map<Integer, Set<Integer>> getOutJumps();
 
-    // Map<SolarSystemID, Set<SolarSystemID>>
+    /// Map<SolarSystemID, Set<SolarSystemID>>
     public abstract Map<Integer, Set<Integer>> getInJumps();
 
-    // Map<ConstellationID, Set<Jump>>
-    public abstract Map<Integer, Set<Jump>> getConstellationJumps();
-
-    // Map<RegionID, Set<Jump>>
-    public abstract Map<Integer, Set<Jump>> getRegionJumps();
-
-    // Map<SolarSystemID, Set<Celestial in solarsystem>>
+    /// Map<SolarSystemID, Set<Celestial in solarsystem>>
     public abstract Map<Integer, Set<Celestial>> getCelestials();
 
-    // Map<SolarSystemID, Set<Station in solarsystem>>
+    /// Map<SolarSystemID, Set<Station in solarsystem>>
     public abstract Map<Integer, Set<Station>> getStations();
 
-    // Map<FactionID, Faction>
+    /// Map<FactionID, Faction>
     public abstract Map<Integer, Faction> getFactions();
 
+    /// Map<MarketGroupID, Faction>
     public abstract Map<Integer, MarketGroup> getMarketGroups();
 
     // Views
@@ -155,85 +144,85 @@ public abstract class SDEData {
 
     // View getters
 
-    // Map<CategoryID, Set<Group>>
+    /// Map<CategoryID, Set<Group>>
     public Map<Integer, Set<Group>> getCategoryGroups() {
         if (categoryGroups == null) throw new IllegalStateException("View collections not initialized!");
         return categoryGroups;
     }
 
-    // Map<GroupID, Set<Type>>
+    /// Map<GroupID, Set<Type>>
     public Map<Integer, Set<Type>> getGroupTypes() {
         if (groupTypes == null) throw new IllegalStateException("View collections not initialized!");
         return groupTypes;
     }
 
-    // Map<Material TypeID, Set<IndustryActivity using material>>
+    /// Map<Material TypeID, Set<IndustryActivity using material>>
     public Map<Integer, Set<IndustryActivity>> getMaterialActivityMap() {
         if (materialActivityMap == null) throw new IllegalStateException("View collections not initialized!");
         return materialActivityMap;
     }
 
-    // Map<Product TypeID, Set<IndustryActivity producing product>>
+    /// Map<Product TypeID, Set<IndustryActivity producing product>>
     public Map<Integer, Set<IndustryActivity>> getProductActivityMap() {
         if (productActivityMap == null) throw new IllegalStateException("View collections not initialized!");
         return productActivityMap;
     }
 
-    // Map<Skill TypeID, Set<IndustryActivity using skill>>
+    /// Map<Skill TypeID, Set<IndustryActivity using skill>>
     public Map<Integer, Set<IndustryActivity>> getSkillActivityMap() {
         if (skillActivityMap == null) throw new IllegalStateException("View collections not initialized!");
         return skillActivityMap;
     }
 
-    // Map<Output TypeID, PlanetSchematic producing output>
+    /// Map<Output TypeID, PlanetSchematic producing output>
     public Map<Integer, PlanetSchematic> getOutputSchematicMap() {
         if (outputSchematicMap == null) throw new IllegalStateException("View collections not initialized!");
         return outputSchematicMap;
     }
 
-    // Map<Input TypeID, Set<PlanetSchematic using input>>
+    /// Map<Input TypeID, Set<PlanetSchematic using input>>
     public Map<Integer, Set<PlanetSchematic>> getInputSchematicMap() {
         if (inputSchematicMap == null) throw new IllegalStateException("View collections not initialized!");
         return inputSchematicMap;
     }
 
-    // Map<Material TypeID, Set<TypeID yielding material>>
+    /// Map<Material TypeID, Set<TypeID yielding material>>
     public Map<Integer, Set<Integer>> getOreReprocessingMap() {
         if (oreReprocessingMap == null) throw new IllegalStateException("View collections not initialized!");
         return oreReprocessingMap;
     }
 
-    // Map<MarketGroupID, Set<Type>>
+    /// Map<MarketGroupID, Set<Type>>
     public Map<Integer, Set<Type>> getMarketGroupTypeMap() {
         if (marketGroupTypeMap == null) throw new IllegalStateException("View collections not initialized!");
         return marketGroupTypeMap;
     }
 
-    // Map<MarketGroupID, Set<MarketGroup>>
+    /// Map<MarketGroupID, Set<MarketGroup>>
     public Map<Integer, Set<MarketGroup>> getMarketGroupChildMap() {
         if (marketGroupChildMap == null) throw new IllegalStateException("View collections not initialized!");
         return marketGroupChildMap;
     }
 
-    // Map<RegionID, List<Constellation>>
+    /// Map<RegionID, List<Constellation>>
     public Map<Integer, List<SolarSystem>> getConstellationSolarSystemMap() {
         if (constellationSolarSystems == null) throw new IllegalStateException("View collections not initialized!");
         return constellationSolarSystems;
     }
 
-    // Map<RegionID, List<SolarSystem>>
+    /// Map<RegionID, List<SolarSystem>>
     public Map<Integer, List<SolarSystem>> getRegionSolarSystemMap() {
         if (regionSolarSystems == null) throw new IllegalStateException("View collections not initialized!");
         return regionSolarSystems;
     }
 
-    // Map<RegionID, List<Constellation>>
+    /// Map<RegionID, List<Constellation>>
     public Map<Integer, List<Constellation>> getRegionConstellationMap() {
         if (regionConstellations == null) throw new IllegalStateException("View collections not initialized!");
         return regionConstellations;
     }
 
-    // Map<skill TypeID, Map<Level, Set<TypeID requiring skill>>>
+    /// Map<skill TypeID, Map<Level, Set<TypeID requiring skill>>>
     public Map<Integer, Map<Integer, Set<Integer>>> getRequiresSkillMap() {
         if (requiresSkillMap == null) throw new IllegalStateException("View collections not initialized!");
         return requiresSkillMap;
@@ -285,7 +274,7 @@ public abstract class SDEData {
         materialActivityMap = produceMap();
         productActivityMap = produceMap();
         skillActivityMap = produceMap();
-        for (Map<Integer, IndustryActivity> activityMap : this.getBpActivities().values()) {
+        for (Map<IndustryActivityType, IndustryActivity> activityMap : this.getBpActivities().values()) {
             for (IndustryActivity activity : activityMap.values()) {
                 for (Integer materialID : activity.materialMap.keySet()) {
                     materialActivityMap.computeIfAbsent(materialID, this::produceSet).add(activity);
@@ -654,13 +643,13 @@ public abstract class SDEData {
 
         // Remove unpublished types
         this.getTypeTraits().keySet().removeIf(typeID -> !types.containsKey(typeID));
-        for (Map<Integer, List<TypeTraitBonus>> trait : this.getTypeTraits().values()) {
-            trait.keySet().removeIf(typeID -> !(typeID < 0 || types.containsKey(typeID)));
+        for (TypeTraits trait : this.getTypeTraits().values()) {
+            trait.skillBonuses().keySet().removeIf(typeID -> !(typeID < 0 || types.containsKey(typeID)));
         }
 
         this.getTypeAttributes().keySet().removeIf(typeID -> !types.containsKey(typeID));
         this.getBpActivities().keySet().removeIf(typeID -> !types.containsKey(typeID));
-        for (Map<Integer, IndustryActivity> map : this.getBpActivities().values()) {
+        for (Map<IndustryActivityType, IndustryActivity> map : this.getBpActivities().values()) {
             map.values().removeIf(activity -> activity.productMap.keySet().stream().anyMatch(typeID -> !types.containsKey(typeID)));
         }
         getBpActivities().values().removeIf(Map::isEmpty);
@@ -670,9 +659,6 @@ public abstract class SDEData {
         for (Set<Integer> variants : this.getVariants().values()) {
             variants.removeIf(typeID -> !types.containsKey(typeID));
         }
-
-        this.getParentTypes().keySet().removeIf(typeID -> !types.containsKey(typeID));
-        this.getParentTypes().values().removeIf(typeID -> !types.containsKey(typeID));
 
         this.getMetaTypes().keySet().removeIf(typeID -> !types.containsKey(typeID));
 

@@ -1,6 +1,6 @@
 # Automatically downloaded or generated.
-# Expected files: "sqlite-latest.sqlite" (Downloaded using SDEUtils)
 *.sqlite
+*.zip
 
 # Native libraries for sqlite4java
 /native/*.so
