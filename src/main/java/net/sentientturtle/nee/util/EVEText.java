@@ -54,21 +54,13 @@ public class EVEText {
         start = 0;
         matcher = showInfoHref.matcher(text);
         while (matcher.find()) {
+            descriptionContent.add(TEXT(text.substring(start, matcher.start())));
+            start = matcher.end();
+
             String styleElement = matcher.group(3); // Will throw if not using the retain-style regex
             if (styleElement != null) {
-                if (retainStyle) {
-                    descriptionContent.add(TEXT(text.substring(start, matcher.start())));
-                    start = matcher.end();
-
-                    descriptionContent.add(HTML.RAW(styleElement));
-                } else {
-                    continue;
-                }
+                descriptionContent.add(HTML.RAW(styleElement));
             } else {
-                descriptionContent.add(TEXT(text.substring(start, matcher.start())));
-                start = matcher.end();
-
-                @Nullable   // Only allow links to existing types
                 Type type = SDEData.getTypes().get(Integer.valueOf(matcher.group(1)));
                 if (type != null) {
                     descriptionContent.add(new PageLink(new TypePage(type), matcher.group(2)));

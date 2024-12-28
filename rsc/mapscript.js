@@ -46,6 +46,51 @@ function iframeUnloadHandler() {
 
 init();
 async function init() {
+    let search_item = new URLSearchParams(window.location.search).get("item");
+
+    let map_file, jumps_file;
+    if (/^-?\d+$/.test(search_item)) {
+        if (search_item in {
+            '30000157': true, '30000192': true, '30001372': true, '30001445': true, '30002079': true, '30002737': true, '30005005': true, '30010141': true,
+            '30031392': true, '30000021': true, '30001413': true, '30002225': true, '30002411': true, '30002770': true, '30003495': true, '30003504': true,
+            '30040141': true, '30045328': true, '30000206': true, '30001381': true, '30002652': true, '30002702': true, '30002797': true, '30003046': true,
+            '30005029': true, '30020141': true, '30045329': true
+        }) {
+            // Pochven system
+            map_file = "./rsc/map/pochven.json";
+            jumps_file = "./rsc/map/pochven_jumps.json";
+        } else if (search_item > 31000000) {
+            // Anoikis system
+            map_file = "./rsc/map/anoikis.json";
+            jumps_file = null;
+        } else if (search_item > 30000000) {
+            // NEC system
+            map_file = "./rsc/map/NEC.json";
+            jumps_file = "./rsc/map/NEC_jumps.json";
+        } else if (search_item > 21000000) {
+            // Anoikis constellation
+            map_file = "./rsc/map/anoikis.json";
+            jumps_file = null;
+        } else if (search_item >= 20000787 && search_item <= 20000789) {
+            // Pochven constellation
+            map_file = "./rsc/map/pochven.json";
+            jumps_file = "./rsc/map/pochven_jumps.json";
+        } else if (search_item == 10000070) {
+            // Pochven region
+            map_file = "./rsc/map/pochven.json";
+            jumps_file = "./rsc/map/pochven_jumps.json";
+        } else if (search_item > 11000000) {
+            // Anoikis region
+            map_file = "./rsc/map/anoikis.json";
+            jumps_file = null;
+        }
+    } else {
+        console.log("Invalid item query parameter!");
+        search_item = null;
+        map_file = "./rsc/map/NEC.json";
+        jumps_file = "./rsc/map/NEC_jumps.json";
+    }
+
     map_spacer = document.getElementById("map_spacer");
     map_container = document.getElementById("map_container");
     iframe = document.getElementById("map_frame");
@@ -193,7 +238,7 @@ async function init() {
                 selectables = s;
             });
 
-        await load_map("./rsc/map/NEC.json", "./rsc/map/NEC_jumps.json");
+        await load_map(map_file, jumps_file);
         renderer.domElement.addEventListener("mousemove", onMouseMove);
         renderer.domElement.addEventListener("mousedown", onMouseDown);
 
@@ -224,12 +269,21 @@ async function init() {
         system_info_jumps_max = Object.values(system_info_jumps).reduce((l, r) => Math.max(l, r), -Infinity);
         system_info_ship_kills_max = Object.values(system_info_ship_kills).reduce((l, r) => Math.max(l, r), -Infinity);
         system_info_npc_kills_max = Object.values(system_info_npc_kills).reduce((l, r) => Math.max(l, r), -Infinity);
-
-        for (let radio of document.querySelectorAll("input[name=\"map_colour\"]")) {
-            radio.disabled = false;
-            radio.onchange = map_colour_update;
-        }
     }
+
+    if (search_item != null) {
+        // We want to fire the reload event here
+        iframe.src = "../map/" + search_item + ".html";
+    }
+
+    for (let radio of document.querySelectorAll("input[name=\"map_colour\"]")) {
+        radio.disabled = false;
+        radio.onchange = map_colour_update;
+    }
+
+    document.getElementById("map_select").disabled = false;
+    document.getElementById("map_show_jumps").disabled = false;
+    document.getElementById("map_reset_camera").disabled = false;
 }
 
 const security_colours = [

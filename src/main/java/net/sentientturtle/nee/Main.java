@@ -1,7 +1,5 @@
 package net.sentientturtle.nee;
 
-import com.almworks.sqlite4java.SQLiteConnection;
-import com.almworks.sqlite4java.SQLiteException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sentientturtle.html.HTMLUtil;
@@ -14,6 +12,8 @@ import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.data.sde.*;
 import net.sentientturtle.nee.data.sharedcache.FSDData;
 import net.sentientturtle.nee.data.sharedcache.IconProvider;
+import net.sentientturtle.nee.page.DynamicMapPage;
+import net.sentientturtle.nee.page.MapPage;
 import net.sentientturtle.nee.page.PageKind;
 import net.sentientturtle.nee.data.sharedcache.SharedCacheReader;
 import net.sentientturtle.nee.util.ExceptionUtil;
@@ -27,6 +27,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.Deflater;
@@ -59,7 +61,7 @@ public class Main {
 
     private static DataSources initializedData = null;
 
-    public static DataSources initialize(boolean patch) throws IOException, SQLiteException {
+    public static DataSources initialize(boolean patch) throws IOException {
         if (initializedData != null) return initializedData;
         String propertyPath = System.getProperty("net.sentientturtle.nee.properties", "./nee.properties");
 
@@ -194,7 +196,7 @@ public class Main {
 
     public static Path OUTPUT_DIR = Path.of("./output");
 
-    public static void main(String[] args) throws SQLiteException, IOException {
+    public static void main(String[] args) throws IOException {
         long startTime = System.nanoTime();
         DataSources data = Main.initialize(true);
 
@@ -284,16 +286,24 @@ public class Main {
         ));
         OutputStreamHtmlContext searchContext = new OutputStreamHtmlContext(0, data, zipOutputStream);
         ObjectMapper objectMapper = new ObjectMapper();
-        record IndexEntry(String index, String name, String path, String icon) {
-        }
+        record IndexEntry(String index, String name, String path, String icon) { }
+
+        String dynamicMapPagePath = new DynamicMapPage().getPath() + "?item=";
 
         List<IndexEntry> indexEntries = PageKind.pageStream(data.SDEData())
             .map(page -> {
                 ResourceLocation pageIcon = page.getIcon(searchContext);
+
+                String path;
+                if (page instanceof MapPage mapPage) {
+                    path = dynamicMapPagePath + mapPage.mapItem.getID();
+                } else {
+                    path = page.getPath();
+                }
                 return new IndexEntry(
                     page.name().toLowerCase(),
                     page.name(),
-                    HTMLUtil.escapeAttributeValue(page.getPath()),
+                    HTMLUtil.escapeAttributeValue(path),
                     pageIcon != null ? HTMLUtil.escapeAttributeValue(pageIcon.getURI(searchContext, true)) : null
                 );
             })

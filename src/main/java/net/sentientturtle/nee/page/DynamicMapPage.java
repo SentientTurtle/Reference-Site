@@ -72,14 +72,14 @@ public class DynamicMapPage extends Page {
                 <div class="map_controls_header eve_clip_top colour_theme_border_bg"><div class="eve_clip_top colour_theme_bg">Controls</div></div>
                 <div class="map_controls_entry">
                     <label for="map_select">Map:</label>
-                    <select name="mapselect" id="map_select">
+                    <select name="mapselect" id="map_select" disabled>
                       <option value="nec">New Eden Cluster</option>
                       <option value="pochven">Pochven</option>
                       <option value="anoikis">Anoikis</option>
                     </select>
                 </div>
                 <div class="map_controls_entry">
-                    <input type="checkbox" name="showjumps" id="map_show_jumps" checked>
+                    <input type="checkbox" name="showjumps" id="map_show_jumps" checked disabled>
                     <label for="map_show_jumps">Show connections</label>
                 </div>
                 <fieldset class="map_colours">
@@ -97,7 +97,7 @@ public class DynamicMapPage extends Page {
                         <input type="radio" name="map_colour" value="npc_kills" id="map_colour_npc_kills" disabled><label for="map_colour_npc_kills">NPC Kills</label>
                     </div>
                 </fieldset>
-                <button id="map_reset_camera">Reset Camera</button>
+                <button id="map_reset_camera" disabled>Reset Camera</button>
             </div>
             <iframe id="map_frame" src="../map/-1.html"></iframe>
             """);

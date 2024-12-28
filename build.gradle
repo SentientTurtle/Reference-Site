@@ -1,9 +1,14 @@
+plugins {
+    id 'application'
+}
+
 group 'net.sentientturtle'
 version '1.0-SNAPSHOT'
 
-apply plugin: 'java'
 sourceCompatibility = 1.22
 targetCompatibility = 1.22
+
+applicationDefaultJvmArgs = ["--enable-native-access=ALL-UNNAMED"]
 
 repositories {
     mavenCentral()

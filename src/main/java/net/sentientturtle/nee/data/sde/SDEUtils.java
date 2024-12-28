@@ -10,6 +10,8 @@ import java.net.URLConnection;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.zip.ZipInputStream;
@@ -18,32 +20,39 @@ import java.util.zip.ZipInputStream;
  * Utility class to download and update the EVE Online Static Data Export
  */
 public class SDEUtils {
-    private static final long downloadRate = 1024*1024*10;  // 10 Megabytes
     private static final String SDE_URL = "https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/sde.zip";   // If this breaks, check https://developers.eveonline.com/resource
     private static final String CHECKSUM_URL = "https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/checksum";
 
     public static void updateSDE(File file) throws IOException {
         System.out.println("Updating SDE...");
-        String mostRecent = SDEUtils.downloadMD5().toLowerCase();
+        String mostRecent = SDEUtils.downloadMD5();
         boolean download;
         if (file.exists()) {
+            String md5String;
 
-            MessageDigest md5;
-            try {
-                md5 = MessageDigest.getInstance("MD5");
-            } catch (NoSuchAlgorithmException e) {
-                md5 = ExceptionUtil.sneakyThrow(e);
+            Path md5File = file.toPath().resolveSibling("sde.md5");
+            if (md5File.toFile().exists()) {
+                md5String = Files.readString(md5File);
+            } else {
+
+                MessageDigest md5;
+                try {
+                    md5 = MessageDigest.getInstance("MD5");
+                } catch (NoSuchAlgorithmException e) {
+                    md5 = ExceptionUtil.sneakyThrow(e);
+                }
+
+                // A bit clunky to read the zip header twice, but ZipFile's enumeration sucks.
+                ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(file));
+                while (zipInputStream.getNextEntry() != null) {
+                    md5.update(zipInputStream.readAllBytes());
+                }
+
+                md5String = String.format("%032x", new BigInteger(1, md5.digest()));
+                Files.writeString(md5File, md5String);
             }
-
-            ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(file));
-            while (zipInputStream.getNextEntry() != null) {
-                md5.update(zipInputStream.readAllBytes());
-            }
-
-            String md5String = String.format("%032x", new BigInteger(1, md5.digest()));
 
             System.out.println("\tCurrent SDE: " + md5String + "\n\tMost recent: " + mostRecent);
-
             download = !md5String.equals(mostRecent);
             if (download) file.delete();
         } else {
@@ -78,7 +87,8 @@ public class SDEUtils {
                     .filter(line -> line.endsWith("sde.zip"))
                     .findFirst()
                     .get()
-                    .substring(0, 32);
+                    .substring(0, 32)
+                    .toLowerCase();
             }
         } catch (URISyntaxException e) {
             throw new IOException(e);
