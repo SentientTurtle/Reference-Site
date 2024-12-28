@@ -1,42 +1,47 @@
 package net.sentientturtle.nee.data.sde;
 
-import com.almworks.sqlite4java.SQLiteException;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import net.sentientturtle.nee.Main;
-import net.sentientturtle.nee.data.DataSources;
+import net.sentientturtle.nee.util.ExceptionUtil;
 import org.jspecify.annotations.Nullable;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 /// Work-in-progress data source using the original YAML Static Data Export
 // The YAML data is much more annoying to work with and not always conforms to YAML specification.
 @SuppressWarnings("Convert2Diamond") // Jackson TypeReference must contain explicit generics to work
-public class YAMLDataExportReader implements AutoCloseable {
-    private final ZipFile zipFile;
+public class YAMLDataExportReader {
+    private final ThreadLocal<ZipFile> tlZipFile;
     private final ObjectMapper yamlMapper;
 
     @SuppressWarnings("Convert2Diamond")
     public YAMLDataExportReader(Path sdePath) throws IOException {
-        zipFile = new ZipFile(sdePath.toFile());
+        File sdePathFile = sdePath.toFile();
+
+        tlZipFile = ThreadLocal.withInitial(() -> {
+            try {
+                return new ZipFile(sdePathFile);
+            } catch (IOException e) {
+                return ExceptionUtil.sneakyThrow(e);
+            }
+        });
         yamlMapper = new ObjectMapper(new YAMLFactory())
             .configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, true);
-    }
-
-    @Override
-    public void close() throws IOException {
-        zipFile.close();
     }
 
     public record LocalizedString(
@@ -56,14 +61,19 @@ public class YAMLDataExportReader implements AutoCloseable {
         @JsonProperty(required = true) Boolean published,
         @Nullable Integer iconID
     ) {}
-    public void readCategories(BiConsumer<Integer, SdeCategory> consumer) throws IOException {
+    public void readCategories(BiConsumer<Integer, SdeCategory> consumer) {
+        ZipFile zipFile = tlZipFile.get();
         ZipEntry entry = zipFile.getEntry("fsd/categories.yaml");
 
-        yamlMapper.readValue(
-            new String(zipFile.getInputStream(entry).readAllBytes(), StandardCharsets.UTF_8),
-            new TypeReference<LinkedHashMap<Integer, SdeCategory>>() {}
-        )
-            .forEach(consumer);
+        try {
+            yamlMapper.readValue(
+                new String(zipFile.getInputStream(entry).readAllBytes(), StandardCharsets.UTF_8),
+                new TypeReference<LinkedHashMap<Integer, SdeCategory>>() {}
+            )
+                .forEach(consumer);
+        } catch (IOException e) {
+            ExceptionUtil.sneakyThrow(e);
+        }
     }
 
     public record SdeGroup(
@@ -76,14 +86,19 @@ public class YAMLDataExportReader implements AutoCloseable {
         @JsonProperty(required = true) boolean fittableNonSingleton,
         @JsonProperty(required = true) boolean useBasePrice
     ) {}
-    public void readGroups(BiConsumer<Integer, SdeGroup> consumer) throws IOException {
+    public void readGroups(BiConsumer<Integer, SdeGroup> consumer) {
+        ZipFile zipFile = tlZipFile.get();
         ZipEntry entry = zipFile.getEntry("fsd/groups.yaml");
 
-        yamlMapper.readValue(
-            new String(zipFile.getInputStream(entry).readAllBytes(), StandardCharsets.UTF_8),
-            new TypeReference<LinkedHashMap<Integer, SdeGroup>>() {}
-        )
-            .forEach(consumer);
+        try {
+            yamlMapper.readValue(
+                new String(zipFile.getInputStream(entry).readAllBytes(), StandardCharsets.UTF_8),
+                new TypeReference<LinkedHashMap<Integer, SdeGroup>>() {}
+            )
+                .forEach(consumer);
+        } catch (IOException e) {
+            ExceptionUtil.sneakyThrow(e);
+        }
     }
 
     public record SdeTrait (
@@ -124,35 +139,40 @@ public class YAMLDataExportReader implements AutoCloseable {
         @Nullable SdeTypeTraits traits,
         @Nullable Integer sofMaterialSetID
     ) {}
-    public void readTypes(BiConsumer<Integer, SdeType> consumer) throws IOException {
+    public void readTypes(BiConsumer<Integer, SdeType> consumer) {
+        ZipFile zipFile = tlZipFile.get();
         ZipEntry entry = zipFile.getEntry("fsd/types.yaml");
 
-        // Split yaml document into individual entries to improve performance & handle format errors more cleanly
-        StringBuilder typeBuffer = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (!line.isEmpty()) {
-                char first = line.charAt(0);
-                if (first >= '0' && first <= '9' && !typeBuffer.isEmpty()) {
-                    Map.Entry<Integer, SdeType> mapEntry = yamlMapper.readValue(
-                        typeBuffer.toString(),
-                        new TypeReference<Map.Entry<Integer, SdeType>>() {}
-                    );
-                    consumer.accept(mapEntry.getKey(), mapEntry.getValue());
-                    typeBuffer.setLength(0);
+        try {
+            // Split yaml document into individual entries to improve performance & handle format errors more cleanly
+            StringBuilder typeBuffer = new StringBuilder();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.isEmpty()) {
+                    char first = line.charAt(0);
+                    if (first >= '0' && first <= '9' && !typeBuffer.isEmpty()) {
+                        Map.Entry<Integer, SdeType> mapEntry = yamlMapper.readValue(
+                            typeBuffer.toString(),
+                            new TypeReference<Map.Entry<Integer, SdeType>>() {}
+                        );
+                        consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+                        typeBuffer.setLength(0);
+                    }
                 }
+                if (!typeBuffer.isEmpty()) typeBuffer.append('\n');
+                typeBuffer.append(line);
             }
-            if (!typeBuffer.isEmpty()) typeBuffer.append('\n');
-            typeBuffer.append(line);
-        }
 
-        if (!typeBuffer.isEmpty()) {
-            Map.Entry<Integer, SdeType> mapEntry = yamlMapper.readValue(
-                typeBuffer.toString(),
-                new TypeReference<Map.Entry<Integer, SdeType>>() {}
-            );
-            consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+            if (!typeBuffer.isEmpty()) {
+                Map.Entry<Integer, SdeType> mapEntry = yamlMapper.readValue(
+                    typeBuffer.toString(),
+                    new TypeReference<Map.Entry<Integer, SdeType>>() {}
+                );
+                consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+            }
+        } catch (IOException e) {
+            ExceptionUtil.sneakyThrow(e);
         }
     }
 
@@ -176,35 +196,40 @@ public class YAMLDataExportReader implements AutoCloseable {
         @Nullable Integer minAttributeID,
         @Nullable Boolean displayWhenZero
     ) {}
-    public void readAttributes(BiConsumer<Integer, SdeAttribute> consumer) throws IOException {
+    public void readAttributes(BiConsumer<Integer, SdeAttribute> consumer) {
+        ZipFile zipFile = tlZipFile.get();
         ZipEntry entry = zipFile.getEntry("fsd/dogmaAttributes.yaml");
 
-        // Split yaml document into individual entries to improve performance & handle format errors more cleanly
-        StringBuilder buffer = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (!line.isEmpty()) {
-                char first = line.charAt(0);
-                if (first >= '0' && first <= '9' && !buffer.isEmpty()) {
-                    Map.Entry<Integer, SdeAttribute> mapEntry = yamlMapper.readValue(
-                        buffer.toString(),
-                        new TypeReference<Map.Entry<Integer, SdeAttribute>>() {}
-                    );
-                    consumer.accept(mapEntry.getKey(), mapEntry.getValue());
-                    buffer.setLength(0);
+        try {
+            // Split yaml document into individual entries to improve performance & handle format errors more cleanly
+            StringBuilder buffer = new StringBuilder();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.isEmpty()) {
+                    char first = line.charAt(0);
+                    if (first >= '0' && first <= '9' && !buffer.isEmpty()) {
+                        Map.Entry<Integer, SdeAttribute> mapEntry = yamlMapper.readValue(
+                            buffer.toString(),
+                            new TypeReference<Map.Entry<Integer, SdeAttribute>>() {}
+                        );
+                        consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+                        buffer.setLength(0);
+                    }
                 }
+                if (!buffer.isEmpty()) buffer.append('\n');
+                buffer.append(line);
             }
-            if (!buffer.isEmpty()) buffer.append('\n');
-            buffer.append(line);
-        }
 
-        if (!buffer.isEmpty()) {
-            Map.Entry<Integer, SdeAttribute> mapEntry = yamlMapper.readValue(
-                buffer.toString(),
-                new TypeReference<Map.Entry<Integer, SdeAttribute>>() {}
-            );
-            consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+            if (!buffer.isEmpty()) {
+                Map.Entry<Integer, SdeAttribute> mapEntry = yamlMapper.readValue(
+                    buffer.toString(),
+                    new TypeReference<Map.Entry<Integer, SdeAttribute>>() {}
+                );
+                consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+            }
+        } catch (IOException e) {
+            ExceptionUtil.sneakyThrow(e);
         }
     }
 
@@ -213,35 +238,40 @@ public class YAMLDataExportReader implements AutoCloseable {
         @JsonProperty(required = true) int effectID,
         @JsonProperty(required = true) String effectName
     ) {}
-    public void readEffects(BiConsumer<Integer, SdeEffect> consumer) throws IOException {
+    public void readEffects(BiConsumer<Integer, SdeEffect> consumer) {
+        ZipFile zipFile = tlZipFile.get();
         ZipEntry entry = zipFile.getEntry("fsd/dogmaEffects.yaml");
 
-        // Split yaml document into individual entries to improve performance & handle format errors more cleanly
-        StringBuilder buffer = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (!line.isEmpty()) {
-                char first = line.charAt(0);
-                if (first >= '0' && first <= '9' && !buffer.isEmpty()) {
-                    Map.Entry<Integer, SdeEffect> mapEntry = yamlMapper.readValue(
-                        buffer.toString(),
-                        new TypeReference<Map.Entry<Integer, SdeEffect>>() {}
-                    );
-                    consumer.accept(mapEntry.getKey(), mapEntry.getValue());
-                    buffer.setLength(0);
+        try {
+            // Split yaml document into individual entries to improve performance & handle format errors more cleanly
+            StringBuilder buffer = new StringBuilder();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.isEmpty()) {
+                    char first = line.charAt(0);
+                    if (first >= '0' && first <= '9' && !buffer.isEmpty()) {
+                        Map.Entry<Integer, SdeEffect> mapEntry = yamlMapper.readValue(
+                            buffer.toString(),
+                            new TypeReference<Map.Entry<Integer, SdeEffect>>() {}
+                        );
+                        consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+                        buffer.setLength(0);
+                    }
                 }
+                if (!buffer.isEmpty()) buffer.append('\n');
+                buffer.append(line);
             }
-            if (!buffer.isEmpty()) buffer.append('\n');
-            buffer.append(line);
-        }
 
-        if (!buffer.isEmpty()) {
-            Map.Entry<Integer, SdeEffect> mapEntry = yamlMapper.readValue(
-                buffer.toString(),
-                new TypeReference<Map.Entry<Integer, SdeEffect>>() {}
-            );
-            consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+            if (!buffer.isEmpty()) {
+                Map.Entry<Integer, SdeEffect> mapEntry = yamlMapper.readValue(
+                    buffer.toString(),
+                    new TypeReference<Map.Entry<Integer, SdeEffect>>() {}
+                );
+                consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+            }
+        } catch (IOException e) {
+            ExceptionUtil.sneakyThrow(e);
         }
     }
 
@@ -258,7 +288,8 @@ public class YAMLDataExportReader implements AutoCloseable {
         HashMap<Integer, Double> attributes,
         HashMap<Integer, Boolean> effects
     ) {}
-    public void readDogma(Consumer<SdeTypeDogma> consumer) throws IOException {
+    public void readDogma(Consumer<SdeTypeDogma> consumer) {
+        ZipFile zipFile = tlZipFile.get();
         ZipEntry entry = zipFile.getEntry("fsd/typeDogma.yaml");
 
         record DogmaEntry(
@@ -266,45 +297,51 @@ public class YAMLDataExportReader implements AutoCloseable {
             @JsonProperty(required = true) ArrayList<SdeTypeEffect> dogmaEffects
         ) {}
 
-        // Split yaml document into individual entries to improve performance
-        StringBuilder buffer = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (!line.isEmpty()) {
-                char first = line.charAt(0);
-                if (first >= '0' && first <= '9' && !buffer.isEmpty()) {
-                    Map.Entry<Integer, DogmaEntry> dogmaEntry = yamlMapper.readValue(buffer.toString(), new TypeReference<Map.Entry<Integer, DogmaEntry>>() {});
-                    HashMap<Integer, Double> attributeMap = new HashMap<>();
-                    for (SdeTypeAttribute attribute : dogmaEntry.getValue().dogmaAttributes) {
-                        attributeMap.put(attribute.attributeID, attribute.value);
-                    }
-                    HashMap<Integer, Boolean> effectMap = new HashMap<>();
-                    for (SdeTypeEffect effect : dogmaEntry.getValue().dogmaEffects) {
-                        effectMap.put(effect.effectID, effect.isDefault);
-                    }
+        try {
+            // Split yaml document into individual entries to improve performance
+            StringBuilder buffer = new StringBuilder();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.isEmpty()) {
+                    char first = line.charAt(0);
+                    if (first >= '0' && first <= '9' && !buffer.isEmpty()) {
+                        Map.Entry<Integer, DogmaEntry> dogmaEntry = yamlMapper.readValue(buffer.toString(), new TypeReference<Map.Entry<Integer, DogmaEntry>>() {
+                        });
+                        HashMap<Integer, Double> attributeMap = new HashMap<>();
+                        for (SdeTypeAttribute attribute : dogmaEntry.getValue().dogmaAttributes) {
+                            attributeMap.put(attribute.attributeID, attribute.value);
+                        }
+                        HashMap<Integer, Boolean> effectMap = new HashMap<>();
+                        for (SdeTypeEffect effect : dogmaEntry.getValue().dogmaEffects) {
+                            effectMap.put(effect.effectID, effect.isDefault);
+                        }
 
-                    consumer.accept(new SdeTypeDogma(dogmaEntry.getKey(), attributeMap, effectMap));
+                        consumer.accept(new SdeTypeDogma(dogmaEntry.getKey(), attributeMap, effectMap));
 
-                    buffer.setLength(0);
+                        buffer.setLength(0);
+                    }
                 }
-            }
-            if (!buffer.isEmpty()) buffer.append('\n');
-            buffer.append(line);
-        }
-
-        if (!buffer.isEmpty()) {
-            Map.Entry<Integer, DogmaEntry> dogmaEntry = yamlMapper.readValue(buffer.toString(), new TypeReference<Map.Entry<Integer, DogmaEntry>>() {});
-            HashMap<Integer, Double> attributeMap = new HashMap<>();
-            for (SdeTypeAttribute attribute : dogmaEntry.getValue().dogmaAttributes) {
-                attributeMap.put(attribute.attributeID, attribute.value);
-            }
-            HashMap<Integer, Boolean> effectMap = new HashMap<>();
-            for (SdeTypeEffect effect : dogmaEntry.getValue().dogmaEffects) {
-                effectMap.put(effect.effectID, effect.isDefault);
+                if (!buffer.isEmpty()) buffer.append('\n');
+                buffer.append(line);
             }
 
-            consumer.accept(new SdeTypeDogma(dogmaEntry.getKey(), attributeMap, effectMap));
+            if (!buffer.isEmpty()) {
+                Map.Entry<Integer, DogmaEntry> dogmaEntry = yamlMapper.readValue(buffer.toString(), new TypeReference<Map.Entry<Integer, DogmaEntry>>() {
+                });
+                HashMap<Integer, Double> attributeMap = new HashMap<>();
+                for (SdeTypeAttribute attribute : dogmaEntry.getValue().dogmaAttributes) {
+                    attributeMap.put(attribute.attributeID, attribute.value);
+                }
+                HashMap<Integer, Boolean> effectMap = new HashMap<>();
+                for (SdeTypeEffect effect : dogmaEntry.getValue().dogmaEffects) {
+                    effectMap.put(effect.effectID, effect.isDefault);
+                }
+
+                consumer.accept(new SdeTypeDogma(dogmaEntry.getKey(), attributeMap, effectMap));
+            }
+        } catch (IOException e) {
+            ExceptionUtil.sneakyThrow(e);
         }
     }
 
@@ -313,14 +350,19 @@ public class YAMLDataExportReader implements AutoCloseable {
         @Nullable boolean obsolete,
         @JsonProperty(required = true) String iconFile
     ) {}
-    public void readIcons(BiConsumer<Integer, SdeIcon> consumer) throws IOException {
+    public void readIcons(BiConsumer<Integer, SdeIcon> consumer) {
+        ZipFile zipFile = tlZipFile.get();
         ZipEntry entry = zipFile.getEntry("fsd/iconIDs.yaml");
 
-        yamlMapper.readValue(
-                new String(zipFile.getInputStream(entry).readAllBytes(), StandardCharsets.UTF_8),
-                new TypeReference<LinkedHashMap<Integer, SdeIcon>>() {}
-            )
-            .forEach(consumer);
+        try {
+            yamlMapper.readValue(
+                    new String(zipFile.getInputStream(entry).readAllBytes(), StandardCharsets.UTF_8),
+                    new TypeReference<LinkedHashMap<Integer, SdeIcon>>() {}
+                )
+                .forEach(consumer);
+        } catch (IOException e) {
+            ExceptionUtil.sneakyThrow(e);
+        }
     }
 
     public record SdeBpItem(
@@ -351,37 +393,44 @@ public class YAMLDataExportReader implements AutoCloseable {
         @JsonProperty(required = true) int blueprintTypeID,
         @JsonProperty(required = true) int maxProductionLimit
     ){}
-    public void readBlueprints(Consumer<SdeBlueprint> consumer) throws IOException {
+    public void readBlueprints(Consumer<SdeBlueprint> consumer) {
+        ZipFile zipFile = tlZipFile.get();
         ZipEntry entry = zipFile.getEntry("fsd/blueprints.yaml");
 
-        // Split yaml document into individual entries to improve performance & handle format errors more cleanly
-        StringBuilder buffer = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (!line.isEmpty()) {
-                char first = line.charAt(0);
-                if (first >= '0' && first <= '9' && !buffer.isEmpty()) {
-                    consumer.accept(
-                        yamlMapper.readValue(
-                            buffer.toString(),
-                            new TypeReference<Map.Entry<Integer, SdeBlueprint>>() {}
-                        ).getValue()
-                    );
-                    buffer.setLength(0);
+        try {
+            // Split yaml document into individual entries to improve performance & handle format errors more cleanly
+            StringBuilder buffer = new StringBuilder();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.isEmpty()) {
+                    char first = line.charAt(0);
+                    if (first >= '0' && first <= '9' && !buffer.isEmpty()) {
+                        consumer.accept(
+                            yamlMapper.readValue(
+                                buffer.toString(),
+                                new TypeReference<Map.Entry<Integer, SdeBlueprint>>() {
+                                }
+                            ).getValue()
+                        );
+                        buffer.setLength(0);
+                    }
                 }
+                if (!buffer.isEmpty()) buffer.append('\n');
+                buffer.append(line);
             }
-            if (!buffer.isEmpty()) buffer.append('\n');
-            buffer.append(line);
-        }
 
-        if (!buffer.isEmpty()) {
-            consumer.accept(
-                yamlMapper.readValue(
-                    buffer.toString(),
-                    new TypeReference<Map.Entry<Integer, SdeBlueprint>>() {}
-                ).getValue()
-            );
+            if (!buffer.isEmpty()) {
+                consumer.accept(
+                    yamlMapper.readValue(
+                        buffer.toString(),
+                        new TypeReference<Map.Entry<Integer, SdeBlueprint>>() {
+                        }
+                    ).getValue()
+                );
+            }
+        } catch (IOException e) {
+            ExceptionUtil.sneakyThrow(e);
         }
     }
 
@@ -390,35 +439,40 @@ public class YAMLDataExportReader implements AutoCloseable {
         @JsonProperty(required = true) int quantity
     ) {}
     public record SdeTypeMaterials(@JsonProperty(required = true) ArrayList<SdeTypeMaterial> materials) {}
-    public void readMaterials(BiConsumer<Integer, SdeTypeMaterials> consumer) throws IOException {
+    public void readMaterials(BiConsumer<Integer, SdeTypeMaterials> consumer) {
+        ZipFile zipFile = tlZipFile.get();
         ZipEntry entry = zipFile.getEntry("fsd/typeMaterials.yaml");
 
-        // Split yaml document into individual entries to improve performance & handle format errors more cleanly
-        StringBuilder buffer = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (!line.isEmpty()) {
-                char first = line.charAt(0);
-                if (first >= '0' && first <= '9' && !buffer.isEmpty()) {
-                    Map.Entry<Integer, SdeTypeMaterials> mapEntry = yamlMapper.readValue(
-                        buffer.toString(),
-                        new TypeReference<Map.Entry<Integer, SdeTypeMaterials>>() {}
-                    );
-                    consumer.accept(mapEntry.getKey(), mapEntry.getValue());
-                    buffer.setLength(0);
+        try {
+            // Split yaml document into individual entries to improve performance & handle format errors more cleanly
+            StringBuilder buffer = new StringBuilder();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.isEmpty()) {
+                    char first = line.charAt(0);
+                    if (first >= '0' && first <= '9' && !buffer.isEmpty()) {
+                        Map.Entry<Integer, SdeTypeMaterials> mapEntry = yamlMapper.readValue(
+                            buffer.toString(),
+                            new TypeReference<Map.Entry<Integer, SdeTypeMaterials>>() {}
+                        );
+                        consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+                        buffer.setLength(0);
+                    }
                 }
+                if (!buffer.isEmpty()) buffer.append('\n');
+                buffer.append(line);
             }
-            if (!buffer.isEmpty()) buffer.append('\n');
-            buffer.append(line);
-        }
 
-        if (!buffer.isEmpty()) {
-            Map.Entry<Integer, SdeTypeMaterials> mapEntry = yamlMapper.readValue(
-                buffer.toString(),
-                new TypeReference<Map.Entry<Integer, SdeTypeMaterials>>() {}
-            );
-            consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+            if (!buffer.isEmpty()) {
+                Map.Entry<Integer, SdeTypeMaterials> mapEntry = yamlMapper.readValue(
+                    buffer.toString(),
+                    new TypeReference<Map.Entry<Integer, SdeTypeMaterials>>() {}
+                );
+                consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+            }
+        } catch (IOException e) {
+            ExceptionUtil.sneakyThrow(e);
         }
     }
 
@@ -429,35 +483,40 @@ public class YAMLDataExportReader implements AutoCloseable {
         @JsonProperty(required = true) ArrayList<Integer> pins,
         @JsonProperty(required = true) LinkedHashMap<Integer, SdePlanetSchematicItem> types
     ) {}
-    public void readSchematics(BiConsumer<Integer, SdePlanetSchematic> consumer) throws IOException {
+    public void readSchematics(BiConsumer<Integer, SdePlanetSchematic> consumer) {
+        ZipFile zipFile = tlZipFile.get();
         ZipEntry entry = zipFile.getEntry("fsd/planetSchematics.yaml");
 
-        // Split yaml document into individual entries to improve performance & handle format errors more cleanly
-        StringBuilder buffer = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (!line.isEmpty()) {
-                char first = line.charAt(0);
-                if (first >= '0' && first <= '9' && !buffer.isEmpty()) {
-                    Map.Entry<Integer, SdePlanetSchematic> mapEntry = yamlMapper.readValue(
-                        buffer.toString(),
-                        new TypeReference<Map.Entry<Integer, SdePlanetSchematic>>() {}
-                    );
-                    consumer.accept(mapEntry.getKey(), mapEntry.getValue());
-                    buffer.setLength(0);
+        try {
+            // Split yaml document into individual entries to improve performance & handle format errors more cleanly
+            StringBuilder buffer = new StringBuilder();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.isEmpty()) {
+                    char first = line.charAt(0);
+                    if (first >= '0' && first <= '9' && !buffer.isEmpty()) {
+                        Map.Entry<Integer, SdePlanetSchematic> mapEntry = yamlMapper.readValue(
+                            buffer.toString(),
+                            new TypeReference<Map.Entry<Integer, SdePlanetSchematic>>() {}
+                        );
+                        consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+                        buffer.setLength(0);
+                    }
                 }
+                if (!buffer.isEmpty()) buffer.append('\n');
+                buffer.append(line);
             }
-            if (!buffer.isEmpty()) buffer.append('\n');
-            buffer.append(line);
-        }
 
-        if (!buffer.isEmpty()) {
-            Map.Entry<Integer, SdePlanetSchematic> mapEntry = yamlMapper.readValue(
-                buffer.toString(),
-                new TypeReference<Map.Entry<Integer, SdePlanetSchematic>>() {}
-            );
-            consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+            if (!buffer.isEmpty()) {
+                Map.Entry<Integer, SdePlanetSchematic> mapEntry = yamlMapper.readValue(
+                    buffer.toString(),
+                    new TypeReference<Map.Entry<Integer, SdePlanetSchematic>>() {}
+                );
+                consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+            }
+        } catch (IOException e) {
+            ExceptionUtil.sneakyThrow(e);
         }
     }
 
@@ -468,14 +527,19 @@ public class YAMLDataExportReader implements AutoCloseable {
         @Nullable String iconSuffix,
         @Nullable LocalizedString descriptionID
     ) {}
-    public void readMetaGroups(BiConsumer<Integer, SdeMetaGroup> consumer) throws IOException {
+    public void readMetaGroups(BiConsumer<Integer, SdeMetaGroup> consumer) {
+        ZipFile zipFile = tlZipFile.get();
         ZipEntry entry = zipFile.getEntry("fsd/metaGroups.yaml");
 
-        yamlMapper.readValue(
-                new String(zipFile.getInputStream(entry).readAllBytes(), StandardCharsets.UTF_8),
-                new TypeReference<LinkedHashMap<Integer, SdeMetaGroup>>() {}
-            )
-            .forEach(consumer);
+        try {
+            yamlMapper.readValue(
+                    new String(zipFile.getInputStream(entry).readAllBytes(), StandardCharsets.UTF_8),
+                    new TypeReference<LinkedHashMap<Integer, SdeMetaGroup>>() {}
+                )
+                .forEach(consumer);
+        } catch (IOException e) {
+            ExceptionUtil.sneakyThrow(e);
+        }
     }
 
     public record SdeFaction(
@@ -490,14 +554,19 @@ public class YAMLDataExportReader implements AutoCloseable {
         @JsonProperty(required = true) int solarSystemID,
         @JsonProperty(required = true) boolean uniqueName
     ) {}
-    public void readFactions(BiConsumer<Integer, SdeFaction> consumer) throws IOException {
+    public void readFactions(BiConsumer<Integer, SdeFaction> consumer) {
+        ZipFile zipFile = tlZipFile.get();
         ZipEntry entry = zipFile.getEntry("fsd/factions.yaml");
 
-        yamlMapper.readValue(
-                new String(zipFile.getInputStream(entry).readAllBytes(), StandardCharsets.UTF_8),
-                new TypeReference<LinkedHashMap<Integer, SdeFaction>>() {}
-            )
-            .forEach(consumer);
+        try {
+            yamlMapper.readValue(
+                    new String(zipFile.getInputStream(entry).readAllBytes(), StandardCharsets.UTF_8),
+                    new TypeReference<LinkedHashMap<Integer, SdeFaction>>() {}
+                )
+                .forEach(consumer);
+        } catch (IOException e) {
+            ExceptionUtil.sneakyThrow(e);
+        }
     }
 
     public record SdeMarketGroup(
@@ -507,35 +576,40 @@ public class YAMLDataExportReader implements AutoCloseable {
         @JsonProperty(required = true) boolean hasTypes,
         @Nullable Integer parentGroupID
     ) {}
-    public void readMarketGroups(BiConsumer<Integer, SdeMarketGroup> consumer) throws IOException {
+    public void readMarketGroups(BiConsumer<Integer, SdeMarketGroup> consumer) {
+        ZipFile zipFile = tlZipFile.get();
         ZipEntry entry = zipFile.getEntry("fsd/marketGroups.yaml");
 
-        // Split yaml document into individual entries to improve performance & handle format errors more cleanly
-        StringBuilder buffer = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (!line.isEmpty()) {
-                char first = line.charAt(0);
-                if (first >= '0' && first <= '9' && !buffer.isEmpty()) {
-                    Map.Entry<Integer, SdeMarketGroup> mapEntry = yamlMapper.readValue(
-                        buffer.toString(),
-                        new TypeReference<Map.Entry<Integer, SdeMarketGroup>>() {}
-                    );
-                    consumer.accept(mapEntry.getKey(), mapEntry.getValue());
-                    buffer.setLength(0);
+        try {
+            // Split yaml document into individual entries to improve performance & handle format errors more cleanly
+            StringBuilder buffer = new StringBuilder();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.isEmpty()) {
+                    char first = line.charAt(0);
+                    if (first >= '0' && first <= '9' && !buffer.isEmpty()) {
+                        Map.Entry<Integer, SdeMarketGroup> mapEntry = yamlMapper.readValue(
+                            buffer.toString(),
+                            new TypeReference<Map.Entry<Integer, SdeMarketGroup>>() {}
+                        );
+                        consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+                        buffer.setLength(0);
+                    }
                 }
+                if (!buffer.isEmpty()) buffer.append('\n');
+                buffer.append(line);
             }
-            if (!buffer.isEmpty()) buffer.append('\n');
-            buffer.append(line);
-        }
 
-        if (!buffer.isEmpty()) {
-            Map.Entry<Integer, SdeMarketGroup> mapEntry = yamlMapper.readValue(
-                buffer.toString(),
-                new TypeReference<Map.Entry<Integer, SdeMarketGroup>>() {}
-            );
-            consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+            if (!buffer.isEmpty()) {
+                Map.Entry<Integer, SdeMarketGroup> mapEntry = yamlMapper.readValue(
+                    buffer.toString(),
+                    new TypeReference<Map.Entry<Integer, SdeMarketGroup>>() {}
+                );
+                consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+            }
+        } catch (IOException e) {
+            ExceptionUtil.sneakyThrow(e);
         }
     }
 
@@ -681,67 +755,106 @@ public class YAMLDataExportReader implements AutoCloseable {
     public void readUniverseMap(
         Consumer<SdeRegion> regionConsumer,
         BiConsumer<Integer, SdeConstellation> constellationConsumer,
-        BiConsumer<SystemParents, SdeSolarSystem> systemConsumer
-    ) throws IOException {
+        BiConsumer<SystemParents, SdeSolarSystem> systemConsumer,
+        Consumer<Runnable> addTask
+    ) {
+        ZipFile zipFile = tlZipFile.get();
         Iterable<? extends ZipEntry> iterable = () -> (Iterator<ZipEntry>) zipFile.entries().asIterator();
 
-        List<ZipEntry> regions = new ArrayList<>();
-        List<ZipEntry> constellations = new ArrayList<>();
-        List<ZipEntry> systems = new ArrayList<>();
+        List<String> regions = new ArrayList<>();
+        List<String> constellations = new ArrayList<>();
+        List<String> systems = new ArrayList<>();
         for (ZipEntry entry : iterable) {
             if (entry.getName().startsWith("universe")) {
                 String[] split = entry.getName().split("/");
                 String filename = split[split.length - 1];
                 switch (filename) {
                     case "landmarks.yaml" -> { /* ignore */ }
-                    case "region.yaml" -> regions.add(entry);
-                    case "constellation.yaml" -> constellations.add(entry);
-                    case "solarsystem.yaml" -> systems.add(entry);
-                    default -> throw new IllegalStateException("Unknown yaml universe file: " + filename);
+                    case "region.yaml" -> regions.add(entry.getName());
+                    case "constellation.yaml" -> constellations.add(entry.getName());
+                    case "solarsystem.yaml" -> systems.add(entry.getName());
+                    default -> throw new IllegalStateException("Unknown yaml universe file: " + entry.getName());
                 }
             }
         }
 
 
-        HashMap<String, Integer> idMap = new HashMap<>();
-        for (ZipEntry region : regions) {
-            String[] split = region.getName().split("/");
-            String regionName = split[split.length - 2];
-            SdeRegion sdeRegion = yamlMapper.readValue(
-                new String(zipFile.getInputStream(region).readAllBytes(), StandardCharsets.UTF_8),
-                new TypeReference<SdeRegion>() {}
-            );
-            idMap.put(regionName, sdeRegion.regionID);
-            regionConsumer.accept(sdeRegion);
-        }
+        // Big indentation mess, but strict ordering between these groups is required
+        ConcurrentHashMap<String, Integer> idMap = new ConcurrentHashMap<>();
 
-        for (ZipEntry constellation : constellations) {
-            String[] split = constellation.getName().split("/");
-            String regionName = split[split.length - 3];
-            String constellationName = split[split.length - 2];
-            SdeConstellation sdeConstellation = yamlMapper.readValue(
-                new String(zipFile.getInputStream(constellation).readAllBytes(), StandardCharsets.UTF_8),
-                new TypeReference<SdeConstellation>() {}
-            );
-            idMap.put(constellationName, sdeConstellation.constellationID);
-            constellationConsumer.accept(Objects.requireNonNull(idMap.get(regionName)), sdeConstellation);
-        }
+        AtomicInteger regionCount = new AtomicInteger();
+        for (String regionEntry : regions) {
+            addTask.accept(() -> {
+                try {
+                    ZipFile zf = tlZipFile.get();
+                    String[] split = regionEntry.split("/");
+                    String regionName = split[split.length - 2];
+                    SdeRegion sdeRegion = yamlMapper.readValue(
+                        new String(zf.getInputStream(zf.getEntry(regionEntry)).readAllBytes(), StandardCharsets.UTF_8),
+                        new TypeReference<SdeRegion>() {}
+                    );
+                    idMap.put(regionName, sdeRegion.regionID);
+                    regionConsumer.accept(sdeRegion);
 
-        for (ZipEntry system : systems) {
-            String[] split = system.getName().split("/");
-            String regionName = split[split.length - 4];
-            String constellationName = split[split.length - 3];
-            SdeSolarSystem sdeSolarSystem = yamlMapper.readValue(
-                new String(zipFile.getInputStream(system).readAllBytes(), StandardCharsets.UTF_8),
-                new TypeReference<SdeSolarSystem>() {}
-            );
-            systemConsumer.accept(
-                new SystemParents(
-                    Objects.requireNonNull(idMap.get(regionName)),
-                    Objects.requireNonNull(idMap.get(constellationName))
-                ),
-                sdeSolarSystem
-            );
+                    if (regionCount.incrementAndGet() == regions.size()) {
+                        AtomicInteger constellationCount = new AtomicInteger();
+                        for (String constellationEntry : constellations) {
+                            addTask.accept(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        ZipFile zf = tlZipFile.get();
+                                        String[] split = constellationEntry.split("/");
+                                        String regionName = split[split.length - 3];
+                                        String constellationName = split[split.length - 2];
+                                        SdeConstellation sdeConstellation = yamlMapper.readValue(
+                                            new String(zf.getInputStream(zf.getEntry(constellationEntry)).readAllBytes(), StandardCharsets.UTF_8),
+                                            new TypeReference<SdeConstellation>() {}
+                                        );
+                                        idMap.put(constellationName, sdeConstellation.constellationID);
+                                        constellationConsumer.accept(Objects.requireNonNull(idMap.get(regionName)), sdeConstellation);
+
+                                        if (constellationCount.incrementAndGet() == constellations.size()) {
+
+
+                                            for (String systemEntry : systems) {
+                                                addTask.accept(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        try {
+                                                            ZipFile zf = tlZipFile.get();
+                                                            String[] split = systemEntry.split("/");
+                                                            String regionName = split[split.length - 4];
+                                                            String constellationName = split[split.length - 3];
+                                                            SdeSolarSystem sdeSolarSystem = yamlMapper.readValue(
+                                                                new String(zf.getInputStream(zf.getEntry(systemEntry)).readAllBytes(), StandardCharsets.UTF_8),
+                                                                new TypeReference<SdeSolarSystem>() {}
+                                                            );
+                                                            systemConsumer.accept(
+                                                                new SystemParents(
+                                                                    Objects.requireNonNull(idMap.get(regionName)),
+                                                                    Objects.requireNonNull(idMap.get(constellationName))
+                                                                ),
+                                                                sdeSolarSystem
+                                                            );
+                                                        } catch (IOException e) {
+                                                            ExceptionUtil.sneakyThrow(e);
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    } catch (IOException e) {
+                                        ExceptionUtil.sneakyThrow(e);
+                                    }
+                                }
+                            });
+                        }
+                    }
+                } catch (IOException e) {
+                    ExceptionUtil.sneakyThrow(e);
+                }
+            });
         }
     }
 
@@ -760,13 +873,18 @@ public class YAMLDataExportReader implements AutoCloseable {
         @JsonProperty(required = true) Set<Integer> services,
         @Nullable Map<Integer, Integer> stationTypes
     ) {}
-    public void readStationOperations(BiConsumer<Integer, SdeStationOperation> consumer) throws IOException {
+    public void readStationOperations(BiConsumer<Integer, SdeStationOperation> consumer) {
+        ZipFile zipFile = tlZipFile.get();
         ZipEntry entry = zipFile.getEntry("fsd/stationOperations.yaml");
-        LinkedHashMap<Integer, SdeStationOperation> mapEntry = yamlMapper.readValue(
-            zipFile.getInputStream(entry),
-            new TypeReference<LinkedHashMap<Integer, SdeStationOperation>>() {}
-        );
-        mapEntry.forEach(consumer);
+
+        try {
+            yamlMapper.readValue(
+                zipFile.getInputStream(entry),
+                new TypeReference<LinkedHashMap<Integer, SdeStationOperation>>() {}
+            ).forEach(consumer);
+        } catch (IOException e) {
+            ExceptionUtil.sneakyThrow(e);
+        }
     }
 
     public record SdeStation(
@@ -789,37 +907,46 @@ public class YAMLDataExportReader implements AutoCloseable {
         @JsonProperty(required = true) double y,
         @JsonProperty(required = true) double z
     ) {}
-    public void readStations(Consumer<SdeStation> consumer) throws IOException {
+    public void readStations(Consumer<SdeStation> consumer) {
+        ZipFile zipFile = tlZipFile.get();
         ZipEntry entry = zipFile.getEntry("bsd/staStations.yaml");
-        ArrayList<SdeStation> mapEntry = yamlMapper.readValue(zipFile.getInputStream(entry), new TypeReference<ArrayList<SdeStation>>() {});
-        mapEntry.forEach(consumer);
+        try {
+            yamlMapper.readValue(zipFile.getInputStream(entry), new TypeReference<ArrayList<SdeStation>>() {}).forEach(consumer);
+        } catch (IOException e) {
+            ExceptionUtil.sneakyThrow(e);
+        }
     }
 
     public record SdeItemName(
         @JsonProperty(required = true) int itemID,
         @JsonProperty(required = true) String itemName
     ) {}
-    public void readItemNames(Consumer<SdeItemName> consumer) throws IOException {
+    public void readItemNames(Consumer<SdeItemName> consumer) {
+        ZipFile zipFile = tlZipFile.get();
         ZipEntry entry = zipFile.getEntry("bsd/invNames.yaml");
 
-        // Split yaml document into individual entries to improve performance & handle format errors more cleanly
-        StringBuilder buffer = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (!line.isEmpty()) {
-                char first = line.charAt(0);
-                if (first == '-' && !buffer.isEmpty()) {
-                    consumer.accept(yamlMapper.readValue(buffer.toString(), new TypeReference<SdeItemName[]>() {})[0]);
-                    buffer.setLength(0);
+        try {
+            // Split yaml document into individual entries to improve performance & handle format errors more cleanly
+            StringBuilder buffer = new StringBuilder();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.isEmpty()) {
+                    char first = line.charAt(0);
+                    if (first == '-' && !buffer.isEmpty()) {
+                        consumer.accept(yamlMapper.readValue(buffer.toString(), new TypeReference<SdeItemName[]>() {})[0]);
+                        buffer.setLength(0);
+                    }
                 }
+                if (!buffer.isEmpty()) buffer.append('\n');
+                buffer.append(line);
             }
-            if (!buffer.isEmpty()) buffer.append('\n');
-            buffer.append(line);
-        }
 
-        if (!buffer.isEmpty()) {
-            consumer.accept(yamlMapper.readValue(buffer.toString(), new TypeReference<SdeItemName[]>() {})[0]);
+            if (!buffer.isEmpty()) {
+                consumer.accept(yamlMapper.readValue(buffer.toString(), new TypeReference<SdeItemName[]>() {})[0]);
+            }
+        } catch (IOException e) {
+            ExceptionUtil.sneakyThrow(e);
         }
     }
 }
