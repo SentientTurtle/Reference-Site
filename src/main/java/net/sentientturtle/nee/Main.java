@@ -12,9 +12,7 @@ import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.data.sde.*;
 import net.sentientturtle.nee.data.sharedcache.FSDData;
 import net.sentientturtle.nee.data.sharedcache.IconProvider;
-import net.sentientturtle.nee.page.DynamicMapPage;
-import net.sentientturtle.nee.page.MapPage;
-import net.sentientturtle.nee.page.PageKind;
+import net.sentientturtle.nee.page.*;
 import net.sentientturtle.nee.data.sharedcache.SharedCacheReader;
 import net.sentientturtle.nee.util.ExceptionUtil;
 
@@ -27,8 +25,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.Deflater;
@@ -291,15 +287,16 @@ public class Main {
         String dynamicMapPagePath = new DynamicMapPage().getPath() + "?item=";
 
         List<IndexEntry> indexEntries = PageKind.pageStream(data.SDEData())
+            .filter(page -> (page instanceof MapPage || page instanceof TypePage))
             .map(page -> {
-                ResourceLocation pageIcon = page.getIcon(searchContext);
-
                 String path;
                 if (page instanceof MapPage mapPage) {
                     path = dynamicMapPagePath + mapPage.mapItem.getID();
                 } else {
                     path = page.getPath();
                 }
+
+                ResourceLocation pageIcon = page.getIcon(searchContext);
                 return new IndexEntry(
                     page.name().toLowerCase(),
                     page.name(),

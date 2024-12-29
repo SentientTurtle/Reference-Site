@@ -30,6 +30,7 @@ public enum PageKind {
     TYPE(data ->
         data.getTypes()
             .values().stream()
+            .filter(type -> type.groupID != 15)
             .map(TypePage::new)
     ),
     ITEM_TREE(_ -> Stream.of(new ShipTreePage(), new StructureTreePage())),

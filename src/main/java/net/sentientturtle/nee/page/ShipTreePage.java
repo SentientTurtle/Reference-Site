@@ -777,7 +777,8 @@ public class ShipTreePage extends Page {
         33079,
         617,
         33083,
-        21097
+        21097,
+        33328
     };
 
     private static final int SHIP_COUNT = AMARR_SHIPS.length
