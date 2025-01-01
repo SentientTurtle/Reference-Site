@@ -496,13 +496,13 @@ function select_item(item_id) {
                     }
                     break;
                 case "jumps":
-                    select_label_security.textContent = "🚀" + system_info_jumps[item_id] ?? 0;
+                    select_label_security.textContent = "🚀" + (system_info_jumps[item_id] ?? 0);
                     break;
                 case "ship_kills":
-                    select_label_security.textContent = "☠️" + system_info_ship_kills[item_id] ?? 0;
+                    select_label_security.textContent = "☠️" + (system_info_ship_kills[item_id] ?? 0);
                     break;
                 case "npc_kills":
-                    select_label_security.textContent = "☠️" + system_info_npc_kills[item_id] ?? 0;
+                    select_label_security.textContent = "☠️" + (system_info_npc_kills[item_id] ?? 0);
                     break;
             }
         }
@@ -528,8 +528,6 @@ function select_item(item_id) {
                 system_mesh.instanceColor.needsUpdate = true;
             })();
         }
-
-        // TODO: load in-system celestials
     } else if (selectable != null) {
         select_label.position.set(
             selectable.x / SCALE,
