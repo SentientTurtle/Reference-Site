@@ -45,6 +45,7 @@ public class Main {
     public static boolean GENERATE_ICONS;
     public static boolean SKIP_RESOURCES;
     public static boolean SKIP_DEV_RESOURCES;
+    public static boolean IS_DEV_BUILD;
     public static String DEPLOYMENT_URL;
 
     // Website title as configurable variable in case a rename is needed; I don't feel like buying a domain name yet
@@ -102,6 +103,7 @@ public class Main {
             GENERATE_ICONS = properties.getProperty("GENERATE_ICONS", "FALSE").equalsIgnoreCase("TRUE");
             SKIP_RESOURCES = properties.getProperty("SKIP_RESOURCES", "FALSE").equalsIgnoreCase("TRUE");
             SKIP_DEV_RESOURCES = properties.getProperty("SKIP_DEV_RESOURCES", "FALSE").equalsIgnoreCase("TRUE");
+            IS_DEV_BUILD = properties.getProperty("IS_DEV_BUILD", "TRUE").equalsIgnoreCase("TRUE");
         } else {
             properties.setProperty("SHARED_CACHE_PATH", "???");
             properties.setProperty("RESOURCE_FOLDER", "./rsc/");
@@ -110,6 +112,7 @@ public class Main {
             properties.setProperty("GENERATE_ICONS", "FALSE");
             properties.setProperty("SKIP_RESOURCES", "FALSE");
             properties.setProperty("SKIP_DEV_RESOURCES", "FALSE");
+            properties.setProperty("IS_DEV_BUILD", "TRUE");
             properties.setProperty("DELETE_THIS_KEY", "");
 
             properties.store(new FileWriter(propertyPath), "NEE Generator config");
@@ -209,7 +212,7 @@ public class Main {
 
         System.out.println("Writing pages...");
         final AtomicInteger pageCount = new AtomicInteger(0);
-        PageKind.pageStream(data.SDEData())
+        PageKind.pageStream(data.sdeData())
             .parallel()
             .forEach(page -> {
                 var context = new StringBuilderHtmlContext(page.getPageKind().getFolderDepth(), data);
@@ -286,7 +289,7 @@ public class Main {
 
         String dynamicMapPagePath = new DynamicMapPage().getPath() + "?item=";
 
-        List<IndexEntry> indexEntries = PageKind.pageStream(data.SDEData())
+        List<IndexEntry> indexEntries = PageKind.pageStream(data.sdeData())
             .filter(page -> (page instanceof MapPage || page instanceof TypePage))
             .map(page -> {
                 String path;

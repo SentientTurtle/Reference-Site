@@ -38,11 +38,10 @@ public class IndexPage extends Page {
             new TextBox("About", HTML.RAW(
                 "<pre>The " + Main.WEBSITE_NAME +
                 " is an automatically updated reference site for <a href='https://en.wikipedia.org/wiki/Eve_Online'>EVE Online.<a>" +   // No link to official site as it's got login options
-                "<br>Issues can be reported on the project's <a href=''>Github repository.</a>" + // TODO: Set URL
+                "<br>Issues can be reported on the project's <a href='https://github.com/SentientTurtle/Reference-Site'>Github repository.</a>" +
                 "<br><br><i>The " + Main.WEBSITE_NAME + " project is not affiliated with CCP hf.</i></pre>"
             )),
-            // TODO: Put behind a flag
-            new TextBox("Development notes", HTML.RAW(
+            !Main.IS_DEV_BUILD ? HTML.empty() : new TextBox("Development notes", HTML.RAW(
                 """
                     This is a development build of the website. Some content and features may not be available or functional on all devices.
                     <br><br>

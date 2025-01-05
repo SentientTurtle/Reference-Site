@@ -99,7 +99,6 @@ public class FSDData {
     // It is also quite funny to have cursed python environments
     private static boolean hasRanPython = false; // Because of a bug or Python limitation, we can't re-initialize Python, so this method only permits being ran once
 
-    // TODO: Configure FFI permission
     private static synchronized List<String> runPython(String pythonLibrary, List<String> scripts) {
         if (hasRanPython) throw new IllegalStateException("Cannot run python twice!");
         hasRanPython = true;
@@ -165,7 +164,7 @@ public class FSDData {
         String localizationPath = sharedCache.getPath("res:/localizationfsd/localization_fsd_en-us.pickle").toAbsolutePath().toString().replace("\\", "\\\\");
 
         List<String> json = runPython(
-            sharedCache.getCacheFolder().resolve("tq/bin64/python27.dll").toAbsolutePath().toString(),  // TODO: Check if this approach is possible with the linux client, and if so, make OS-agnostic
+            sharedCache.getCacheFolder().resolve("tq/bin64/python27.dll").toAbsolutePath().toString(),
             List.of(
                 String.format(
                     FSD_SCRIPT_TEMPLATE,

@@ -50,8 +50,8 @@ public class GroupPage extends Page {
 
     @Nullable
     @Override
-    public ResourceLocation getIcon(HtmlContext context) { // TODO: Replace with icon of first type in group
-        return group.iconID != null ? ResourceLocation.ofIconID(group.iconID, context) : null;
+    public ResourceLocation getIcon(HtmlContext context) {
+        return group.getIconWithFallback(context);
     }
 
 }

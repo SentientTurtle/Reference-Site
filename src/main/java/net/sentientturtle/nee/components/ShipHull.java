@@ -24,7 +24,7 @@ public class ShipHull extends ShipHealth {
     }
 
     @Override
-    protected Resists getResists(SDEData SDEData) {
-        return super.getResists(SDEData, 113, 110, 109, 111);
+    protected Resists getResists(SDEData sdeData) {
+        return super.getResists(sdeData, 113, 110, 109, 111);
     }
 }

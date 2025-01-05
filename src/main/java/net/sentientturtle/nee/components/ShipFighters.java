@@ -10,14 +10,13 @@ public class ShipFighters extends AttributeList {
         super(
             "Fighters",
             type,
-            false,
             new Entry[][]{{
-                new Entry("Light Squadron Limit", 2217),
-                new Entry("Support Squadron Limit", 2218, 0.0),
-                new Entry("Heavy Squadron Limit", 2219, 0.0),
+                new Entry.Attribute("Light Squadron Limit", 2217),
+                new Entry.AttributeWithDefault("Support Squadron Limit", 2218, 0.0),
+                new Entry.AttributeWithDefault("Heavy Squadron Limit", 2219, 0.0),
             }, {
-                new Entry("Launch Tubes", 2216),
-                new Entry("Hangar Capacity", 2055),
+                new Entry.Attribute("Launch Tubes", 2216),
+                new Entry.Attribute("Hangar Capacity", 2055),
             }}
         );
     }

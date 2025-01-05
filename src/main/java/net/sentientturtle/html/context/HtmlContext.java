@@ -49,7 +49,7 @@ public abstract class HtmlContext {
         this.folderDepth = folderDepth;
 
         this.dataSources = dataSources;
-        this.sde = dataSources.SDEData();
+        this.sde = dataSources.sdeData();
         this.sharedCache = dataSources.sharedCache();
         this.fsdData = dataSources.fsdData();
         this.css = new LinkedHashSet<>();

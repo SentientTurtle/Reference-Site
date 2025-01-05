@@ -15,6 +15,15 @@ public class MetaGroup {
         this.metaGroupName = metaGroupName;
     }
 
+    public int getMetaLevel() {
+        return switch (this.metaGroupID) {
+            case 2 -> 5;
+            case 3, 4, 14 -> 6;
+            case 5, 6 -> 7;
+            default -> 0;
+        };
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

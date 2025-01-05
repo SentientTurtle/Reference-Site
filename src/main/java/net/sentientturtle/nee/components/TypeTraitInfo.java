@@ -93,11 +93,11 @@ public class TypeTraitInfo extends Component {
             }""";
     }
 
-    private void appendBonus(Element table, TypeTraits.Bonus bonus, SDEData SDEData) {
+    private void appendBonus(Element table, TypeTraits.Bonus bonus, SDEData sdeData) {
         table.content(
             TR().content(
-                TD().content(bonus.bonusAmount() != null ? SDEData.format_with_unit(bonus.bonusAmount(), bonus.unitID()) : TEXT("")),
-                TD().content(EVEText.escape(bonus.bonusText(), SDEData, true))
+                TD().content(bonus.bonusAmount() != null ? sdeData.format_with_unit(bonus.bonusAmount(), bonus.unitID()) : TEXT("")),
+                TD().content(EVEText.escape(bonus.bonusText(), sdeData, true))
             )
         );
     }

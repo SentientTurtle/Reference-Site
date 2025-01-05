@@ -48,23 +48,20 @@ public class GroupList extends Component {
             entries = context.sde.getCategoryGroups()
                 .getOrDefault(category.categoryID, (Set<Group>) EMPTY_SET)
                 .stream()
-                .filter(g -> g.published)
                 .sorted(Comparator.comparingInt(g -> g.groupID))
-                .map(group ->
-                    DIV("group_list_entry")
-                    .content(
-                        group.iconID != null
-                            ? IMG(ResourceLocation.ofIconID(group.iconID, context), null, 64).className("group_list_icon")
-                            : DIV("group_list_icon"),
-                        SPAN("font_header")
-                            .content(new PageLink(new GroupPage(group)))
-                    )
-                );
+                .map(group -> {
+                    ResourceLocation icon = group.getIconWithFallback(context);
+                    return DIV("group_list_entry")
+                        .content(
+                            icon != null ? IMG(icon, null, 64).className("group_list_icon") : DIV("group_list_icon"),
+                            SPAN("font_header")
+                                .content(new PageLink(new GroupPage(group)))
+                        );
+                });
         } else if (category == null && group != null) {
             entries = context.sde.getGroupTypes()
                 .getOrDefault(group.groupID, (Set<Type>) EMPTY_SET)
                 .stream()
-                .filter(t -> t.published)
                 .sorted(Type.comparator(context.sde))
                 .map(type ->
                     DIV("group_list_entry")

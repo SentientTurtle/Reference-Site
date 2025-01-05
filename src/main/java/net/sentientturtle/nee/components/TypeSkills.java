@@ -74,8 +74,8 @@ public class TypeSkills extends Component {
             """;
     }
 
-    private void fetchSkills(int typeID, SDEData SDEData, Element parent, int indent) {
-        Map<Integer, Map<Integer, Double>> attributeValues = SDEData.getTypeAttributes();
+    private void fetchSkills(int typeID, SDEData sdeData, Element parent, int indent) {
+        Map<Integer, Map<Integer, Double>> attributeValues = sdeData.getTypeAttributes();
 
         for (int i = 0; i < SKILL_ATTRIBUTES.length; i++) {
             Double skill = attributeValues.get(typeID).get(SKILL_ATTRIBUTES[i]);
@@ -91,7 +91,7 @@ public class TypeSkills extends Component {
                 row.content(
                     HTML.repeat(indent, DIV("type_skills_spacer")),
                     SPAN("type_skills_text").content(
-                        SDEData.format_with_unit(skill, 116), // 116 = typeID unit
+                        sdeData.format_with_unit(skill, 116), // 116 = typeID unit
                         SPAN("type_skills_level font_roman_numeral").text(" " + level + " ").content(
                             SPAN("type_skills_indicator").text(levelBoxes)
                         )
@@ -99,7 +99,7 @@ public class TypeSkills extends Component {
                 );
 
                 if (attributeValues.get(skill.intValue()).containsKey(182)) {
-                    fetchSkills(skill.intValue(), SDEData, parent, indent + 1);
+                    fetchSkills(skill.intValue(), sdeData, parent, indent + 1);
                 }
             }
         }

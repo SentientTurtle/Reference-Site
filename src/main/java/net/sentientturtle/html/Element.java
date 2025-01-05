@@ -45,6 +45,7 @@ public non-sealed class Element implements HTML {
     public Element attribute(@NonNull String name, @Nullable String value) throws IllegalStateException {
         Objects.requireNonNull(name);
         name = name.toLowerCase();
+        if ("id".equals(name)) throw new IllegalStateException("Element id may not be set using #attribute(), use #id()");
         if ("class".equals(name)) throw new IllegalStateException("Element className may not be set using #attribute(), use #className()");
         if (this.attributes.containsKey(name)) throw new IllegalStateException("duplicate attribute declaration: " + name);
         this.attributes.put(name, _ -> value);
@@ -81,8 +82,11 @@ public non-sealed class Element implements HTML {
 
     /// Sets the html id of this element.
     /// ID may only be set once
-    public Element id(@NonNull ID id) { // TODO: Prohibit the use of #attribute() to set "id"
-        return this.attribute("id", id.toString());
+    public Element id(@NonNull ID id) {
+        @NonNull String name = "id";
+        if (this.attributes.containsKey(name)) throw new IllegalStateException("duplicate id declaration");
+        this.attributes.put(name, _ -> id.toString());
+        return this;
     }
 
     /// "style" attribute shorthand

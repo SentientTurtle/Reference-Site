@@ -118,7 +118,7 @@ public class TypePage extends Page {
         }
 
         if (type.description != null && type.description.length() > 0)
-            left.content(new ItemDescription(EVEText.escape(type.description, context.sde, false)));    // TODO: Maybe retain style
+            left.content(new ItemDescription(EVEText.escape(type.description, context.sde, false)));
 
         if (dataSupplier.getTypeTraits().get(type.typeID) != null)
             left.content(new TypeTraitInfo(type));
@@ -126,8 +126,11 @@ public class TypePage extends Page {
         Map<Integer, Attribute> attributes = dataSupplier.getAttributes();
         Map<Integer, Double> typeAttributes = dataSupplier.getTypeAttributes().getOrDefault(type.typeID, Map.of());
 
-        // Type is a ship or structure // TODO: CONTAINERS!
-        if (categoryID == 6 || categoryID == 22 || categoryID == 23 || categoryID == 40 || categoryID == 46 || categoryID == 65) {
+        // Type is a ship or structure
+        if (
+            categoryID == 6 || categoryID == 22 || categoryID == 23 || categoryID == 40 || categoryID == 46 || categoryID == 65
+            || type.groupID == 12 || type.groupID == 340 || type.groupID == 448 || type.groupID == 649
+        ) {
             if (type.capacity > 0.0 || typeAttributes.keySet().stream().map(attributes::get).anyMatch(attribute -> attribute != null && Objects.equals(attribute.categoryID, 40))) {
                 left.content(new ShipCargo(type));
             }

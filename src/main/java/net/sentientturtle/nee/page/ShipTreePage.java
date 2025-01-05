@@ -125,7 +125,7 @@ public class ShipTreePage extends Page {
 
     // Array with each entry (line) being a list of groupIDs representing a ship class
     private static final int[][] GROUP_ORDER = new int[][]{
-        {237, 31, 1022},                              // Corvette, Shuttle, Prototype Exploration Ship
+        {29, 237, 31, 1022},                          // Capsule, Corvette, Shuttle, Prototype Exploration Ship
         {25, 831, 324, 830, 834, 893, 1527, 1283},    // Frigates
         {420, 541, 1534, 1305},                       // Destroyers
         {26, 906, 833, 358, 894, 832, 963, 1972},     // Cruisers
@@ -259,8 +259,6 @@ public class ShipTreePage extends Page {
             .filter(type -> type.published)
             .map(type -> type.typeID)
             .collect(Collectors.toCollection(HashSet::new));
-
-        shipTypeIDs.remove(670);    // Capsule not included in ship tree
 
         var content = new TabBox(List.of(
             new TabBox.Tab(
@@ -753,7 +751,8 @@ public class ShipTreePage extends Page {
         85236
     };
 
-    private static final int[] SPECIAL_SHIPS = new int[]{
+    public static final int[] SPECIAL_SHIPS = new int[]{
+        670,
         64034,
         33513,
         3532,

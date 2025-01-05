@@ -41,13 +41,23 @@ public abstract class ShipHealth extends Component {
         if (rechargeText != null) {
             table.content(
                 TR().content(
-                    TD("ship_health_icon").content(IMG(ResourceLocation.ofIconID(1392, context), null, 32)),
+                    TD("ship_health_icon").content(IMG(ResourceLocation.ofIconID(context.sde.getAttributes().get(getHpAttribute()).iconID, context), null, 32)),
                     TD().content(rechargeText),
                     TD()    // Intentionally blank column
                 )
             );
         }
 
+        HTML[] sustainText = getSustainText(context.sde);
+        if (sustainText != null) {
+            table.content(
+                TR().content(
+                    TD("ship_health_icon").content(IMG(ResourceLocation.ofIconID(1392, context), null, 32)),
+                    TD().content(sustainText),
+                    TD()    // Intentionally blank column
+                )
+            );
+        }
 
         Resists resists = getResists(context.sde);
         if (resists != null) {
@@ -165,31 +175,41 @@ public abstract class ShipHealth extends Component {
     /**
      * Specifies resist attribute values for the health type implemented by subclass
      *
-     * @param SDEData Data supplier to use
+     * @param sdeData Data supplier to use
      * @return Damage resistance values, as damage multiplier value (i.e. 60% resistance = 0.4)
      */
-    protected abstract Resists getResists(SDEData SDEData);
+    protected abstract Resists getResists(SDEData sdeData);
 
     /**
-     * Specifies text to be shown for HP regeneration for the health type implemented by subclass
+     * Specifies text to be shown for HP regeneration time
      *
-     * @param SDEData Data supplier to use
-     * @return Text to be shown for HP regeneration, or null if no such text should be shown
+     * @param sdeData Data supplier to use
+     * @return Text to be shown for HP regeneration time, or null if no such text should be shown
      */
-    protected HTML[] getRechargeText(SDEData SDEData) {
+    protected HTML[] getRechargeText(SDEData sdeData) {
+        return null;
+    }
+
+    /**
+     * Specifies text to be shown for HP regeneration sustain
+     *
+     * @param sdeData Data supplier to use
+     * @return Text to be shown for HP regeneration sustain, or null if no such text should be shown
+     */
+    protected HTML[] getSustainText(SDEData sdeData) {
         return null;
     }
 
     // Helper method for fetching hitpoints string
-    private HTML getHp(SDEData SDEData, int hpAttributeID) {
-        return SDEData.format_with_unit(SDEData.getTypeAttributes().get(type.typeID).get(hpAttributeID), SDEData.getAttributes().get(hpAttributeID).unitID);
+    private HTML getHp(SDEData sdeData, int hpAttributeID) {
+        return sdeData.format_with_unit(sdeData.getTypeAttributes().get(type.typeID).get(hpAttributeID), sdeData.getAttributes().get(hpAttributeID).unitID);
     }
 
 
     /**
      * Helper method for subclasses, fetches resists from a given data supplier using attributes for the resists of the health type implemented by subclass
      *
-     * @param SDEData Data supplier to use
+     * @param sdeData Data supplier to use
      * @param emAttribute  Electromagnetic resistance attributeID
      * @param thAttribute  Thermal resistance attributeID
      * @param kiAttribute  Kinetic resistance attributeID
@@ -197,12 +217,12 @@ public abstract class ShipHealth extends Component {
      * @see #getResists(SDEData)
      */
     @SuppressWarnings("WeakerAccess")
-    protected Resists getResists(SDEData SDEData, int emAttribute, int thAttribute, int kiAttribute, int exAttribute) {
+    protected Resists getResists(SDEData sdeData, int emAttribute, int thAttribute, int kiAttribute, int exAttribute) {
         return new Resists(
-            SDEData.getTypeAttributes().get(type.typeID).getOrDefault(emAttribute, 1.0),   // Default to 1.0, which is 0% resistance
-            SDEData.getTypeAttributes().get(type.typeID).getOrDefault(thAttribute, 1.0),
-            SDEData.getTypeAttributes().get(type.typeID).getOrDefault(kiAttribute, 1.0),
-            SDEData.getTypeAttributes().get(type.typeID).getOrDefault(exAttribute, 1.0)
+            sdeData.getTypeAttributes().get(type.typeID).getOrDefault(emAttribute, 1.0),   // Default to 1.0, which is 0% resistance
+            sdeData.getTypeAttributes().get(type.typeID).getOrDefault(thAttribute, 1.0),
+            sdeData.getTypeAttributes().get(type.typeID).getOrDefault(kiAttribute, 1.0),
+            sdeData.getTypeAttributes().get(type.typeID).getOrDefault(exAttribute, 1.0)
         );
     }
 

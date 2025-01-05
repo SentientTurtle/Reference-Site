@@ -3,11 +3,13 @@ package net.sentientturtle.nee.components;
 import net.sentientturtle.html.Component;
 import net.sentientturtle.html.Element;
 import net.sentientturtle.html.HTML;
+import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.datatypes.Attribute;
 import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.data.sharedcache.FSDData;
 import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.page.TypePage;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -452,6 +454,7 @@ public class ItemStats extends Component {
 
     @Override
     protected HTML[] getContent(HtmlContext context) {
+        Map<Integer, Type> types = context.sde.getTypes();
         Map<Integer, Attribute> attributes = context.sde.getAttributes();
         Map<Integer, Double> typeAttributes = context.sde.getTypeAttributes().getOrDefault(type.typeID, Map.of());
 
@@ -546,7 +549,7 @@ public class ItemStats extends Component {
         if ((fuelType = typeAttributes.get(713)) != null) {
             double fuelQuantity = typeAttributes.getOrDefault(714, 0.0);
 
-            Integer iconID = context.sde.getTypes().get((int) (double) fuelType).iconID;
+            Integer iconID = types.get((int) (double) fuelType).iconID;
             table.content(TR().content(
                 TD().content(SPAN("item_stats_span").title("Fuel required").content(
                         iconID != null ? IMG(ResourceLocation.ofIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
@@ -566,9 +569,10 @@ public class ItemStats extends Component {
         }
 
         Element mutationsTable = TABLE("item_stats_table");
+        Element applicableTypeTable = TABLE("item_stats_table");
         FSDData.DynamicAttributes dynamicAttributes = context.fsdData.dynamicAttributes.get(type.typeID);
         if (dynamicAttributes != null) {
-            mutationsTable.content(TR().content(TH().attribute("colspan", "2").text("Mutations")));
+            mutationsTable.content(TR().content(TH().attribute("colspan", "4").text("Mutations")));
             for (Map.Entry<Integer, FSDData.DyAttribute> entry : dynamicAttributes.attributeIDs().entrySet()) {
                 int attributeID = entry.getKey();
 
@@ -604,6 +608,23 @@ public class ItemStats extends Component {
                     ));
                 }
             }
+
+            applicableTypeTable.content(TR().content(TH().attribute("colspan", "4").text("Applicable to")));
+            dynamicAttributes.inputOutputMapping()
+                .stream()
+                .flatMap(ioMapping -> ioMapping.applicableTypes().stream())
+                .map(types::get)
+                .filter(Objects::nonNull)
+                .sorted(Type.comparator(context.sde))
+                .forEach(applicableType -> {
+                    applicableTypeTable.content(TR().content(
+                        TD().attribute("colspan", "4").content(SPAN("item_stats_span").content(
+                                IMG(ResourceLocation.typeIcon(applicableType.typeID, context), null, 32).className("item_stats_icon"),
+                                new PageLink(new TypePage(applicableType))
+                            )
+                        )
+                    ));
+                });
         }
 
         Element warfareBuffTable = TABLE("item_stats_table");
@@ -643,11 +664,11 @@ public class ItemStats extends Component {
 
         }
 
-        String itemKind = context.sde.getCategories().get(context.sde.getGroups().get(type.groupID).categoryID).name;
         return new HTML[]{
-            HEADER("font_header").text(itemKind + " stats"),
+            HEADER("font_header").text("Stats"),
             table.isEmpty() ? HTML.empty() : table,
             mutationsTable.isEmpty() ? HTML.empty() : mutationsTable,
+            applicableTypeTable.isEmpty() ? HTML.empty() : applicableTypeTable,
             warfareBuffTable.isEmpty() ? HTML.empty() : warfareBuffTable
         };
     }
@@ -657,6 +678,9 @@ public class ItemStats extends Component {
         return """
             .item_stats {
                 padding: 0.5rem;
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
             }
             
             .item_stats_table {
@@ -666,10 +690,6 @@ public class ItemStats extends Component {
             
             .item_stats_table tr:not(:first-child) {
                 border-top: var(--border-size) solid var(--colour-theme-minor-border);
-            }
-            
-            .item_stats > header {
-                margin-bottom: 0.5rem;
             }
             
             .item_stats_table:not(:last-child) {

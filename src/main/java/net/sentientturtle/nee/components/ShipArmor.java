@@ -24,7 +24,7 @@ public class ShipArmor extends ShipHealth {
     }
 
     @Override
-    protected Resists getResists(SDEData SDEData) {
-        return super.getResists(SDEData, 267, 270, 269, 268);
+    protected Resists getResists(SDEData sdeData) {
+        return super.getResists(sdeData, 267, 270, 269, 268);
     }
 }

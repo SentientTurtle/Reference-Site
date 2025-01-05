@@ -10,6 +10,7 @@ import net.sentientturtle.nee.data.ResourceLocation;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 import static net.sentientturtle.html.HTML.*;
 
@@ -17,14 +18,12 @@ import static net.sentientturtle.html.HTML.*;
 public abstract class AttributeList extends Component {
     private final @Nullable String title;
     private final Type type;
-    private final boolean skipMissing;
     private final Entry[][] data;
 
-    protected AttributeList(@Nullable String title, Type type, boolean skipMissing, Entry[][] data) {
+    protected AttributeList(@Nullable String title, Type type, Entry[][] data) {
         super("attribute_list colour_theme_minor");
         this.title = title;
         this.type = type;
-        this.skipMissing = skipMissing;
         this.data = data;
     }
 
@@ -38,54 +37,56 @@ public abstract class AttributeList extends Component {
         for (Entry[] rowData : data) {
             var row = TR();
             for (Entry entry : rowData) {
-                Element icon;
-                Integer iconID = attributeMap.get(entry.attributeID).iconID;
-                if (iconID != null) {
-                    icon = IMG(ResourceLocation.ofIconID(iconID, context), null, 32).className("attribute_list_icon");
-                } else {
-                    icon = DIV("attribute_list_icon");
-                }
-
-                double value;
-                Double valueNullable = attributeValueMap.get(type.typeID).get(entry.attributeID);
-                if (valueNullable == null) {
-                    if (entry.defaultValue == null) {
-                        if (skipMissing) {
-                            continue;
-                        } else {
-                            throw new IllegalStateException("Missing attribute " + entry.attributeID + " on type " + type);
-                        }
-                    } else {
-                        value = entry.defaultValue;
+                switch (entry) {
+                    case Entry.Attribute(String name, int attributeID) -> {
+                        Integer iconID = attributeMap.get(attributeID).iconID;
+                        Double value = attributeValueMap.get(type.typeID).get(attributeID);
+                        if (value == null) throw new IllegalStateException("Missing attribute (" + attributeID + ") on type: " + type);
+                        row.content(
+                            TD().content(
+                                SPAN("attribute_list_span").title(name).content(
+                                    iconID != null ? IMG(ResourceLocation.ofIconID(iconID, context), null, 32).className("attribute_list_icon") : DIV("attribute_list_icon"),
+                                    TEXT(name + ": "),
+                                    context.sde.format_with_unit(value, attributeMap.get(attributeID).unitID)
+                                )
+                            )
+                        );
                     }
-                } else {
-                    value = valueNullable;
-                }
-
-                if (entry.name != null) {
-                    row.content(
-                        TD().content(
-                            SPAN("attribute_list_span").title(entry.name).content(
-                                icon,
-                                TEXT(entry.name + ": "),
-                                context.sde.format_with_unit(value, attributeMap.get(entry.attributeID).unitID)
+                    case Entry.AttributeWithDefault(String name, int attributeID, double defaultValue) -> {
+                        Integer iconID = attributeMap.get(attributeID).iconID;
+                        double value = attributeValueMap.get(type.typeID).getOrDefault(attributeID, defaultValue);
+                        row.content(
+                            TD().content(
+                                SPAN("attribute_list_span").title(name).content(
+                                    iconID != null ? IMG(ResourceLocation.ofIconID(iconID, context), null, 32).className("attribute_list_icon") : DIV("attribute_list_icon"),
+                                    TEXT(name + ": "),
+                                    context.sde.format_with_unit(value, attributeMap.get(attributeID).unitID)
+                                )
                             )
-                        )
-                    );
-                } else {
-                    row.content(
-                        TD().content(
-                            SPAN("attribute_list_span").content(
-                                icon,
-                                context.sde.format_with_unit(value, attributeMap.get(entry.attributeID).unitID)
-                            )
-                        )
-                    );
+                        );
+                    }
+                    case Entry.AttributeSkipIfAbsent(String name, int attributeID) -> {
+                        Integer iconID = attributeMap.get(attributeID).iconID;
+                        Double value = attributeValueMap.get(type.typeID).get(attributeID);
+                        if (value != null) {
+                            row.content(
+                                TD().content(
+                                    SPAN("attribute_list_span").title(name).content(
+                                        iconID != null ? IMG(ResourceLocation.ofIconID(iconID, context), null, 32).className("attribute_list_icon") : DIV("attribute_list_icon"),
+                                        TEXT(name + ": "),
+                                        context.sde.format_with_unit(value, attributeMap.get(attributeID).unitID)
+                                    )
+                                )
+                            );
+                        }
+                    }
+                    case Entry.Custom(BiConsumer<Element, HtmlContext> render) -> render.accept(row, context);
                 }
             }
-            table.content(row);
+            if (!row.isEmpty()) {
+                table.content(row);
+            }
         }
-
 
         return new HTML[]{
             this.title != null ? HEADER("font_header").text(title) : HTML.empty(),
@@ -123,21 +124,10 @@ public abstract class AttributeList extends Component {
             """;
     }
 
-    public static final class Entry {
-        public final @Nullable String name;
-        public final int attributeID;
-        public final Double defaultValue;
-
-        public Entry(@Nullable String name, int attributeID) {
-            this.name = name;
-            this.attributeID = attributeID;
-            this.defaultValue = null;
-        }
-
-        public Entry(@Nullable String name, int attributeID, @Nullable Double defaultValue) {
-            this.name = name;
-            this.attributeID = attributeID;
-            this.defaultValue = defaultValue;
-        }
+    public sealed interface Entry {
+        record Attribute(String name, int attributeID) implements Entry {}
+        record AttributeSkipIfAbsent(String name, int attributeID) implements Entry {}
+        record AttributeWithDefault(String name, int attributeID, double defaultValue) implements Entry {}
+        record Custom(BiConsumer<Element, HtmlContext> render) implements Entry {}
     }
 }

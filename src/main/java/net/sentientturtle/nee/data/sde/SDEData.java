@@ -12,6 +12,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -343,225 +344,227 @@ public abstract class SDEData {
     }
 
 
+    private HTML formatDuration(double duration, TimeUnit timeUnit) {
+        if (Double.isNaN(duration)) {
+            return HTML.TEXT("???");
+        } else {
+            // convert to seconds, as Double
+            double multiplier = ((double) timeUnit.toNanos(1)) / ((double) TimeUnit.SECONDS.toNanos(1));
+
+            long durationLong = Math.round(duration * multiplier);
+            if (durationLong < 60) {
+                return HTML.TEXT(String.format("%2ds", durationLong));
+            } else if (durationLong < 60 * 60) {
+                return HTML.TEXT(String.format("%2dm %2ds", durationLong / 60, durationLong % 60));
+            } else if (durationLong < 60 * 60 * 24) {
+                return HTML.TEXT(String.format("%2dh %2dm %2ds", durationLong / (60 * 60), durationLong % (60 * 60) / 60, durationLong % 60));
+            } else if (durationLong < 60.0 * 60.0 * 24.0 * 30.0) {
+                return HTML.TEXT(String.format("%2dd", durationLong / (60 * 60 * 24)) + " " + String.format("%2dh %2dm %2ds", durationLong % (60 * 60 * 24) / (60 * 60), durationLong % (60 * 60) / 60, durationLong % 60));
+            } else if (durationLong < 60.0 * 60.0 * 24.0 * 365.0) {
+                return HTML.TEXT(String.format("%2dm", durationLong / (60 * 60 * 24 * 30)) + " " + String.format("%2dd", durationLong % (60 * 60 * 24 * 30) / (60 * 60 * 24)) + " " + String.format("%2dh %2dm %2ds", durationLong % (60 * 60 * 24) / (60 * 60), durationLong % (60 * 60) / 60, durationLong % 60));
+            } else {
+                return HTML.TEXT(String.format("%2dy", durationLong / (60 * 60 * 24 * 365)) + " " + String.format("%2dm", durationLong % (60 * 60 * 24 * 365) / (60 * 60 * 24 * 30)) + " " + String.format("%2dd", durationLong % (60 * 60 * 24 * 30) / (60 * 60 * 24)) + " " + String.format("%2dh %2dm %2ds", durationLong % (60 * 60 * 24) / (60 * 60), durationLong % (60 * 60) / 60, durationLong % 60));
+            }
+        }
+    }
+
     /**
-     * Formats a double value into a String with a given unit
+     * Formats a value into a String with a given unit
      *
      * @param value  Value to format
      * @param unitID UnitID of the unit to format the value with
      * @return Value formatted as a String with the specified unit
      */
-    public HTML format_with_unit(double value, @Nullable Integer unitID) {  // TODO: Apply no-break to text
+    public HTML format_with_unit(double value, @Nullable Integer unitID) {
         if (unitID == null) unitID = -1;
 
-        switch (unitID) {
-            case -2:    // Datetime (unix)
-                return HTML.TEXT(dateFormat.format(new Date(((long) value) * 1000)) + " (EVE)");
-            case -1:    // No unit
-                return HTML.TEXT(decimalFormat.format(value));
-            case 1:     // Metre
-                if (value > 1000.0) {
-                    return HTML.TEXT(decimalFormat.format(value / 1000.0) + " km");
-                } else {
-                    return HTML.TEXT(decimalFormat.format(value) + " m");
-                }
-            case 2:     // Kilogram
-                return HTML.TEXT(decimalFormat.format(value) + " kg");
-            case 101:   // Milliseconds
-                value = value / 1000.0;
-            case 3:     // Seconds  // TODO: Handle NaN on date/time formats!
-                long duration = Math.round(value);  // TODO: Add fractions of a second back
-                if (duration < 60) {
-                    return HTML.TEXT(String.format("%2ds", duration));
-                } else if (duration < 60 * 60) {
-                    return HTML.TEXT(String.format("%2dm %2ds", duration / 60, duration % 60));
-                } else if (duration < 60 * 60 * 24) {
-                    return HTML.TEXT(String.format("%2dh %2dm %2ds", duration / (60 * 60), duration % (60 * 60) / 60, duration % 60));
-                } else if (duration < 60.0 * 60.0 * 24.0 * 30.0) {
-                    return HTML.TEXT(String.format("%2dd", duration / (60 * 60 * 24)) + " " + String.format("%2dh %2dm %2ds", duration % (60 * 60 * 24) / (60 * 60), duration % (60 * 60) / 60, duration % 60));
-                } else if (duration < 60.0 * 60.0 * 24.0 * 365.0) {
-                    return HTML.TEXT(String.format("%2dm", duration / (60 * 60 * 24 * 30)) + " " + String.format("%2dd", duration % (60 * 60 * 24 * 30) / (60 * 60 * 24)) + " " + String.format("%2dh %2dm %2ds", duration % (60 * 60 * 24) / (60 * 60), duration % (60 * 60) / 60, duration % 60));
-                } else {
-                    return HTML.TEXT(String.format("%2dy", duration / (60 * 60 * 24 * 365)) + " " + String.format("%2dm", duration % (60 * 60 * 24 * 365) / (60 * 60 * 24 * 30)) + " " + String.format("%2dd", duration % (60 * 60 * 24 * 30) / (60 * 60 * 24)) + " " + String.format("%2dh %2dm %2ds", duration % (60 * 60 * 24) / (60 * 60), duration % (60 * 60) / 60, duration % 60));
-                }
-            case 4:     // Ampere
-                return HTML.TEXT(decimalFormat.format(value) + " A");
-            case 5:     // Kelvin
-                return HTML.TEXT(decimalFormat.format(value) + " K");
-            case 6:     // Mole
-                return HTML.TEXT(decimalFormat.format(value) + " mol");
-            case 7:     // Candela
-                return HTML.TEXT(decimalFormat.format(value) + " cd");
-            case 8:     // Square metre
-                return HTML.TEXT(decimalFormat.format(value) + " m²");
-            case 9:     // Cubic metre
-                return HTML.TEXT(decimalFormat.format(value) + " m³");
-            case 10:    // Metres per second
-                return HTML.TEXT(decimalFormat.format(value) + " m/s");
-            case 11:    // Metres per second squared; Displayed as metres-per-second for :legacy code: reasons
-                return HTML.TEXT(decimalFormat.format(value) + " m/s");
-            case 12:    // Wave number / Reciprocal metre
-                return HTML.TEXT(decimalFormat.format(value) + " m⁻¹");
-            case 13:    // Kilogram per cubic metre
-                return HTML.TEXT(decimalFormat.format(value) + " kg/m³");
-            case 14:    // Cubic metre per kilogram
-                return HTML.TEXT(decimalFormat.format(value) + " m³/kg");
-            case 15:    // Ampere per square meter
-                return HTML.TEXT(decimalFormat.format(value) + " A/m²");
-            case 16:    // Ampere per meter
-                return HTML.TEXT(decimalFormat.format(value) + " A/m");
-            case 17:    // Mole per cubic meter
-                return HTML.TEXT(decimalFormat.format(value) + " m/m³");
-            case 18:    // Candela per square meter
-                return HTML.TEXT(decimalFormat.format(value) + " cd/m²");
-            case 19:    // Mass fraction / Kilogram per Kilogram
-                return HTML.TEXT(decimalFormat.format(value));
-            // No units 20 to 100
-            // 101 merged with 3 for durations
-            case 102:    // Millimetre
-                return HTML.TEXT(decimalFormat.format(value) + " mm");
-            case 103:   // MegaPascal
-                return HTML.TEXT(decimalFormat.format(value) + " MPa");
-            case 104:   // Multiplier
-                return HTML.TEXT(decimalFormat.format(value) + "×");
-            case 105:   // Percentage
-                return HTML.TEXT(decimalFormat.format(value) + "%");
-            case 106:   // Teraflops
-                return HTML.TEXT(decimalFormat.format(value) + " tf");  // Game convention breaks with formal unit
-            case 107:   // Megawatt
-                return HTML.TEXT(decimalFormat.format(value) + " MW");
-            case 108:   // Inverse Absolute Percent
-                return HTML.TEXT(Math.round((1 - value) * 100) + "%");
-            case 109:   // Modifier Percent
-                return HTML.TEXT((Math.round((value - 1) * 100) > 0 ? "+" + Math.round((value - 1) * 100) : Math.round((value - 1) * 100)) + "%");
-            // No unit 110
-            case 111:   // Inversed Modifier Percent
-                return HTML.TEXT(Math.round((1 - value) * 100) + "%");
-            case 112:   // Radians per second
-                return HTML.TEXT(decimalFormat.format(value) + " rad/s");
-            case 113:   // Hitpoints
-                return HTML.TEXT(decimalFormat.format(value) + " HP");
-            case 114:   // Gigajoule
-                return HTML.TEXT(decimalFormat.format(value) + " GJ");
-            case 115:   // "groupID"
-                Map<Integer, Group> groupMap = getGroups();
-                if (groupMap.containsKey((int) value)) {
-                    return new PageLink(new GroupPage(groupMap.get((int) value)));
-                } else {
-                    throw new RuntimeException("Reference to unknown group: " + value);
-                }
-            case 116:   // "typeID"
-                Map<Integer, Type> typeMap = getTypes();
-                if (typeMap.containsKey((int) value)) {
-                    return new PageLink(new TypePage(typeMap.get((int) value)));
-                } else {
-                    throw new RuntimeException("Reference to unknown item: " + value);
-                }
-            case 117:   // Size class
-                if (value == 0.0) {
-                    return HTML.TEXT("X-Small");
-                } else if (value == 1.0) {
-                    return HTML.TEXT("Small");
-                } else if (value == 2.0) {
-                    return HTML.TEXT("Medium");
-                } else if (value == 3.0) {
-                    return HTML.TEXT("Large");
-                } else if (value == 4.0) {
-                    return HTML.TEXT("X-Large");
-                } else {
-                    throw new RuntimeException("Invalid size class: " + value);
-                }
-            case 118:   // Ore units
-                throw new RuntimeException("Unsupported unit: Ore Units");
-            case 119:   // "attributeID"
-//                return HTML.TEXT("attributeID " + decimalFormat.format(value));
-                throw new RuntimeException("Unsupported unit: attribute ID");   // Exception to find usage
-            case 120:   // "attributePoints"
-                return HTML.TEXT(decimalFormat.format(value) + (value == 1.0 ? " point" : " points"));
-            case 121:   // Real percentage "Used for real percentages, i.e. the number 5 is 5%"
-                return HTML.TEXT(decimalFormat.format(value) + "%");
-            case 122:   // Fitting slots
-                return HTML.TEXT(decimalFormat.format(value) + (value == 1.0 ? " slot" : " slots"));
-            case 123:   // Seconds (No time formatting)
-                return HTML.TEXT(decimalFormat.format(value) + "s");
-            case 124:   // Modifier Relative Percent "Used for relative percentages displayed as %"
-                return HTML.TEXT(decimalFormat.format(value) + "%");
-            case 125:   // Newton
-                return HTML.TEXT(decimalFormat.format(value) + " N");
-            case 126:   // Light-year
-                return HTML.TEXT(decimalFormat.format(value) + " ly");
-            case 127:   // Absolute Percent	"0.0 = 0% 1.0 = 100%"
-                return HTML.TEXT(decimalFormat.format(value * 100) + "%");
-            case 128:   // Drone bandwidth
-                return HTML.TEXT(decimalFormat.format(value) + " Mbit/s");
-            case 129:   // Hours TODO: Merge with other durations
-                value *= 60 * 60;
-                if (value < 60) {
-                    return HTML.TEXT(String.format("%2ds", (int) value));
-                } else if (value < 60 * 60) {
-                    return HTML.TEXT(String.format("%2dm %2ds", (int) value / 60, (int) value % 60));
-                } else if (value < 60 * 60 * 24) {
-                    return HTML.TEXT(String.format("%2dh %2dm %2ds", (int) value / (60 * 60), (int) value % (60 * 60) / 60, (int) value % 60));
-                } else if (value < 60.0 * 60.0 * 24.0 * 30.0) {
-                    return HTML.TEXT(String.format("%2dd", (int) value / (60 * 60 * 24)) + " " + String.format("%2dh %2dm %2ds", (int) value % (60 * 60 * 24) / (60 * 60), (int) value % (60 * 60) / 60, (int) value % 60));
-                } else if (value < 60.0 * 60.0 * 24.0 * 365.0) {
-                    return HTML.TEXT(String.format("%2dm", (int) value / (60 * 60 * 24 * 30)) + " " + String.format("%2dd", (int) value % (60 * 60 * 24 * 30) / (60 * 60 * 24)) + " " + String.format("%2dh %2dm %2ds", (int) value % (60 * 60 * 24) / (60 * 60), (int) value % (60 * 60) / 60, (int) value % 60));
-                } else {
-                    return HTML.TEXT(String.format("%2dy", (int) value / (60 * 60 * 24 * 365)) + " " + String.format("%2dm", (int) value % (60 * 60 * 24 * 365) / (60 * 60 * 24 * 30)) + " " + String.format("%2dd", (int) value % (60 * 60 * 24 * 30) / (60 * 60 * 24)) + " " + String.format("%2dh %2dm %2ds", (int) value % (60 * 60 * 24) / (60 * 60), (int) value % (60 * 60) / 60, (int) value % 60));
-                }
+        return HTML.SPAN("no_break")
+            .content(switch (unitID) {
+                case -4:    // Health sustain (HP/s)
+                    yield HTML.TEXT(decimalFormat.format(value) + " HP/s");
+                case -3:    // Capacitor sustain (GJ/s)
+                    yield HTML.TEXT(decimalFormat.format(value) + " GJ/s");
+                case -2:    // Datetime (unix)
+                    yield HTML.TEXT(dateFormat.format(new Date(((long) value) * 1000)) + " (EVE)");
+                case -1:    // No unit
+                    yield HTML.TEXT(decimalFormat.format(value));
+                case 1:     // Metre
+                    if (value > 1000.0) {
+                        yield HTML.TEXT(decimalFormat.format(value / 1000.0) + " km");
+                    } else {
+                        yield HTML.TEXT(decimalFormat.format(value) + " m");
+                    }
+                case 2:     // Kilogram
+                    yield HTML.TEXT(decimalFormat.format(value) + " kg");
+                case 101:   // Milliseconds
+                    value = value / 1000.0;
+                case 3:     // Seconds
+                    yield formatDuration(value, TimeUnit.SECONDS);
+                case 4:     // Ampere
+                    yield HTML.TEXT(decimalFormat.format(value) + " A");
+                case 5:     // Kelvin
+                    yield HTML.TEXT(decimalFormat.format(value) + " K");
+                case 6:     // Mole
+                    yield HTML.TEXT(decimalFormat.format(value) + " mol");
+                case 7:     // Candela
+                    yield HTML.TEXT(decimalFormat.format(value) + " cd");
+                case 8:     // Square metre
+                    yield HTML.TEXT(decimalFormat.format(value) + " m²");
+                case 9:     // Cubic metre
+                    yield HTML.TEXT(decimalFormat.format(value) + " m³");
+                case 10:    // Metres per second
+                    yield HTML.TEXT(decimalFormat.format(value) + " m/s");
+                case 11:    // Metres per second squared; Displayed as metres-per-second for :legacy code: reasons
+                    yield HTML.TEXT(decimalFormat.format(value) + " m/s");
+                case 12:    // Wave number / Reciprocal metre
+                    yield HTML.TEXT(decimalFormat.format(value) + " m⁻¹");
+                case 13:    // Kilogram per cubic metre
+                    yield HTML.TEXT(decimalFormat.format(value) + " kg/m³");
+                case 14:    // Cubic metre per kilogram
+                    yield HTML.TEXT(decimalFormat.format(value) + " m³/kg");
+                case 15:    // Ampere per square meter
+                    yield HTML.TEXT(decimalFormat.format(value) + " A/m²");
+                case 16:    // Ampere per meter
+                    yield HTML.TEXT(decimalFormat.format(value) + " A/m");
+                case 17:    // Mole per cubic meter
+                    yield HTML.TEXT(decimalFormat.format(value) + " m/m³");
+                case 18:    // Candela per square meter
+                    yield HTML.TEXT(decimalFormat.format(value) + " cd/m²");
+                case 19:    // Mass fraction / Kilogram per Kilogram
+                    yield HTML.TEXT(decimalFormat.format(value));
+                    // No units 20 to 100
+                    // 101 merged with 3 for durations
+                case 102:    // Millimetre
+                    yield HTML.TEXT(decimalFormat.format(value) + " mm");
+                case 103:   // MegaPascal
+                    yield HTML.TEXT(decimalFormat.format(value) + " MPa");
+                case 104:   // Multiplier
+                    yield HTML.TEXT(decimalFormat.format(value) + "×");
+                case 105:   // Percentage
+                    yield HTML.TEXT(decimalFormat.format(value) + "%");
+                case 106:   // Teraflops
+                    yield HTML.TEXT(decimalFormat.format(value) + " tf");  // Game convention breaks with formal unit
+                case 107:   // Megawatt
+                    yield HTML.TEXT(decimalFormat.format(value) + " MW");
+                case 108:   // Inverse Absolute Percent
+                    yield HTML.TEXT(Math.round((1 - value) * 100) + "%");
+                case 109:   // Modifier Percent
+                    yield HTML.TEXT((Math.round((value - 1) * 100) > 0 ? "+" + Math.round((value - 1) * 100) : Math.round((value - 1) * 100)) + "%");
+                    // No unit 110
+                case 111:   // Inversed Modifier Percent
+                    yield HTML.TEXT(Math.round((1 - value) * 100) + "%");
+                case 112:   // Radians per second
+                    yield HTML.TEXT(decimalFormat.format(value) + " rad/s");
+                case 113:   // Hitpoints
+                    yield HTML.TEXT(decimalFormat.format(value) + " HP");
+                case 114:   // Gigajoule
+                    yield HTML.TEXT(decimalFormat.format(value) + " GJ");
+                case 115:   // "groupID"
+                    Map<Integer, Group> groupMap = getGroups();
+                    if (groupMap.containsKey((int) value)) {
+                        yield new PageLink(new GroupPage(groupMap.get((int) value)));
+                    } else {
+                        throw new RuntimeException("Reference to unknown group: " + value);
+                    }
+                case 116:   // "typeID"
+                    Map<Integer, Type> typeMap = getTypes();
+                    if (typeMap.containsKey((int) value)) {
+                        yield new PageLink(new TypePage(typeMap.get((int) value)));
+                    } else {
+                        throw new RuntimeException("Reference to unknown item: " + value);
+                    }
+                case 117:   // Size class
+                    if (value == 0.0) {
+                        yield HTML.TEXT("X-Small");
+                    } else if (value == 1.0) {
+                        yield HTML.TEXT("Small");
+                    } else if (value == 2.0) {
+                        yield HTML.TEXT("Medium");
+                    } else if (value == 3.0) {
+                        yield HTML.TEXT("Large");
+                    } else if (value == 4.0) {
+                        yield HTML.TEXT("X-Large");
+                    } else {
+                        throw new RuntimeException("Invalid size class: " + value);
+                    }
+                case 118:   // Ore units
+                    throw new RuntimeException("Unsupported unit: Ore Units");
+                case 119:   // "attributeID"
+                    throw new RuntimeException("Unsupported unit: attribute ID");   // Exception to find usage
+                case 120:   // "attributePoints"
+                    yield HTML.TEXT(decimalFormat.format(value) + (value == 1.0 ? " point" : " points"));
+                case 121:   // Real percentage "Used for real percentages, i.e. the number 5 is 5%"
+                    yield HTML.TEXT(decimalFormat.format(value) + "%");
+                case 122:   // Fitting slots
+                    yield HTML.TEXT(decimalFormat.format(value) + (value == 1.0 ? " slot" : " slots"));
+                case 123:   // Seconds (No time formatting)
+                    yield HTML.TEXT(decimalFormat.format(value) + "s");
+                case 124:   // Modifier Relative Percent "Used for relative percentages displayed as %"
+                    yield HTML.TEXT(decimalFormat.format(value) + "%");
+                case 125:   // Newton
+                    yield HTML.TEXT(decimalFormat.format(value) + " N");
+                case 126:   // Light-year
+                    yield HTML.TEXT(decimalFormat.format(value) + " ly");
+                case 127:   // Absolute Percent	"0.0 = 0% 1.0 = 100%"
+                    yield HTML.TEXT(decimalFormat.format(value * 100) + "%");
+                case 128:   // Drone bandwidth
+                    yield HTML.TEXT(decimalFormat.format(value) + " Mbit/s");
+                case 129:   // Hours
+                    yield formatDuration(value, TimeUnit.HOURS);
                 // No units 130-132
-            case 133:   // "Money"	"ISK"	"ISK"
-                return HTML.TEXT(decimalFormat.format(value) + " ISK");
-            case 134:   // Logistical capacity
-                return HTML.TEXT(decimalFormat.format(value) + " m³/hr");
-            case 135:   // Astronomical Unit
-                return HTML.TEXT(decimalFormat.format(value) + " m³/hr");
-            case 136:   // Slot    "Slot number prefix for various purposes"
-                return HTML.TEXT("Slot " + decimalFormat.format(value));
-            case 137:   // Boolean	"1=True 0=False"
-                if (value == 1.0) {
-                    return HTML.TEXT("True");
-                } else if (value == 0.0) {
-                    return HTML.TEXT("False");
-                } else {
-                    throw new RuntimeException("Invalid boolean: " + value);
-                }
-            case 138:   // Units	"Units of something, for example fuel"
-                return HTML.TEXT(decimalFormat.format(value) + (value == 1.0 ? " unit" : " units"));
-            case 139:   // Bonus	"Forces a plus sign for positive values"
-                if (value > 0) {
-                    return HTML.TEXT("+" + decimalFormat.format(value));
-                } else {
-                    return HTML.TEXT(decimalFormat.format(value));
-                }
-            case 140:   // Level	"Level"	"For anything which is divided by levels"
-                return HTML.TEXT("Level " + decimalFormat.format(value));
-            case 141:   // Hardpoints	"For various counts to do with turret, launcher and rig hardpoints"
-                return HTML.TEXT(decimalFormat.format(value) + (value == 1.0 ? " hardpoint" : " hardpoints"));
-            case 142:   // Sex	"1=Male 2=Unisex 3=Female"
-                if (value == 1.0) {
-                    return HTML.TEXT("Male");
-                } else if (value == 2.0) {
-                    return HTML.TEXT("Unisex");
-                } else if (value == 3.0) {
-                    return HTML.TEXT("Female");
-                } else {
-                    throw new RuntimeException("Invalid sex: " + value);
-                }
-            case 143:   // Datetime	"Date and time"
-                long unix_timestamp = (long) (value * 86400.0);
-                return HTML.TEXT(dateFormat.format(new Date(unix_timestamp * 1000)) + " (EVE)");  // TODO:
-            case 144:   // Astronomical Unit per second
-                return HTML.TEXT(decimalFormat.format(value) + " AU/s");
-            // No unit 145-204
-            case 205:   // Modifier real percentage
-                if (value > 0) {
-                    return HTML.TEXT("+" + decimalFormat.format(value) + "%");
-                } else {
-                    return HTML.TEXT(decimalFormat.format(value) + "%");
-                }
-            default:
-                throw new IllegalArgumentException("Unknown unit: " + unitID);
-        }
+                case 133:   // "Money"	"ISK"	"ISK"
+                    yield HTML.TEXT(decimalFormat.format(value) + " ISK");
+                case 134:   // Logistical capacity
+                    yield HTML.TEXT(decimalFormat.format(value) + " m³/hr");
+                case 135:   // Astronomical Unit
+                    yield HTML.TEXT(decimalFormat.format(value) + " m³/hr");
+                case 136:   // Slot    "Slot number prefix for various purposes"
+                    yield HTML.TEXT("Slot " + decimalFormat.format(value));
+                case 137:   // Boolean	"1=True 0=False"
+                    if (value == 1.0) {
+                        yield HTML.TEXT("True");
+                    } else if (value == 0.0) {
+                        yield HTML.TEXT("False");
+                    } else {
+                        throw new RuntimeException("Invalid boolean: " + value);
+                    }
+                case 138:   // Units	"Units of something, for example fuel"
+                    yield HTML.TEXT(decimalFormat.format(value) + (value == 1.0 ? " unit" : " units"));
+                case 139:   // Bonus	"Forces a plus sign for positive values"
+                    if (value > 0) {
+                        yield HTML.TEXT("+" + decimalFormat.format(value));
+                    } else {
+                        yield HTML.TEXT(decimalFormat.format(value));
+                    }
+                case 140:   // Level	"Level"	"For anything which is divided by levels"
+                    yield HTML.TEXT("Level " + decimalFormat.format(value));
+                case 141:   // Hardpoints	"For various counts to do with turret, launcher and rig hardpoints"
+                    yield HTML.TEXT(decimalFormat.format(value) + (value == 1.0 ? " hardpoint" : " hardpoints"));
+                case 142:   // Sex	"1=Male 2=Unisex 3=Female"
+                    if (value == 1.0) {
+                        yield HTML.TEXT("Male");
+                    } else if (value == 2.0) {
+                        yield HTML.TEXT("Unisex");
+                    } else if (value == 3.0) {
+                        yield HTML.TEXT("Female");
+                    } else {
+                        throw new RuntimeException("Invalid sex: " + value);
+                    }
+                case 143:   // Datetime	"Date and time"
+                    long unix_timestamp = (long) (value * 86400.0);
+                    yield HTML.TEXT(dateFormat.format(new Date(unix_timestamp * 1000)) + " (EVE)");
+                case 144:   // Astronomical Unit per second
+                    yield HTML.TEXT(decimalFormat.format(value) + " AU/s");
+                    // No unit 145-204
+                case 205:   // Modifier real percentage
+                    if (value > 0) {
+                        yield HTML.TEXT("+" + decimalFormat.format(value) + "%");
+                    } else {
+                        yield HTML.TEXT(decimalFormat.format(value) + "%");
+                    }
+                default:
+                    throw new IllegalArgumentException("Unknown unit: " + unitID);
+            });
     }
 
     protected void patch() {
@@ -625,7 +628,7 @@ public abstract class SDEData {
             Group group = iterator.next();
             if (publishedGroups.contains(group.groupID)) group.published = true;
 
-            if (!group.published && !validGroups.contains(group.groupID)) {
+            if (!group.published || !validGroups.contains(group.groupID)) {
                 iterator.remove();
             } else {
                 validCategories.add(group.categoryID);
@@ -704,5 +707,21 @@ public abstract class SDEData {
         attributes.get(38).categoryID = 40;
         attributes.get(1233).categoryID = 40;
         attributes.get(1770).categoryID = 40;
+
+
+        // Patch meta level
+        for (Map.Entry<Integer, Integer> entry : getMetaTypes().entrySet()) {
+            int typeID = entry.getKey();
+            Map<Integer, Double> typeAttributes = getTypeAttributes().get(typeID);
+            if (typeAttributes != null) {
+                int metaGroup = entry.getValue();
+                int minLevel = getMetaGroups().get(metaGroup).getMetaLevel();
+
+                Double metaLevel = typeAttributes.get(633);
+                if (metaLevel != null && metaLevel < minLevel) {
+                    typeAttributes.put(633, (double) minLevel);
+                }
+            }
+        }
     }
 }

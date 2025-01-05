@@ -44,7 +44,7 @@ public class IconProvider {
         ZipOutputStream rendersOut = new ZipOutputStream(outputStream);
         rendersOut.setLevel(Deflater.NO_COMPRESSION);
 
-        sources.SDEData().getTypes()
+        sources.sdeData().getTypes()
             .values()
             .parallelStream()
             .filter(type -> IconProvider.hasRender(type, sources))
@@ -73,7 +73,7 @@ public class IconProvider {
         ZipOutputStream iconsOut = new ZipOutputStream(outputStream);
         iconsOut.setLevel(Deflater.NO_COMPRESSION);
 
-        sources.SDEData().getTypes()
+        sources.sdeData().getTypes()
             .values()
             .parallelStream()
             .forEach(type -> {
@@ -93,7 +93,7 @@ public class IconProvider {
                     }
 
                     if (
-                        sources.SDEData().getGroups().get(type.groupID).categoryID == 9
+                        sources.sdeData().getGroups().get(type.groupID).categoryID == 9
                         && !(type.groupID == 1888 || type.groupID == 1889 || type.groupID == 1890 || type.groupID == 4097)
                     ) {
                         typeIcon64 = getTypeIcon64(
@@ -207,9 +207,9 @@ public class IconProvider {
     private static final Semaphore imageServiceSemaphore = new Semaphore(1);
 
     public static @Nullable byte[] getTypeIcon64(int typeID, DataSources dataSources, boolean isBPC, boolean useOldOverlay) throws IOException {
-        Type type = dataSources.SDEData().getTypes().get(typeID);
-        Group group = dataSources.SDEData().getGroups().get(type.groupID);
-        int metaGroup = dataSources.SDEData().getMetaTypes().getOrDefault(type.typeID, 1);
+        Type type = dataSources.sdeData().getTypes().get(typeID);
+        Group group = dataSources.sdeData().getGroups().get(type.groupID);
+        int metaGroup = dataSources.sdeData().getMetaTypes().getOrDefault(type.typeID, 1);
 
         String cacheKey = null;
         ProcessBuilder imageMagickCall = null;
@@ -227,9 +227,9 @@ public class IconProvider {
                 backgroundResource = "res:/ui/texture/icons/reaction.png";
                 overlayResource = "res:/ui/texture/icons/bpo_overlay.png";
 
-                Set<Integer> outputs = dataSources.SDEData().getBpActivities().get(typeID).get(IndustryActivityType.REACTIONS).productMap.keySet();
+                Set<Integer> outputs = dataSources.sdeData().getBpActivities().get(typeID).get(IndustryActivityType.REACTIONS).productMap.keySet();
                 if (outputs.size() > 1) throw new IllegalStateException("Reaction with multiple outputs: " + type);
-                outputType = dataSources.SDEData().getTypes().get(outputs.iterator().next());
+                outputType = dataSources.sdeData().getTypes().get(outputs.iterator().next());
             } else { // Blueprints
                 if (isBPC) {
                     backgroundResource = "res:/ui/texture/icons/bpc.png";
@@ -239,11 +239,11 @@ public class IconProvider {
                     overlayResource = "res:/ui/texture/icons/bpo_overlay.png";
                 }
 
-                IndustryActivity activity = dataSources.SDEData().getBpActivities().containsKey(typeID) ? dataSources.SDEData().getBpActivities().get(typeID).get(IndustryActivityType.MANUFACTURING) : null;
+                IndustryActivity activity = dataSources.sdeData().getBpActivities().containsKey(typeID) ? dataSources.sdeData().getBpActivities().get(typeID).get(IndustryActivityType.MANUFACTURING) : null;
                 if (activity != null) {
                     Set<Integer> outputs = activity.productMap.keySet();
                     if (outputs.size() > 0) {
-                        outputType = dataSources.SDEData().getTypes().get(outputs.iterator().next());
+                        outputType = dataSources.sdeData().getTypes().get(outputs.iterator().next());
                     } else {
                         outputType = null;
                     }
@@ -253,7 +253,7 @@ public class IconProvider {
             }
 
             if (outputType == null) {
-                return null;     // TODO: Empty blueprint?
+                return null;
             }
 
             FSDData.Graphic graphic = dataSources.fsdData().graphics.get(outputType.graphicID != null ? outputType.graphicID : 0);
@@ -305,7 +305,7 @@ public class IconProvider {
             }
 
             if (imageMagickCall == null && outputType.iconID != null) {
-                String iconResource = dataSources.SDEData().getEveIcons().get(outputType.iconID);
+                String iconResource = dataSources.sdeData().getEveIcons().get(outputType.iconID);
 
                 Path techOverlay = techOverlayPath(metaGroup, dataSources, useOldOverlay);
                 if (techOverlay != null) {
@@ -349,7 +349,7 @@ public class IconProvider {
             }
 
             if (imageMagickCall == null) {
-                return null;    // TODO: Maybe yield blank blueprint
+                return null;
             }
         } else {    // Regular item
             String iconResource = null;
@@ -361,10 +361,10 @@ public class IconProvider {
                     iconResource = graphic.iconInfo().folder() + "/" + type.graphicID + "_64.png";
                 }
                 if (!dataSources.sharedCache().containsResource(iconResource) && type.iconID != null) {
-                    iconResource = dataSources.SDEData().getEveIcons().get(type.iconID);
+                    iconResource = dataSources.sdeData().getEveIcons().get(type.iconID);
                 }
             } else if (type.iconID != null) {
-                iconResource = dataSources.SDEData().getEveIcons().get(type.iconID);
+                iconResource = dataSources.sdeData().getEveIcons().get(type.iconID);
             }
 
             if (iconResource == null || !dataSources.sharedCache().containsResource(iconResource)) {
@@ -414,7 +414,7 @@ public class IconProvider {
     }
 
     public static boolean hasRender(Type type, DataSources dataSources) {
-        int categoryID = dataSources.SDEData().getGroups().get(type.groupID).categoryID;
+        int categoryID = dataSources.sdeData().getGroups().get(type.groupID).categoryID;
         if (categoryID == 6         // Ship
             || categoryID == 18     // Drone
             || categoryID == 22     // Deployable
@@ -440,7 +440,7 @@ public class IconProvider {
 
 
     public static @Nullable byte[] getTypeRender512(int typeID, DataSources dataSources, boolean convertToPNG) throws IOException {
-        Type type = dataSources.SDEData().getTypes().get(typeID);
+        Type type = dataSources.sdeData().getTypes().get(typeID);
 
         String renderResource;
         FSDData.Graphic graphic = dataSources.fsdData().graphics.get(type.graphicID != null ? type.graphicID : 0);

@@ -8,6 +8,7 @@ import net.sentientturtle.nee.data.datatypes.Type;
 
 
 import java.util.Map;
+import java.util.Objects;
 
 import static net.sentientturtle.html.HTML.*;
 
@@ -120,7 +121,6 @@ public class ShipFitting extends Component {
             ));
         }
         if (showCapacitor) {
-            // TODO: Max sustained load, also on shields
             stat_table.content(TR().content(
                 TD().content(
                     SPAN("ship_fitting_span").content(
@@ -132,6 +132,17 @@ public class ShipFitting extends Component {
                     SPAN("ship_fitting_span").content(
                         IMG(ResourceLocation.ofIconID(1392, context), null, 32).className("ship_fitting_icon"),
                         TEXT("Capacitor recharge: "), context.sde.format_with_unit(capacitorRecharge, context.sde.getAttributes().get(55).unitID)
+                    )
+                )
+            ));
+
+            assert Objects.equals(101, context.sde.getAttributes().get(55).unitID);
+            double peakRecharge = 2500.0 * capacitorCapacity / capacitorRecharge;
+            stat_table.content(TR().content(
+                TD().attribute("colspan", "2").content(
+                    SPAN("ship_fitting_span").content(
+                        IMG(ResourceLocation.ofIconID(1668, context), null, 32).className("ship_fitting_icon"),
+                        TEXT("Peak capacitor rate: "), context.sde.format_with_unit(peakRecharge, -3)
                     )
                 )
             ));

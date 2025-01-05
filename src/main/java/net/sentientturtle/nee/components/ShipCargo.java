@@ -38,7 +38,7 @@ public class ShipCargo extends Component {
 
             table.content(
                 TR().content(
-                    TD().text(basicName),   // TODO: Link to cargo bay explanation page
+                    TD().text(basicName),
                     TD().content(context.sde.format_with_unit(type.capacity, 9))
                 )
             );

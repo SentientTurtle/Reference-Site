@@ -148,18 +148,6 @@ public class ResourceLocation {
         );
     }
 
-    /// ResourceLocation for an EVE player corporation logo; Is a remote link to the EVE Online Image Service. (64x64 PNG file)
-    public static ResourceLocation iconOfCorpID(int corporationID) {
-        try {
-            return new ResourceLocation(
-                new ResourceData.Remote(new URI("https://imageserver.eveonline.com/corporations/" + corporationID + "/logo?size=64")),  // TODO: This is still the old URL, fix or remove
-                "corp_icons/" + corporationID + ".png"
-            );
-        } catch (URISyntaxException e) {
-            return ExceptionUtil.sneakyThrow(e);   // Shouldn't happen as we construct the URL in this function, so we just re-throw
-        }
-    }
-
     /// ResourceLocation for the search index data-script file
     public static ResourceLocation searchIndex() {
         return new ResourceLocation(new ResourceData.NoData(), "searchindex.js");
@@ -200,7 +188,7 @@ public class ResourceLocation {
                 try {
                     StringBuilder builder = new StringBuilder();
                     builder.append("data:")
-                        .append(MIME.getType((destinationPath).substring(destinationPath.lastIndexOf('.'))))     // TODO: Move mime type into datasource
+                        .append(MIME.getType((destinationPath).substring(destinationPath.lastIndexOf('.'))))
                         .append(";base64,");
                     byte[] encode = Base64.getEncoder().encode(dataSource.getData(context.dataSources));    // Fail intentionally on NoData
                     builder.append(new String(encode));

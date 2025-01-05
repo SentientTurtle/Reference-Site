@@ -12,14 +12,13 @@ public class ShipFightersStandup extends AttributeList {
         super(
             "Standup Fighters",
             type,
-            false,
             new Entry[][]{{
-                new Entry("Light Squadron Limit", 2737),
-                new Entry("Support Squadron Limit", 2738),
-                new Entry("Heavy Squadron Limit", 2739),
+                new Entry.Attribute("Light Squadron Limit", 2737),
+                new Entry.Attribute("Support Squadron Limit", 2738),
+                new Entry.Attribute("Heavy Squadron Limit", 2739),
             }, {
-                new Entry("Launch Tubes", 2216),
-                new Entry("Hangar Capacity", 2055),
+                new Entry.Attribute("Launch Tubes", 2216),
+                new Entry.Attribute("Hangar Capacity", 2055),
             }}
         );
     }

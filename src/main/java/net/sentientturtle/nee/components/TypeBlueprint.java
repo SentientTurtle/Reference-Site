@@ -96,7 +96,7 @@ public class TypeBlueprint extends Component {
 
                 if (activity.productMap.size() > 0) {
                     String outputDisplayText = activity.productMap.size() > 1 ? "Output (select one)" : "Output";
-                    table.content(TR().content(TH("type_blueprint_subheader").attribute("colspan", "3").text(outputDisplayText)));   // TODO: Copy-this buttons
+                    table.content(TR().content(TH("type_blueprint_subheader").attribute("colspan", "3").text(outputDisplayText)));
                     for (Map.Entry<Integer, Integer> entry : activity.productMap.entrySet()) {
                         Element quantityTD = TD().content(context.sde.format_with_unit(entry.getValue(), -1));
                         Double probability = activity.probabilityMap.get(entry.getKey());
