@@ -52,7 +52,8 @@ public class PageList extends Component {
             
             .page_list_entry {
                 display: flex;
-                height: 2rem;
+                gap: 0.5rem;
+                align-items: center;
             }
             
             .page_list_icon {
@@ -62,7 +63,6 @@ public class PageList extends Component {
             
             .page_list_type {
                 font-size: 1.25rem;
-                margin: 0.5rem;
             }""";
     }
 }

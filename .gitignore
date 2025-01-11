@@ -1,6 +1,7 @@
 # Automatically downloaded or generated.
 *.sqlite
 *.zip
+*.md5
 
 # Native libraries for sqlite4java
 /native/*.so
@@ -19,7 +20,7 @@
 /rsc/pythonlib/*/*.pyc
 
 # Output
-*.zip
+/output/
 
 # IDE & build output
 /.gradle/

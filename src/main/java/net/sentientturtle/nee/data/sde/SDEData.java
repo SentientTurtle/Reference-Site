@@ -574,7 +574,7 @@ public abstract class SDEData {
             type.description = type.description.replace("// ", "//");
         }
 
-        Set<Integer> publishedGroups = Set.of(6, 15);
+        Set<Integer> publishedGroups = Set.of(6, 15, 1324);
 
         Set<Integer> publishedTypes = Set.of(30574, 30575, 30576, 30577, 30669, 30670);
         for (Integer publishedType : publishedTypes) {
@@ -586,6 +586,7 @@ public abstract class SDEData {
             27038,  // Mission item
             28320,  // Group is unpublished
             34574,  // Legacy entry
+            35915,  // Unused FLEX structure module
             47449,  // Mission item, other items in group set unpublished
             // Defunct starbase Blueprint
             2742, 2743, 2744, 2745, 2746, 2747, 2748, 2786, 2790, 2791, 2793, 2795, 2797, 2820, 2821, 28605, 33515, 33584, 2788, 2789, 2800, 33582,
@@ -606,7 +607,7 @@ public abstract class SDEData {
             .map(group -> group.groupID)
             .collect(Collectors.toCollection(HashSet::new));
 
-        Collections.addAll(unpublishedTypeGroups, 186, 316, 920, 935, 952, 110, 1324, 1461, 1717, 1975, 1977, 2004, 2022, 2026, 4161, 1048);
+        Collections.addAll(unpublishedTypeGroups, 186, 316, 920, 935, 952, 110, /* 1324, */ 1461, 1717, 1975, 1977, 2004, 2022, 2026, 4161, 1048);
 
         var types = this.getTypes();
         var validGroups = new HashSet<Integer>();

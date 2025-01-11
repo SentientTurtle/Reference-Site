@@ -1,7 +1,10 @@
 package net.sentientturtle.html;
 
+import net.sentientturtle.nee.page.TypePage;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+
+import java.util.Objects;
 
 
 /**
@@ -22,5 +25,11 @@ public class PageLink extends Element {
         super("a");
         this.attribute("href", context -> context.pathTo(document));
         this.content(content);
+    }
+
+    public PageLink(String absolutePath, @NonNull String text) {
+        super("a");
+        this.attribute("href", context -> context.pathTo(absolutePath));
+        this.text(Objects.requireNonNull(text));
     }
 }

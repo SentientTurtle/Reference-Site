@@ -23,6 +23,7 @@ public class ShipPropulsion extends AttributeList {
                     if (inertia == null || attributes.getOrDefault(600, 0.0) == 0.0) return;
 
                     // Game ticks will always round up
+                    // algebraically identical to the official one https://developers.eveonline.com/docs/guides/useful-formulae/ TODO: Copy this to eve-math project
                     double alignTime = Math.ceil(inertia * (type.mass / 1_000_000.0) * -Math.log(0.25));
 
                     tr.content(

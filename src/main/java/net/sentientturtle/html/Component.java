@@ -11,9 +11,14 @@ import java.util.Collections;
 /// Components consist of a DIV with some subclass-specified content & style
 public abstract class Component extends Element {
     /// @param className Unique className for this component
-    protected Component(String className) {
-        super("div");
+    protected Component(String tagName, String className) {
+        super(tagName);
         this.className(className);
+    }
+
+    /// @param className Unique className for this component
+    protected Component(String className) {
+        this("div", className);
     }
 
     /// Components cannot be rendered to HTML without a {@link HtmlContext} and so do not support toString();

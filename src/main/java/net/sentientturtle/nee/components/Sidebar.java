@@ -11,7 +11,7 @@ import static net.sentientturtle.html.HTML.*;
 /// Website navigation sidebar
 public class Sidebar extends Component {
     public Sidebar() {
-        super("sidebar font_header");
+        super("nav", "sidebar font_header");
     }
 
     @Override
