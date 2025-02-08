@@ -97,6 +97,7 @@ public class TypePage extends Page {
                         || categoryID == 22     // Deployable
                         || categoryID == 24     // Starbase
                         || categoryID == 65     // Structure
+                        || categoryID == 40     // Sov Structure
                         || categoryID == 87;    // Fighter
         }
 
@@ -149,14 +150,12 @@ public class TypePage extends Page {
                 mid.content(new ShipHull(type));
             }
 
-            if (categoryID == 6 || categoryID == 22 || categoryID == 23 || categoryID == 40 || categoryID == 46) {
-                int highSlots = typeAttributes.getOrDefault(14, 0.0).intValue();
-                int medSlots = typeAttributes.getOrDefault(13, 0.0).intValue();
-                int lowSlots = typeAttributes.getOrDefault(12, 0.0).intValue();
+            int highSlots = typeAttributes.getOrDefault(14, 0.0).intValue();
+            int medSlots = typeAttributes.getOrDefault(13, 0.0).intValue();
+            int lowSlots = typeAttributes.getOrDefault(12, 0.0).intValue();
 
-                if (highSlots != 0 || medSlots != 0 || lowSlots != 0) {
-                    mid.content(new ShipFitting(type));
-                }
+            if (highSlots != 0 || medSlots != 0 || lowSlots != 0) {
+                mid.content(new ShipFitting(type));
             }
 
             if (typeAttributes.getOrDefault(37, 0.0) > 0) // Max velocity > 0
@@ -184,12 +183,12 @@ public class TypePage extends Page {
             }
         }
 
-        if (group.categoryID == 7)
+        if (group.categoryID == 7 || group.categoryID == 66)
             mid.content(new ModuleFitting(type));
 
         if (type.groupID == 1964) { // If item type is a Mutaplasmid
             mid.content(new ItemStats(type));
-        } else if (categoryID == 7 || categoryID == 8 || categoryID == 20) {    // If module, charge, or implant
+        } else if (categoryID == 7 || categoryID == 32 || categoryID == 66 || categoryID == 8 || categoryID == 20 || categoryID == 22) {    // If module, subsystem, structure module, charge, implant, or deployable
             for (int listedAttribute : ItemStats.INCLUDED_ATTRIBUTES) {
                 if (typeAttributes.containsKey(listedAttribute) && listedAttribute != 9) {
                     mid.content(new ItemStats(type));

@@ -1,5 +1,6 @@
 # Automatically downloaded or generated.
 *.sqlite
+*.db
 *.zip
 *.md5
 

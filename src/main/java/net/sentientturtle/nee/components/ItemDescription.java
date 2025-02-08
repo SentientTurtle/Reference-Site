@@ -22,7 +22,7 @@ public class ItemDescription extends Component {
     protected HTML[] getContent(HtmlContext context) {
         return new HTML[]{
             HEADER("font_header").text("Description"),
-            DIV("html_text item_description_text font_text").content(content)
+            DIV("item_description_text font_text").content(content)
         };
     }
 
@@ -37,6 +37,7 @@ public class ItemDescription extends Component {
               padding: 0.5rem;
               font-style: italic;
               font-size: 0.9rem;
+              white-space: pre-wrap;
             }""";
     }
 }

@@ -52,7 +52,7 @@ public enum PageKind {
             .map(MapPage::new)
     ),
     DEV_RESOURCE(_ -> Stream.ofNullable(Main.SKIP_DEV_RESOURCES ? null : new DevResourcePage())),
-    STATIC(_ -> Stream.of(new IndexPage(), new SearchResults(), new DynamicMapPage())) {
+    STATIC(_ -> Stream.of(new IndexPage(), new SearchResults(), new DynamicMapPage(), new TermsOfServicePage())) {
         @Override
         public String getPageFilePath(String pageName) {
             return pageName + ".html";

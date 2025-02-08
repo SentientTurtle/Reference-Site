@@ -177,6 +177,11 @@ public sealed interface HTML permits Element, HTML.EmptyHTML, HTML.MultiHTML, HT
         return new Element("meta", true);
     }
 
+    /// {@code <pre></pre> }
+    static Element PRE() {
+        return new Element("pre", false);
+    }
+
     /// {@code <script type='module' src='[location]'></script> }
     static Element SCRIPT_EXTERNAL(ResourceLocation location) {
         return new Element("script")

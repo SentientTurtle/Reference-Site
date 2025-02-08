@@ -285,26 +285,6 @@ public class YamlSDEData extends SDEData {
             );
         });
 
-        HashMap<Integer, EnumSet<Station.Service>> operationServices = new HashMap<>();
-        reader.readStationOperations((operationID, operation) -> {
-            EnumSet<Station.Service> services = operationServices.computeIfAbsent(operationID, _ -> EnumSet.noneOf(Station.Service.class));
-            for (Integer serviceID : operation.services()) {
-                Station.Service service = switch (serviceID) {
-                    case 5 -> Station.Service.REPROCESSING;
-                    case 7 -> Station.Service.MARKET;
-                    case 10 -> Station.Service.CLONEBAY;
-                    case 13 -> Station.Service.REPAIRSHOP;
-                    case 14 -> Station.Service.INDUSTRY;
-                    case 17 -> Station.Service.FITTING;
-                    case 21 -> Station.Service.INSURANCE;
-                    case 25 -> Station.Service.LPSTORE;
-                    case 26 -> Station.Service.MILITIAOFFICE;
-                    default -> null;
-                };
-                if (service != null) services.add(service);
-            }
-        });
-
         this.stations = this.produceMap();
         reader.readStations(station -> {
             this.stations.computeIfAbsent(station.solarSystemID(), this::produceSet)
@@ -312,7 +292,8 @@ public class YamlSDEData extends SDEData {
                     station.stationID(),
                     station.stationTypeID(),
                     station.stationName(),
-                    operationServices.getOrDefault(station.operationID(), EnumSet.noneOf(Station.Service.class))
+                    station.operationID(),
+                    EnumSet.noneOf(Station.Service.class)
                 ));
         });
 

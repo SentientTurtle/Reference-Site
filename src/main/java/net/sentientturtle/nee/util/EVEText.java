@@ -54,7 +54,7 @@ public class EVEText {
         // 3: <br> element, substituted with a pure newline `\n`
         // 4: Text style element such as <i>, included verbatim in the output HTML
         // Additionally, the <color>, <font>, <p>, <li>, <il>, <div> elements are stripped out of the text, leaving their contents as plaintext
-        "<(?:a href|url)=[\"']?(?:showinfo:([\\d/]+))?[^>]*?>([^<]+?)</(?:a|url)>|</?(?:color[^'>]*?|font[^>]*?|p|li|ul)>|</?div[^>]*>|(<br>)|(</?[ibu]>)"
+        "<(?:a href|url)=[\"']?(?:showinfo:([\\d/]+))?[^>]*>([^<]+)</(?:a|url)>|</?(?:color[^>]*|font[^>]*|p|li|ul)>|</?div[^>]*>|(<br>)|(</?[ibu]>)"
     );
     public static HTML[] escape(String input, SDEData sdeData, boolean retainMarkup) {
         ArrayList<HTML> htmlContent = new ArrayList<>();

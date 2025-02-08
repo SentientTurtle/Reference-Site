@@ -1,5 +1,6 @@
 package net.sentientturtle.nee.data;
 
+import net.sentientturtle.html.HTML;
 import net.sentientturtle.nee.data.sharedcache.IconProvider;
 import net.sentientturtle.nee.page.PageKind;
 
@@ -19,6 +20,7 @@ public class DevResources {
     public record DevResource(
         String name,
         Path path,
+        ResourceLocation README,
         BiConsumer<DataSources, OutputStream> data
     ) {}
 
@@ -26,11 +28,12 @@ public class DevResources {
 
     public static List<ResourceGroup> getResources(DataSources data) {
         return List.of(new ResourceGroup(
-            "Item type icons",
-            "Drop-in replacement for the official Image-Export-Collection, updated to recent game versions & with correct tech tiers",
+            "Icon Export",
+            "Drop-in replacement for the official Image-Export-Collection, updated to recent game versions & with correct tech tiers.",
             List.of(
-                new DevResource("Item type icons (64x64)", OUTPUT_DEV_RES_FOLDER.resolve("type_images - v" + data.gameVersion() + ".zip"), IconProvider::generateTypeIconExport),
-                new DevResource("Item type renders (512x512)", OUTPUT_DEV_RES_FOLDER.resolve("type_renders - v" + data.gameVersion() + ".zip"), IconProvider::generateTypeRenderExport)
+                new DevResource("Item type icons (64x64)", OUTPUT_DEV_RES_FOLDER.resolve("type_images - v" + data.gameVersion() + ".zip"), ResourceLocation.file("devrsc/README_TYPE_ICONS.txt"), IconProvider::generateTypeIconExport),
+                new DevResource("Item type renders (512x512)", OUTPUT_DEV_RES_FOLDER.resolve("type_renders - v" + data.gameVersion() + ".zip"), ResourceLocation.file("devrsc/README_TYPE_RENDERS.txt"), IconProvider::generateTypeRenderExport),
+                new DevResource("Game icons", OUTPUT_DEV_RES_FOLDER.resolve("game_icons - v" + data.gameVersion() + ".zip"), ResourceLocation.file("devrsc/README_ICONS.txt"), IconProvider::generateBulkIconExport)
             )
         ));
     }

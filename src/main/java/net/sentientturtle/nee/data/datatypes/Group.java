@@ -22,7 +22,7 @@ public class Group implements HasPage {
      * May be left null to indicate this group has no icon
      */
     @Nullable
-    public final Integer iconID;
+    public Integer iconID;
     public boolean published;
 
     public Group(int groupID, int categoryID, String name, @Nullable Integer iconID, boolean published) {

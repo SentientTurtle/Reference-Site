@@ -24,7 +24,7 @@ public final class SolarSystem implements MapItem {
     public final double y;
     public final double z;
     public final double security;
-    public final @Nullable Integer factionID;
+    public @Nullable Integer factionID;
     public final @Nullable Integer sunTypeID;
     public final @Nullable Integer wormholeClassID;
 

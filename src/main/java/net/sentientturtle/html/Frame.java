@@ -76,23 +76,26 @@ public abstract non-sealed class Frame implements Document, HTML {
             String head_font = "@font-face {" +
                                "   font-family: 'Electrolize';" +
                                "   src: url('" + ResourceLocation.file("font/Electrolize.woff2").getURI(context, true) + "') format('woff2');" +
+                               "   font-display: swap;" +
                                "}";
 
             String roman_numeral_font = "@font-face {" +
                                         "   font-family: 'RomanNumeral';" +
                                         "   src: url('" + ResourceLocation.file("font/RomanNumerals.woff2").getURI(context, true) + "') format('woff2');" +
+                                        "   font-display: swap;" +
                                         "}";
 
-            String css = this.getCSS(context);
-            if (css != null) {
-                context.registerCSS(css);
-            }
 
             context.registerCSS(
                 head_font + "\n" +
                 roman_numeral_font + "\n" +
                 GLOBAL_CSS + PAGE_CSS
             );
+
+            String css = this.getCSS(context);
+            if (css != null) {
+                context.registerCSS(css);
+            }
 
             content.renderTo(context);
         } catch (Exception e) {
@@ -187,11 +190,11 @@ public abstract non-sealed class Frame implements Document, HTML {
         
         #footer {
             grid-area: 3 / 2 / 4 / 3;
-        }
-        
-        .footer_text {
-            font-size: 0.7rem;
             padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.7rem;
         }
         """;
     protected static final String GLOBAL_CSS = """        
@@ -530,10 +533,6 @@ public abstract non-sealed class Frame implements Document, HTML {
         
         .font_roman_numeral {
             font-family: 'RomanNumeral', sans-serif;
-        }
-        
-        .html_text {
-            white-space: pre-wrap;
         }
         
         .no_break {

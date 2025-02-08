@@ -11,7 +11,7 @@ import net.sentientturtle.nee.data.datatypes.Station;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 
 import static net.sentientturtle.html.HTML.DIV;
@@ -41,6 +41,13 @@ public class MapPage extends Frame {
     @Override
     public String filename() {
         return String.valueOf(mapItem.getID());
+    }
+
+    @Override
+    protected List<HTML> headEntries(HtmlContext context) {
+        // Let the parent window know iframe has reached document-loaded (Which happens immediately before script execution for module scripts)
+        // Iframe's onload event is the full window load event, which happens after images/etc load, so we manually create our own
+        return List.of(HTML.SCRIPT_MODULE("window.parent.postMessage('MAPFRAME-DOMLOADED');"));
     }
 
     @Override

@@ -36,6 +36,24 @@ public class DevResourcePage extends Page {
     }
 
     @Override
+    protected @Nullable String getCSS(HtmlContext context) {
+        return """
+            .dev_resource_table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            
+            .dev_resource_table tr:not(:first-child) {
+                border-top: var(--border-size) solid var(--colour-theme-minor-border);
+            }
+            
+            .dev_resource_table td {
+                padding: 0.25rem;
+            }
+            """;
+    }
+
+    @Override
     protected HTML getContent(HtmlContext context) {
         return new TextBox("3rd party development resources",
             multi(
@@ -48,12 +66,15 @@ public class DevResourcePage extends Page {
                 .stream()
                 .map(resourceGroup -> DIV().content(
                     HEADER().text(resourceGroup.name()),
-                    BR(),
-                    TEXT(resourceGroup.description()),
-                    UL().content(
+                    PRE().content(TEXT(resourceGroup.description())),
+                    TABLE("dev_resource_table").content(
                         resourceGroup.resources()
                             .stream()
-                            .map(resource -> LI().content(A(context.pathTo(resource.path().toString()), TEXT(resource.name()))))
+                            .map(resource ->
+                                TR().content(
+                                    TD().content(A(context.pathTo(resource.path().toString()), TEXT(resource.name()))),
+                                    TD().content(A(resource.README().getURI(context), TEXT("[README]"))))
+                                )
                     )
                 ))
         );

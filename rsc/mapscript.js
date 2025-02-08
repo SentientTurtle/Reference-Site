@@ -29,6 +29,9 @@ let system_info_jumps = {},
     system_info_npc_kills = {},
     system_info_npc_kills_max = null;
 
+let alliance_names = {};
+let system_sov = {};
+
 const NUMBER_FORMAT = new Intl.NumberFormat('en', {minimumFractionDigits: 1});
 const SCALE = 1.0E18;
 const SYSTEM_SIZE = 25 * 250 * 149_597_870_700;
@@ -83,9 +86,12 @@ async function init() {
             // Anoikis region
             map_file = "./rsc/map/anoikis.json";
             jumps_file = null;
+        } else {
+            console.log("Invalid item query parameter: " + search_item);
+            map_file = "./rsc/map/NEC.json";
+            jumps_file = "./rsc/map/NEC_jumps.json";
         }
     } else {
-        console.log("Invalid item query parameter!");
         search_item = null;
         map_file = "./rsc/map/NEC.json";
         jumps_file = "./rsc/map/NEC_jumps.json";
@@ -271,8 +277,32 @@ async function init() {
         system_info_npc_kills_max = Object.values(system_info_npc_kills).reduce((l, r) => Math.max(l, r), -Infinity);
     }
 
+    {
+        fetch("./rsc/map/system_sov.json")
+            .then(r => r.json())
+            .then(sov => { system_sov = sov; });
+        
+        fetch("./rsc/map/alliance_names.json")
+            .then(r => r.json())
+            .then(names => { alliance_names = names; });
+
+        window.onmessage = (e) => {
+            if (e.data === "MAPFRAME-DOMLOADED") {
+                const id = iframe.contentWindow.location.href
+                    .split("/")
+                    .pop()
+                    .split(".")[0];
+
+                if (id in system_sov) {
+                    iframe.contentDocument.querySelector(".map_sovereignty_text").textContent = alliance_names[system_sov[id]] ?? "";
+                    iframe.contentDocument.querySelector(".map_sovereignty_icon").src = "https://images.evetech.net/alliances/" + system_sov[id] + "/logo";
+                }
+            }
+        }
+    }
+
     if (search_item != null) {
-        // We want to fire the reload event here
+        // (Re)load event is not suppressed, as we intentionally want to fire it here.
         iframe.src = "../map/" + search_item + ".html";
     }
 

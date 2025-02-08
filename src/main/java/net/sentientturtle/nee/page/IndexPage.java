@@ -8,6 +8,8 @@ import net.sentientturtle.nee.components.TextBox;
 import net.sentientturtle.nee.data.ResourceLocation;
 import org.jspecify.annotations.Nullable;
 
+import java.util.List;
+
 import static net.sentientturtle.html.HTML.*;
 
 /// "index.html" main page
@@ -33,6 +35,29 @@ public class IndexPage extends Page {
     }
 
     @Override
+    protected List<HTML> headEntries(HtmlContext context) {
+        return List.of(
+            // TODO: Add map-updated timestamp to DynamicMapPage
+            SCRIPT_MODULE("""
+                fetch("./rsc/status.json")
+                        .then(r => r.json())
+                        .then(status => {
+                            document.querySelector("#server_status_infobox > .text_box_text")
+                                .replaceChildren(
+                                    document.createTextNode("Tranquility"),
+                                    document.createElement("br"),
+                                    document.createTextNode(`${status.players} players`),
+                                    document.createElement("br"),
+                                    document.createTextNode(`Server version: ${status.server_version}`),
+                                    document.createElement("br"),
+                                    document.createTextNode(`(Status updated: ${status.updated} EVE)`)
+                                );
+                        });
+            """)
+        );
+    }
+
+    @Override
     protected HTML getContent(HtmlContext context) {
         return HTML.multi(
             new TextBox("About", HTML.RAW(
@@ -41,28 +66,7 @@ public class IndexPage extends Page {
                 "<br>Issues can be reported on the project's <a href='https://github.com/SentientTurtle/Reference-Site'>Github repository.</a>" +
                 "<br><br><i>The " + Main.WEBSITE_NAME + " project is not affiliated with CCP hf.</i></pre>"
             )),
-            !Main.IS_DEV_BUILD ? HTML.empty() : new TextBox("Development notes", HTML.RAW(
-                """
-                    This is a development build of the website. Some content and features may not be available or functional on all devices.
-                    <br><br>
-                    Known issues:
-                    <ul>
-                        <li>Search is slow and unreliable (Basic implementation for testing)</li>
-                    </ul>
-                    Work in progress features:
-                    <ul>
-                        <li>Dynamic map</li>
-                    </ul>
-                    Features needing feedback:
-                    <ul>
-                        <li>Ship/Structure/Module stats</li>
-                        <li>Ship/Structure/Module index</li>
-                        <li>Item/market index</li>
-                        <li>Website name ("Encyclopedia" connotations as opposed to user-edited "wiki" connotations?)</li>
-                        <li>Ideas for other front-page content</li>
-                    </ul>
-                    """
-            )),
+            !Main.IS_DEV_BUILD ? HTML.empty() : new TextBox("Development notes", HTML.RAW("This is a development build of the website. Some content and features may not be available or functional on all devices.\n")),
             new PageList(
                 "Featured pages",
                 new TypePage(context.sde.getTypes().get(35834)),
@@ -71,10 +75,12 @@ public class IndexPage extends Page {
                 new TypePage(context.sde.getTypes().get(16213)),
                 new TypePage(context.sde.getTypes().get(33474))
             ),
-            new TextBox(null, HTML.multi(
-                TEXT("Updated: "), context.sde.format_with_unit((double) (System.currentTimeMillis() / 1000), -2),
-                BR(), TEXT("Game version: " + context.dataSources.gameVersion())
-            ))
+            new TextBox("Version", HTML.multi(
+                TEXT("Version: " + context.dataSources.gameVersion()),
+                BR(),
+                TEXT("Updated: "), context.sde.format_with_unit((double) (System.currentTimeMillis() / 1000), -2)
+            )).id(context.tryID("site_status_infobox")),
+            new TextBox("EVE Server Status", HTML.TEXT("... Loading Server Status & Dynamic Data ...")).id(context.tryID("server_status_infobox"))
         );
     }
 

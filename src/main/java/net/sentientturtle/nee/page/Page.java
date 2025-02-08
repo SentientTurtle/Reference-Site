@@ -30,7 +30,8 @@ public abstract class Page extends Frame {
 
     private static HTML getFooter(HtmlContext context) {
         return DIV().id(context.tryID("footer")).content(
-            DIV("footer_text font_text").text(
+            DIV().content(new PageLink(new TermsOfServicePage(), "Terms of Service & Privacy")),
+            DIV("font_text").text(
                 "EVE Online and the EVE logo are the registered trademarks of CCP hf.\n" +
                 "All rights are reserved worldwide.\n" +
                 "All other trademarks are the property of their respective owners.\n" +

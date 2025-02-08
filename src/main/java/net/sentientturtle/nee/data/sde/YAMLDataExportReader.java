@@ -745,30 +745,6 @@ public class YAMLDataExportReader implements AutoCloseable {
         }
     }
 
-
-    public record SdeStationOperation(
-        @JsonProperty(required = true) int activityID,
-        @JsonProperty(required = true) double border,
-        @JsonProperty(required = true) double corridor,
-        @Nullable LocalizedString descriptionID,
-        @JsonProperty(required = true) double fringe,
-        @JsonProperty(required = true) double hub,
-        @JsonProperty(required = true) double manufacturingFactor,
-        @JsonProperty(required = true) LocalizedString operationNameID,
-        @JsonProperty(required = true) double ratio,
-        @JsonProperty(required = true) double researchFactor,
-        @JsonProperty(required = true) Set<Integer> services,
-        @Nullable Map<Integer, Integer> stationTypes
-    ) {}
-    public void readStationOperations(BiConsumer<Integer, SdeStationOperation> consumer) throws IOException {
-        ZipEntry entry = zipFile.getEntry("fsd/stationOperations.yaml");
-        LinkedHashMap<Integer, SdeStationOperation> mapEntry = yamlMapper.readValue(
-            zipFile.getInputStream(entry),
-            new TypeReference<LinkedHashMap<Integer, SdeStationOperation>>() {}
-        );
-        mapEntry.forEach(consumer);
-    }
-
     public record SdeStation(
         @JsonProperty(required = true) int constellationID,
         @JsonProperty(required = true) int corporationID,

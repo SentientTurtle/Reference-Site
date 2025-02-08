@@ -101,6 +101,7 @@ public class ResourceLocation {
 
     /// ResourceLocation for an iconID-specified icon (Variable size PNG file)
     public static ResourceLocation ofIconID(int iconID, HtmlContext context) {
+        if (iconID == 0) throw new IllegalArgumentException("iconID 0 should be patched out!");
         String iconResource = context.sde.getEveIcons().get(iconID);
         if (context.sharedCache.containsResource(iconResource)) {
             return new ResourceLocation(new ResourceData.SharedCache(iconResource), sharedCacheFile(iconResource, context));
@@ -138,7 +139,6 @@ public class ResourceLocation {
             case 500027 -> "res:/ui/texture/corps/edencom.png";
             case 500028 -> "res:/ui/texture/corps/air_laboratories_green.png";
             case 500029 -> "res:/ui/texture/corps/deathlesscircle.png";
-
 
             default -> throw new IllegalArgumentException("Unknown faction: " + factionID);
         };

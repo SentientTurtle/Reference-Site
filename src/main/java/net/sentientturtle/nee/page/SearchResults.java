@@ -60,28 +60,15 @@ public class SearchResults extends Page {
                 "import searchindex from \"/" + ResourceLocation.searchIndex().getURI(context) + "\";\n"
                 +
                 """
-                    function escapeHtml(unsafe) {
-                        return unsafe
-                            .replace(/&/g, "&amp;")
-                            .replace(/</g, "&lt;")
-                            .replace(/>/g, "&gt;")
-                            .replace(/"/g, "&quot;")
-                            .replace(/'/g, "&#039;");
-                    }
-                    
-                    function getURLParameter(name) {
-                        return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [null, ''])[1].replace(/\\+/g, '%20')) || null;
-                    }
-                    
-                    var query = (getURLParameter('search') ?? "").toLowerCase();
+                    const query = (new URLSearchParams(window.location.search).get("search") ?? "").toLowerCase();
                     
                     document.getElementsByClassName('item_title_text')[0].innerHTML = 'Search results: ' + query;
-                    document.getElementById('search_input').value = escapeHtml(query)
+                    document.getElementById('search_input').value = query;
                     
                     if (query.length >= 3) {
-                        var results = [];
+                        const results = [];
                         for (var i = 0; i < searchindex.length; i++) {
-                            if (searchindex[i].index.includes(query)) {
+                            if (searchindex[i].name.toLowerCase().includes(query)) {
                                 results.push(searchindex[i]);
                             }
                     
@@ -89,21 +76,29 @@ public class SearchResults extends Page {
                         results.sort(function (a, b) {
                             return a.name.length - b.name.length;
                         });
-                        var table = "";
+                        const table = document.getElementById("search_results_table");
+                        table.innerHTML = "";
                         for (var j = 0; j < results.length; j++) {
-                            table += "<tr>";
-                            table += "<td class='search_results_entry'>"
+                            const row = table.appendChild(document.createElement("tr"));
+        
+                            const iconTD = row.appendChild(document.createElement("td"));
                             if ('icon' in results[j] && results[j].icon != null) {
-                                table += "<img src='" + results[j].icon + "' height='64' width='64'>"
+                                const img = document.createElement("img");
+                                img.src = results[j].icon;
+                                img.height = 64;
+                                img.width = 64;
+                                iconTD.appendChild(img);
                             }
-                            table += "</td><td class='search_results_entry font_header'><span class='search_results_page'><a href='" + results[j].path + "'>" + results[j].name + "</a></span></td>";
-                            table += "</tr>";
+                            const linkElement = row.appendChild(document.createElement("td"))
+                                .appendChild(document.createElement("span"))
+                                .appendChild(document.createElement("a"));
+                    
+                            linkElement.href = results[j].path;
+                            linkElement.textContent = results[j].name;
                         }
-                        document.getElementById("search_results_table").innerHTML = table;
                     } else {
                         document.getElementById("search_results_table").innerHTML = "<div class='font_header'>Search query must be at least 3 characters!</div>";
                     }
-                    
                     """
             )
         );

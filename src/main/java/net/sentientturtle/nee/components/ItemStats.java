@@ -33,7 +33,6 @@ public class ItemStats extends Component {
 
     /// Attributes that are directly listed
     private static final int[] LISTED_ATTRIBUTES = new int[]{
-        9,      // Structure HP     Special-cased to only be shown on modules with hull resistance
         11,     // Powergrid Output
         20,     // Maximum Velocity Bonus (Used by prop-mods, drone upgrades, and stasis webs)
         37,     // Maximum Velocity
@@ -52,6 +51,7 @@ public class ItemStats extends Component {
         80,     // Speed Bonus
         83,     // Hull HP repaired
         84,     // Armor HP repaired
+        87,     // Shield Transfer Range
         90,     // Energy nosferatu/leech amount
         97,     // Energy neutralization amount // TODO: Sustained neut pressure (amount / module activation time), also same with boosters?
         99,     // AOE Radius
@@ -133,6 +133,7 @@ public class ItemStats extends Component {
         548,    // Shield boost bonus
         549,    // Powergrid bonus
         552,    // Signature Radius
+        556,    // Anchoring Delay
         557,    // Flight Time Bonus
         566,    // Scan resolution bonus
         567,    // Thrust (Prop mods)
@@ -150,6 +151,7 @@ public class ItemStats extends Component {
         624,    // Warp Speed Bonus
         653,    // Explosion Velocity
         654,    // Explosion Radius
+        717,    // Refining Yield Multiplier
         767,    // Tracking Speed Bonus
         780,    // Cycle time bonus
         782,    // Asteroid Specialization Yield Modifier
@@ -173,6 +175,7 @@ public class ItemStats extends Component {
         927,    // CPU Penalty Reduction
         973,    // Signature radius bonus
         983,    // Signature radius modifier
+        1032,	// Restricted To Security Level Of At Most
         1034,   // Cloak Reactivation Delay
         1045,   // Tractor beam velocity
         1076,   // Velocity modifier
@@ -205,6 +208,7 @@ public class ItemStats extends Component {
         1190,   // EW Capacitor Need Bonus
         1227,   // Modification of Signature Radius Bonus
         1245,   // Disallow Activation In Warp
+        1252,	// Uses Covert Cynosural Field Technology
         1255,   // Drone Damage Bonus
         1270,   // Afterburner and Microwarpdrive Thrust Bonus
         1271,   // Drone Bandwidth
@@ -229,6 +233,7 @@ public class ItemStats extends Component {
         1374,   // High Slot Modifier
         1375,   // Medium Slot Modifier
         1376,   // Low Slot Modifier
+        1470,   // Maximum velocity Multiplier
         1471,   // Mass multiplier
         1536,   // ECM Range Bonus
         1544,   // Max modules in group allowed
@@ -239,7 +244,7 @@ public class ItemStats extends Component {
         1839,   // Damage Delay
         1886,   // Boosted repair multiplier (?)
         1905,   // Scan deviation bonus
-        1906,   // Scan duration bonus  (TODO: Rename to include "scan"? Check uses by other types)
+        1906,   // Scan duration bonus
         1907,   // Scan strength bonus
         1910,   // Virus Coherence
         1911,   // Virus utility slots
@@ -248,6 +253,7 @@ public class ItemStats extends Component {
         1920,   // Virus Strength
         1932,   // Ascendancy Set bonus
         1950,   // Warp speed increase TODO: Set AU/s unit
+        1970,   // Banned in High Sec Space
         1978,   // Global resistance reduction  TODO: Patch name to "Damage resistance reduction"
         2023,   // Modification of Explosion Radius Bonus
         2024,   // Modification of Explosion Velocity Bonus
@@ -260,6 +266,12 @@ public class ItemStats extends Component {
         2073,   // Modification of Ladar Strength Bonus
         2074,   // Modification of Magnetometric Strength Bonus
         2075,   // Modification of Radar Strength Bonus
+        2104,   // Number of Doomsday Targets
+        2105,   // Maximum Target Jump Range
+        2106,   // Damage Reduction per Target Jump
+        2108,   // Service Module Fuel Need (type)
+        2109,   // Service Module Cycle Fuel Need
+        2110,   // Service Module Online Fuel Need
         2253,   // ECM Resistance
         2259,   // Warm-up Neutralization Radius
         2260,   // Warm-up Neutralization Amount
@@ -269,6 +281,8 @@ public class ItemStats extends Component {
         2264,   // Beam Duration
         2265,   // Beam Damage Cycle
         2267,   // Neutralizer resistance bonus
+        2277,   // Additional doomsday secondary targets
+        2278,   // Bonus to doomsday secondary target damage reduction
         2279,   // AOE Range
         2280,   // AOE Duration
         2281,   // AOE Signature Radius
@@ -290,6 +304,9 @@ public class ItemStats extends Component {
         2351,   // Sensor Dampener Resistance Bonus
         2352,   // Remote Assistance Impedance Bonus
         2353,   // Weapon Disruption Resistance Bonus
+        2355,	// High Security Bonus Multiplier
+        2356,	// Low Security Bonus Multiplier
+        2357,	// Nullsec and Wormhole Bonus Multiplier
         2402,   // Modification of EM Damage Resistance Bonus
         2403,   // Modification of Explosive Damage Resistance Bonus
         2404,   // Modification of Kinetic Damage Resistance Bonus
@@ -297,7 +314,21 @@ public class ItemStats extends Component {
         2422,   // Expiry Date
         2427,   // Jump/Dock/Tether/Cloak restriction duration
         2428,   // Immobility Duration
-        2747,   // Stasis Webifier Maximum Range Bonus
+        // 2429,    // Superweapon shape TODO: Needs custom handling & unit
+        2431,   // Max Modules Of This Type Allowed
+        2434,   // Maximum Locked Targets Bonus
+        2435,   // Scan Resolution Bonus
+        2436,	// Point Defense Battery Range Bonus
+        2437,	// Point Defense Battery Capacitor Use Bonus
+        2438,	// Explosion Velocity Bonus
+        2439,	// Missile Velocity Bonus
+        2440,	// Optimal Range Bonus
+        2441,	// Falloff Bonus
+        2442,	// Capacitor Use Bonus
+        2449,	// Guided Bomb Explosion Radius Bonus
+        2444,   // Refining yield for Asteroid Belt Ores
+        2445,   // Refining yield for Moon Ores
+        2448,   // Refining yield for Ice
         2451,   // Neutralizer signature res TODO: Patch a more user-friendly name
         2457,   // Armor Repair Bonus
         2535,   // Modifier duration
@@ -308,12 +339,16 @@ public class ItemStats extends Component {
         2586,   // Drone Ice Harvesting Speed Bonus
         2587,   // Mining Foreman Burst Strength Bonus
         2588,   // Command and Mining Foreman Burst Range Bonus
+        2593,	// Time Reduction Bonus
+        2594,	// Material Reduction Bonus
+        2595,	// Cost Reduction Bonus
         2603,   // Maximum Velocity Bonus
         2604,   // Capital Remote Shield Booster Range Bonus
         2605,   // Capital Remote Shield Booster Duration and Capacitor Use Bonus
         2606,   // Shield Booster Duration Bonus
         2607,   // Shield Booster Amount Bonus
         2608,   // Minimum Velocity Limitation
+        2653,	// Thukker Enhanced Capital Component Material Reduction Bonus
         2665,   // Neutralizer fitting reduction
         2666,   // Medium Hybrid Turret fitting reduction
         2667,   // Medium Projectile Turret Fitting reduction
@@ -321,7 +356,7 @@ public class ItemStats extends Component {
         2669,   // Medium Missile Launcher fitting reduction
         2670,   // Medium remote shield rep fitting reduction
         2671,   // Medium remote armor rep fitting reduction
-        2688,   // Structure HP Bonus
+        2688,   // Structure HP Bonus TODO: Set hull HP icon
         2689,   // Cargo Capacity Bonus
         2690,   // Additional Inertia Modifier
         2692,   // Command burst fitting reduction
@@ -331,9 +366,31 @@ public class ItemStats extends Component {
         2697,   // Maximum Scan Range
         2700,   // Maximum Auto-Targeting Range
         2701,   // Survey probe scan time reduction
+        2707,	// Chunk Stability Bonus
+        2708,	// Extracted Asteroid Decay Bonus
+        2709,	// Moon Asteroid Belt Radius Bonus
+        2710,	// Moon Extraction Volume Bonus
+        2713,	// Time Bonus
+        2714,	// Material Reduction Bonus
         2733,   // Damage Multiplier Bonus Per Cycle
         2734,   // Maximum Damage Multiplier Bonus
         2746,   // Activated Damage Resistance
+        2747,   // Stasis Webifier Maximum Range Bonus
+        2748,	// Maximum Targeting Range Bonus
+        2772,	// Bonus to all hitpoints and capacitor capacity
+        2773,	// Bonus to T1 Ship Manufacturing Job Time Requirements
+        2774,	// Bonus to T2 Ship Manufacturing Job Time Requirements
+        2775,	// Bonus to Advanced Component Manufacturing Job Time Requirements
+        2776,	// Bonus to Capital Component Manufacturing Job Time Requirements
+        2777,	// Bonus to Equipment Manufacturing Job Time Requirements
+        2778,	// Bonus to ME Research Job Time Requirements
+        2779,	// Bonus to TE Research Job Time Requirements
+        2780,	// Bonus to Blueprint Copy Job Time Requirements
+        2781,	// Bonus to Invention Job Time Requirements
+        2782,	// Reduction in ME, TE, and Copy Job ISK Costs
+        2783,	// Reduction in Invention Job ISK Costs
+        2791,   // Cannot be Unfit
+        2794,   // Activation Delay
         2796,   // Repair multiplier bonus per cycle
         2797,   // Maximum repair multiplier
         2821,   // Rapid Torpedo Launcher Bonus
@@ -370,8 +427,10 @@ public class ItemStats extends Component {
         5412,   // Applied Debuff Duration
         5425,   // Disallow Cloaking While Fit
         5426,   // Requires Active Siege Module
+        5561,	// Unusable in Zarzakh
         5686,   // Max capital ships jumped
         5687,   // Warp scramble duration
+        5688,   // Requires Sovereignty Hub Upgrade
         5735,   // Damage effect duration
         5736,   // Maximum damage per second
         5737,   // Maximum percentage of target HP damaged per second TODO: Patch this to be shorter
@@ -460,14 +519,58 @@ public class ItemStats extends Component {
 
         var table = TABLE("item_stats_table");
 
-        boolean showHullHP = false;
+        int categoryID = context.sde.getGroups().get(type.groupID).categoryID;
         tryRow(context, table, "Damage", 114, 118, 117, 116);
         tryRow(context, table, "Damage Resistance Bonus", 984, 987, 986, 985);
         tryRow(context, table, "Damage Resistance Bonus", 994, 997, 996, 995);  // TODO: Ingame this is named "Passive Resistance Bonus", maybe change?
-        tryRow(context, table, "Shield Damage Resistance", 271, 274, 273, 272);
-        showHullHP |= tryRow(context, table, "Armor Damage Resistance", 267, 270, 269, 268);
-        showHullHP |= tryRow(context, table, "Hull Damage Resistance", 974, 977, 976, 975);
-        showHullHP |= tryRow(context, table, "Hull Damage Resistance", 113, 110, 109, 111);
+
+        if (type.groupID == 60 || type.groupID == 1150 || type.groupID == 515) { // Damage control/reactive-armour-hardener/bastion module only
+            tryRow(context, table, "Shield Damage Resistance Bonus", 271, 274, 273, 272);
+            tryRow(context, table, "Armor Damage Resistance", 267, 270, 269, 268);
+            tryRow(context, table, "Hull Damage Resistance", 974, 977, 976, 975);
+        }
+        if (categoryID == 8) {  // For ammo (missiles) show HP and resistances, as these missiles can be shot down with smartbombs
+            /* hull */ {
+                Attribute attribute = attributes.get(9);
+                double attributeValue = typeAttributes.getOrDefault(9, 0.0);
+
+                if (attributeValue > 0.0) {
+                    Integer iconID = attribute.iconID;
+                    String name = attribute.displayName != null ? attribute.displayName : attribute.attributeName;
+                    table.content(TR().content(
+                        TD().content(SPAN("item_stats_span").title(name).content(
+                                iconID != null ? IMG(ResourceLocation.ofIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
+                                TEXT(name + ":")
+                            )
+                        ),
+                        TD().content(context.sde.format_with_unit(attributeValue, attribute.unitID))
+                    ));
+
+                    tryRow(context, table, "Hull Damage Resistance", 113, 110, 109, 111);
+                }
+            }
+            /* Armor */ {
+                Attribute attribute = attributes.get(265);
+                double attributeValue = typeAttributes.getOrDefault(265, 0.0);
+
+                if (attributeValue > 0.0) {
+                    Integer iconID = attribute.iconID;
+                    String name = attribute.displayName != null ? attribute.displayName : attribute.attributeName;
+                    table.content(TR().content(
+                        TD().content(SPAN("item_stats_span").title(name).content(
+                                iconID != null ? IMG(ResourceLocation.ofIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
+                                TEXT(name + ":")
+                            )
+                        ),
+                        TD().content(context.sde.format_with_unit(attributeValue, attribute.unitID))
+                    ));
+
+                    tryRow(context, table, "Armor Damage Resistance", 267, 270, 269, 268);
+                }
+            }
+
+        }
+
         tryRow(context, table, "ECM Jammer Strength", 241, 240, 238, 239);
         tryRow(context, table, "Sensor Strength Bonus", 1030, 1029, 1027, 1028);
         tryRow(context, table, "Sensor Strength Bonus", 1565, 1568, 1567, 1566);
@@ -510,7 +613,10 @@ public class ItemStats extends Component {
 
         // Slightly inefficient, but we want the ordering of LISTED_ATTRIBUTES
         for (int attributeID : LISTED_ATTRIBUTES) {
-            if (attributeID == 9 && !showHullHP) continue;
+            // If not a subsystem, skip armour and shield HP attributes
+            if (attributeID == 263 && type.groupID != 954) continue;
+            if (attributeID == 265 && type.groupID != 954) continue;
+
             Attribute attribute = attributes.get(attributeID);
             Double attributeValue = typeAttributes.get(attributeID);
             if (attributeValue != null && attributeValue != attribute.defaultValue()) {
@@ -521,13 +627,20 @@ public class ItemStats extends Component {
                 if (SUSTAIN_ATTRIBUTES.contains(attributeID) && activationTime > 0.0) {
                     double reactivationDelay = typeAttributes.getOrDefault(669, 0.0);
 
+                    int unitID = switch (attribute.unitID) {
+                        case 113 -> -4;
+                        case 9 -> -5;
+                        case 114 -> -3;
+                        case null, default -> throw new IllegalStateException("Unknown sustained-amount unitID for attribute " + attributeID + " unit " + attribute.unitID);
+                    };
+
                     valueTD.content(
                         context.sde.format_with_unit(attributeValue, attribute.unitID),
                         TEXT(" "),
                         SPAN("no_break").content(
                             TEXT("("),
-                            context.sde.format_with_unit(attributeValue / ((activationTime + reactivationDelay) / 1000.0), attribute.unitID),
-                            TEXT("/s)")
+                            context.sde.format_with_unit(attributeValue / ((activationTime + reactivationDelay) / 1000.0), unitID),
+                            TEXT(")")
                         )
                     );
                 } else {
@@ -674,7 +787,7 @@ public class ItemStats extends Component {
     }
 
     @Override
-    protected String getCSS() {
+    protected String getCSS() { // TODO: Flex-wrap multi-row content, check http://localhost:8000/type/35928-Standup%20Arcing%20Vorton%20Projector%20I.html
         return """
             .item_stats {
                 padding: 0.5rem;
@@ -699,6 +812,7 @@ public class ItemStats extends Component {
             .item_stats_multirow_content {
                 width: 100%;
                 display: flex;
+                flex-wrap: wrap;
                 align-items: center;
                 justify-content: space-between;
             }

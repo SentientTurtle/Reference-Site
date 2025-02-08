@@ -64,7 +64,7 @@ public abstract class SDEData {
     /// Map<TypeID, Set<EffectID>>
     public abstract Map<Integer, Set<Integer>> getTypeEffects();
 
-    /// Map<IconID, IconFile>
+    /// Map<IconID, Icon resource>
     public abstract Map<Integer, String> getEveIcons();
 
     /// Map<Blueprint TypeID, Map<IndustryActivityType, IndustryActivity using blueprint>>
@@ -380,6 +380,8 @@ public abstract class SDEData {
 
         return HTML.SPAN("no_break")
             .content(switch (unitID) {
+                case -5:    // Mining yield (m³/s)
+                    yield HTML.TEXT(decimalFormat.format(value) + " m³/s");
                 case -4:    // Health sustain (HP/s)
                     yield HTML.TEXT(decimalFormat.format(value) + " HP/s");
                 case -3:    // Capacitor sustain (GJ/s)
@@ -568,20 +570,20 @@ public abstract class SDEData {
     }
 
     protected void patch() {
-        // Error in type description
-        {
-            Type type = this.getTypes().get(2846);
-            type.description = type.description.replace("// ", "//");
-        }
+        // TODO: Finish comments on these IDs
+        Set<Integer> publishCategories = Set.of();
+        HashSet<Integer> publishCategoriesAndChildren = new HashSet<>();
+        Set<Integer> publishGroups = Set.of();
+        HashSet<Integer> publishGroupsAndChildren = new HashSet<>(List.of(6, 15, 1324));
+        Set<Integer> publishTypes = Set.of(30574, 30575, 30576, 30577, 30669, 30670);
 
-        Set<Integer> publishedGroups = Set.of(6, 15, 1324);
-
-        Set<Integer> publishedTypes = Set.of(30574, 30575, 30576, 30577, 30669, 30670);
-        for (Integer publishedType : publishedTypes) {
-            this.getTypes().get(publishedType).published = true;
-        }
-
-        Set<Integer> unpublishedTypes = Set.of(
+        Set<Integer> unpublishCategories = Set.of();
+        HashSet<Integer> unpublishCategoriesAndChildren = new HashSet<>(List.of(11, 54, 91, 2118));
+        Set<Integer> unpublishGroups = Set.of();
+        HashSet<Integer> unpublishGroupsAndChildren = new HashSet<>(List.of(
+            110, 186, 316, 836, 872, 876, 920, 935, 952, 1016, 1020, 1021, 1048, 1273, 1461, 1717, 1975, 1977, 1984, 2004, 2022, 2026, 4161
+        ));
+        Set<Integer> unpublishTypes = Set.of(
             3404,   // Legacy item, other items in this group are set unpublished
             27038,  // Mission item
             28320,  // Group is unpublished
@@ -594,56 +596,67 @@ public abstract class SDEData {
             12239, 14343, 16221, 16869, 17982, 20175, 22634, 24684, 25270, 25271, 25280, 25821, 30655, 30656, 16216, 24567, 28351, 32245, 33477, 33581, 33583,
             27673, 27674, 27897
         );
-        for (Integer unpublishedType : unpublishedTypes) {
-            this.getTypes().get(unpublishedType).published = false;
+
+        for (Category category : getCategories().values()) {
+            if (publishCategories.contains(category.categoryID) || publishCategoriesAndChildren.contains(category.categoryID)) {
+                category.published = true;
+            }
+            if (unpublishCategories.contains(category.categoryID) || unpublishCategoriesAndChildren.contains(category.categoryID)) {
+                category.published = false;
+            }
         }
 
-        Map<Integer, Group> groups = this.getGroups();
-        Set<Integer> unpublishedTypeCategories = Set.of(11, 54, 91, 2118);
-        Set<Integer> unpublishedTypeGroups = groups  // Data supplier views are not available during patch
-            .values()
-            .stream()
-            .filter(group -> unpublishedTypeCategories.contains(group.categoryID))
-            .map(group -> group.groupID)
-            .collect(Collectors.toCollection(HashSet::new));
+        for (Group group : getGroups().values()) {
+            if (publishGroups.contains(group.groupID) || publishGroupsAndChildren.contains(group.groupID)) {
+                group.published = true;
+            }
+            if (publishCategoriesAndChildren.contains(group.categoryID)) {
+                group.published = true;
+                publishGroupsAndChildren.add(group.groupID);
+            }
 
-        Collections.addAll(unpublishedTypeGroups, 186, 316, 920, 935, 952, 110, /* 1324, */ 1461, 1717, 1975, 1977, 2004, 2022, 2026, 4161, 1048);
+            if (unpublishGroups.contains(group.groupID) || unpublishGroupsAndChildren.contains(group.groupID)) {
+                group.published = false;
+            }
+            if (unpublishCategoriesAndChildren.contains(group.categoryID)) {
+                group.published = false;
+                unpublishGroupsAndChildren.add(group.groupID);
+            }
+        }
 
-        var types = this.getTypes();
-        var validGroups = new HashSet<Integer>();
-        for (Iterator<Type> iterator = types.values().iterator(); iterator.hasNext(); ) {
+        HashSet<Integer> validGroups = new HashSet<>();
+        for (Iterator<Type> iterator = getTypes().values().iterator(); iterator.hasNext();) {
             Type type = iterator.next();
-            if (publishedGroups.contains(type.groupID)) {
+            if (publishTypes.contains(type.typeID) || publishGroupsAndChildren.contains(type.groupID)) {
                 type.published = true;
             }
-
-            if (!type.published || unpublishedTypeGroups.contains(type.groupID) || type.name.startsWith("Batch Compressed")) {
-                iterator.remove();
-            } else {
+            if (unpublishTypes.contains(type.typeID) || unpublishGroupsAndChildren.contains(type.groupID)) {
+                type.published = false;
+            }
+            if (type.published) {
                 validGroups.add(type.groupID);
-            }
-        }
-
-        var validCategories = new HashSet<Integer>();
-        for (Iterator<Group> iterator = groups.values().iterator(); iterator.hasNext(); ) {
-            Group group = iterator.next();
-            if (publishedGroups.contains(group.groupID)) group.published = true;
-
-            if (!group.published || !validGroups.contains(group.groupID)) {
-                iterator.remove();
             } else {
-                validCategories.add(group.categoryID);
+                iterator.remove();
             }
         }
 
-        types.values().removeIf(type -> !groups.containsKey(type.groupID));
+        // Clean up groups/categories with no items in them
+        HashSet<Integer> validCategories = new HashSet<>();
+        for (Iterator<Group> iterator = getGroups().values().iterator(); iterator.hasNext();) {
+            Group group = iterator.next();
+            if (validGroups.contains(group.groupID)) {
+                group.published = true; // If the group still has published types, set it to published
+                validCategories.add(group.categoryID);
+            } else {
+                iterator.remove();
+            }
+        }
+        getCategories().keySet().retainAll(validCategories);
+        for (Category category : getCategories().values()) {
+            category.published = true;  // If the category still has published groups, set it to published
+        }
 
-        Map<Integer, Category> categories = this.getCategories();
-        categories.keySet().retainAll(validCategories);
-
-        categories.get(3).published = true;
-
-        categories.values().removeIf(category -> !category.published);
+        Map<Integer, Type> types = getTypes();
 
         // Remove unpublished types
         this.getTypeTraits().keySet().removeIf(typeID -> !types.containsKey(typeID));
@@ -659,23 +672,26 @@ public abstract class SDEData {
         getBpActivities().values().removeIf(Map::isEmpty);
         this.getReprocessingMaterials().keySet().removeIf(typeID -> !types.containsKey(typeID));
 
-        this.getVariants().keySet().removeIf(typeID -> !types.containsKey(typeID));
-        for (Set<Integer> variants : this.getVariants().values()) {
+        Map<Integer, Set<Integer>> typeVariants = getVariants();
+
+        typeVariants.keySet().removeIf(typeID -> !types.containsKey(typeID));
+        for (Set<Integer> variants : typeVariants.values()) {
             variants.removeIf(typeID -> !types.containsKey(typeID));
         }
 
         this.getMetaTypes().keySet().removeIf(typeID -> !types.containsKey(typeID));
 
-        // Create parent marketGroup
+        // Create parent marketGroup for all without one
         Map<Integer, MarketGroup> marketGroups = this.getMarketGroups();
         marketGroups.put(-1, new MarketGroup(-1, null, "Items", null));
-        marketGroups.get(157).parentGroupID = 9;
-        marketGroups.get(955).parentGroupID = 9;
         for (MarketGroup marketGroup : marketGroups.values()) {
-            if (marketGroup.parentGroupID == null && marketGroup.marketGroupID != -1 && marketGroup.marketGroupID != 4) {
+            if (marketGroup.parentGroupID == null && marketGroup.marketGroupID != -1) {
                 marketGroup.parentGroupID = -1;
             }
         }
+        marketGroups.get(157).parentGroupID = 9;    // Parent Drones market group to Ship Equipment
+        marketGroups.get(955).parentGroupID = 9;    // Parent Ship Rigs market group to Ship Equipment
+        marketGroups.get(2203).parentGroupID = 2202;    // Parent Structure Rigs market group to Structure Equipment
 
         Set<Integer> validMarketGroups = types.values()
             .stream()
@@ -683,8 +699,8 @@ public abstract class SDEData {
             .filter(Objects::nonNull)
             .collect(Collectors.toCollection(this::produceSet));
 
-        // New hashset as we modify validMarketGroups in this iteration
-        for (Integer marketGroupID : new HashSet<>(validMarketGroups)) {
+        // New collection as we modify validMarketGroups in this iteration
+        for (Integer marketGroupID : new ArrayList<>(validMarketGroups)) {
             Integer parentGroupID = marketGroups.get(marketGroupID).parentGroupID;
             while (parentGroupID != null) {
                 validMarketGroups.add(parentGroupID);
@@ -709,6 +725,9 @@ public abstract class SDEData {
         attributes.get(1233).categoryID = 40;
         attributes.get(1770).categoryID = 40;
 
+        // Fix units
+        attributes.get(2104).unitID = -1;
+        attributes.get(90).unitID = 114;
 
         // Patch meta level
         for (Map.Entry<Integer, Integer> entry : getMetaTypes().entrySet()) {
@@ -723,6 +742,49 @@ public abstract class SDEData {
                     typeAttributes.put(633, (double) minLevel);
                 }
             }
+        }
+
+        // Patch missing variants
+        Set<Integer> standupECMVariants = typeVariants.get(35940);
+        standupECMVariants.add(46577);
+        typeVariants.putIfAbsent(46577, standupECMVariants);
+
+        Set<Integer> researchLabVariants = produceSet();
+        researchLabVariants.add(35891);
+        researchLabVariants.add(45550);
+        typeVariants.put(35891, researchLabVariants);
+        typeVariants.put(45550, researchLabVariants);
+
+        // Patch map factions
+        Map<Integer, Integer> regionFactions = getRegions()
+            .values()
+            .stream()
+            .filter(region -> region.factionID != null)
+            .collect(Collectors.toMap(region -> region.regionID, region -> region.factionID));
+
+        Map<Integer, Integer> constellationFactions = new HashMap<>();
+        for (Constellation constellation : getConstellations().values()) {
+            if (constellation.factionID == null) {
+                constellation.factionID = regionFactions.get(constellation.regionID);
+            }
+            constellationFactions.put(constellation.constellationID, constellation.factionID);
+        }
+
+        for (SolarSystem solarSystem : getSolarSystems().values()) {
+            if (solarSystem.factionID == null) {
+                solarSystem.factionID = constellationFactions.get(solarSystem.constellationID);
+            }
+        }
+
+        // Patch iconIDs
+        for (Category category : getCategories().values()) {
+            if (category.iconID != null && category.iconID == 0) category.iconID = null;
+        }
+        for (Group group : getGroups().values()) {
+            if  (group.iconID != null && group.iconID == 0) group.iconID = null;
+        }
+        for (Attribute attribute : getAttributes().values()) {
+            if (attribute.iconID != null && attribute.iconID == 0) attribute.iconID = null;
         }
     }
 }

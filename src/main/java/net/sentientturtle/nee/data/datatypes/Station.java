@@ -9,12 +9,14 @@ public class Station {
     public final int stationID;
     public final int stationTypeID;
     public final String stationName;
+    public final int operationID;
     public final EnumSet<Service> services;
 
-    public Station(int stationID, int stationTypeID, String stationName, EnumSet<Service> services) {
+    public Station(int stationID, int stationTypeID, String stationName, int operationID, EnumSet<Service> services) {
         this.stationID = stationID;
         this.stationTypeID = stationTypeID;
         this.stationName = stationName;
+        this.operationID = operationID;
         this.services = services;
     }
 

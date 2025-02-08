@@ -551,30 +551,6 @@ public class SQLiteSDEData extends SDEData {
         st.dispose();
 
         stations = this.produceMap();
-        Map<Integer, EnumSet<Station.Service>> operationServices = this.produceMap();
-        st = connection.prepare("SELECT operationID, serviceID FROM staOperationServices");
-        while (st.step()) {
-            assert !st.columnNull(0) && !st.columnNull(1);
-            int serviceID = st.columnInt(1);
-            if (Integer.bitCount(serviceID) != 1) throw new IllegalArgumentException("ServiceID must be a single set bit flag!");
-            Station.Service service = switch (serviceID) {
-                case 16 -> Station.Service.REPROCESSING;
-                case 64 -> Station.Service.MARKET;
-                case 512 -> Station.Service.CLONEBAY;
-                case 4096 -> Station.Service.REPAIRSHOP;
-                case 8192 -> Station.Service.INDUSTRY;
-                case 65536 -> Station.Service.FITTING;
-                case 1048576 -> Station.Service.INSURANCE;
-                case 16777216 -> Station.Service.LPSTORE;
-                case 33554432 -> Station.Service.MILITIAOFFICE;
-                default -> null;
-            };
-            if (service != null) {
-                operationServices.computeIfAbsent(st.columnInt(0), _ -> EnumSet.noneOf(Station.Service.class))
-                    .add(service);
-            }
-        }
-        st.dispose();
         st = connection.prepare("SELECT stationID, operationID, stationTypeID, solarSystemID, stationName FROM staStations");
         while (st.step()) {
             assert !st.columnNull(0) && !st.columnNull(1) && !st.columnNull(2) && !st.columnNull(3) && !st.columnNull(4);
@@ -583,7 +559,8 @@ public class SQLiteSDEData extends SDEData {
                     st.columnInt(0),
                     st.columnInt(2),
                     st.columnString(4),
-                    operationServices.getOrDefault(st.columnInt(1), EnumSet.noneOf(Station.Service.class))
+                    st.columnInt(1),
+                    EnumSet.noneOf(Station.Service.class)
                 ));
         }
         st.dispose();

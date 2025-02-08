@@ -17,7 +17,7 @@ public class Category implements HasPage {
      * May be left null to indicate this Category has no icon.
      */
     @Nullable
-    public final Integer iconID;
+    public Integer iconID;
     public boolean published;
 
     public Category(int categoryID, String name, @Nullable Integer iconID, boolean published) {

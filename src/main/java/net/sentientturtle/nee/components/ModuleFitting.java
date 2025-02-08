@@ -193,6 +193,32 @@ public class ModuleFitting extends Component {
             table.content(row);
         }
 
+        if (type.groupID == 4086) {
+            int[] structureID = switch (type.typeID) {
+                case 56201 -> new int[] { 35832 };  // Astrahus
+                case 56204 -> new int[] { 35833, 47512, 47513, 47514, 47515, 47516 }; // Fortizar
+                case 56207 -> new int[] { 35834, 40340 };   // Keepstar
+                case 56202 -> new int[] { 35835 };  // Athanor
+                case 56205 -> new int[] { 35836 };  // Tatara
+                case 56203 -> new int[] { 35825 };  // Raitaru
+                case 56206 -> new int[] { 35826 };  // Azbel
+                case 56208 -> new int[] { 35827 };  // Sotiyo
+                case 81920 -> new int[] { 81826 };  // Metenox Moon Drill
+                default -> throw new IllegalStateException("Unknown quantum core: " + type);
+            };
+
+            for (int id : structureID) {
+                table.content(TR().content(
+                    TD().content(
+                        SPAN("module_fitting_span").content(
+                            IMG(ResourceLocation.ofIconID(21729, context), null, 32).className("module_fitting_icon"),
+                            TEXT("Quantum core slot: "), context.sde.format_with_unit(id, 116)
+                        )
+                    )
+                ));
+            }
+        }
+
         return new HTML[]{
             HEADER("font_header").text("Fitting"),
             table

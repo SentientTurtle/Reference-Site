@@ -42,6 +42,9 @@ public class FSDData {
     public record Graphic(int explosionBucketID, IconInfo iconInfo, String sofRaceName, String sofFactionName, String sofHullName) {}
     public final LinkedHashMap<Integer, Graphic> graphics;
 
+    public record Operation(int[] services) {}
+    public final LinkedHashMap<Integer, Operation> stationOperations;
+
     public record WarfareBuff(int displayNameID, String developerDescription, List<BuffModifier> itemModifiers, String showOutputValueInUI) {}
     public record BuffModifier(int dogmaAttributeID) {}
     public final LinkedHashMap<Integer, WarfareBuff> warfareBuffs;
@@ -160,6 +163,7 @@ public class FSDData {
         String typeListPath = sharedCache.getPath("res:/staticdata/typelist.fsdbinary").toAbsolutePath().toString().replace("\\", "\\\\");
         String dynamicAttributesPath = sharedCache.getPath("res:/staticdata/dynamicitemattributes.fsdbinary").toAbsolutePath().toString().replace("\\", "\\\\");
         String graphicsPath = sharedCache.getPath("res:/staticdata/graphicids.fsdbinary").toAbsolutePath().toString().replace("\\", "\\\\");
+        String operationsPath = sharedCache.getPath("res:/staticdata/stationoperations.fsdbinary").toAbsolutePath().toString().replace("\\", "\\\\");
 
         String localizationPath = sharedCache.getPath("res:/localizationfsd/localization_fsd_en-us.pickle").toAbsolutePath().toString().replace("\\", "\\\\");
 
@@ -188,6 +192,13 @@ public class FSDData {
                     "\"" + graphicsPath + "\""
                 ),
                 String.format(
+                    FSD_SCRIPT_TEMPLATE,
+                    "\"" + libPath + "\"",
+                    "\"" + binPath + "\"",
+                    "\"stationOperationsLoader\"",
+                    "\"" + operationsPath + "\""
+                ),
+                String.format(
                     LOCALIZATION_STRING_SCRIPT_TEMPLATE,
                     "\"" + libPath + "\"",
                     "\"" + binPath + "\"",
@@ -197,14 +208,14 @@ public class FSDData {
 
         ObjectMapper objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-
         try {
             Files.writeString(Path.of("./graphicids.json"), json.get(2));
 
             typeLists = objectMapper.readValue(json.get(0), new TypeReference<LinkedHashMap<Integer, TypeList>>() {});
             dynamicAttributes = objectMapper.readValue(json.get(1), new TypeReference<LinkedHashMap<Integer, DynamicAttributes>>() {});
             graphics = objectMapper.readValue(json.get(2), new TypeReference<LinkedHashMap<Integer, Graphic>>() {});
-            localizationStrings = objectMapper.readValue(json.get(3), new TypeReference<HashMap<Integer, String>>() {});
+            stationOperations = objectMapper.readValue(json.get(3), new TypeReference<LinkedHashMap<Integer, Operation>>() {});
+            localizationStrings = objectMapper.readValue(json.get(4), new TypeReference<HashMap<Integer, String>>() {});
             warfareBuffs = new LinkedHashMap<>();
 
             SQLiteConnection sqLiteConnection = new SQLiteConnection(sharedCache.getPath("res:/staticdata/dbuffcollections.static").toFile());

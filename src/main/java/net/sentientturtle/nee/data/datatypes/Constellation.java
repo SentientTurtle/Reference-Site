@@ -28,8 +28,7 @@ public class Constellation implements MapItem {
     public final double xMax;
     public final double yMax;
     public final double zMax;
-    /// May be left null to indicate this constellation does not belong to a faction
-    public final @Nullable Integer factionID;
+    public @Nullable Integer factionID;
     public final @Nullable Integer wormholeClassID;
 
     public Constellation(int regionID, int constellationID, String constellationName, double x, double y, double z, double xMin, double yMin, double zMin, double xMax, double yMax, double zMax, @Nullable Integer factionID, @Nullable Integer wormholeClassID) {
