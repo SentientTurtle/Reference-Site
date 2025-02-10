@@ -80,7 +80,10 @@ public class IndexPage extends Page {
                 BR(),
                 TEXT("Updated: "), context.sde.format_with_unit((double) (System.currentTimeMillis() / 1000), -2)
             )).id(context.tryID("site_status_infobox")),
-            new TextBox("EVE Server Status", HTML.TEXT("... Loading Server Status & Dynamic Data ...")).id(context.tryID("server_status_infobox"))
+            new TextBox("EVE Server Status", HTML.multi(
+                HTML.TEXT("... Loading Server Status & Dynamic Data ..."),
+                HTML.RAW("<noscript><br>⚠ Server status requires JavaScript ⚠</noscript>")
+            )).id(context.tryID("server_status_infobox"))
         );
     }
 

@@ -47,6 +47,7 @@ public class SearchResults extends Page {
     @Override
     protected HTML getContent(HtmlContext context) {
         return DIV("search_results_grid").content(
+            HTML.RAW("<noscript>⚠ Search requires JavaScript ⚠</noscript>"),
             new ItemTitle("Search results:", null),
             TABLE().id(context.tryID("search_results_table"))
                 .content(TR().content(TD().text("Loading...")))   // This table is replaced on update

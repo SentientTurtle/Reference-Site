@@ -45,7 +45,8 @@ public abstract class Component extends Element {
         } catch (Exception e) {
             throw new RenderingException("Error in " + this.getClass().getName(), e);
         }
-        context.registerCSS(getCSS());
+        String css = getCSS();
+        if (css != null) context.registerCSS(css);
         String script = getScript();
         if (script != null) context.registerJavascript(script);
     }

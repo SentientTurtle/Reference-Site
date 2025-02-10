@@ -13,6 +13,8 @@ import static net.sentientturtle.html.HTML.BUTTON;
 
 /// 'Tabbed' content, allowing the user to select between multiple different sections of content on the same page
 public class TabBox extends Component {
+    public record Tab(HTML button, HTML content) {}
+
     private final List<Tab> content;
 
     public TabBox() {
@@ -49,7 +51,18 @@ public class TabBox extends Component {
             );
         }
 
-        return new HTML[]{bar, tabContents};
+        // Fallback for noscript; Set all content to visible
+        var noscript_style = HTML.RAW("""
+            <noscript>
+                <style>
+                    .tab_box_container {
+                        visibility: visible !important;
+                        display: block !important;
+                    }
+                </style>
+            </noscript>""");
+
+        return new HTML[]{noscript_style, bar, tabContents};
     }
 
     @Override
@@ -133,6 +146,6 @@ public class TabBox extends Component {
             """;
     }
 
-    public record Tab(HTML button, HTML content) {
-    }
+
+
 }

@@ -66,7 +66,9 @@ public class DynamicMapPage extends Page {
     protected HTML getContent(HtmlContext context) {
         // Map canvas is contained in an 'absolute' element to stop the canvas increasing the size of the containing elements
         // Canvas dynamically follows the size of 'map_spacer', but this is done from JS after a reflow, requiring the reflow to happen first.
+        // Noscript: Display only the iframe
         return RAW("""
+            <noscript><style>#map_spacer { display: none !important; } .map_controls { display: none !important; } #map_frame { width: 100%; height: 100rem; }</style></noscript>
             <div id="map_spacer" class="colour_theme_minor"><div id="map_container"></div></div>
             <div class="map_controls">
                 <div class="map_controls_header eve_clip_top colour_theme_border_bg"><div class="eve_clip_top colour_theme_bg">Controls</div></div>
