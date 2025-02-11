@@ -87,11 +87,13 @@ public abstract class Page extends Frame {
             String head_font = "@font-face {" +
                                "   font-family: 'Electrolize';" +
                                "   src: url('" + ResourceLocation.file("font/Electrolize.woff2").getURI(context, true) + "') format('woff2');" +
+                               "   font-display: swap;" +
                                "}";
 
             String roman_numeral_font = "@font-face {" +
                                         "   font-family: 'RomanNumeral';" +
                                         "   src: url('" + ResourceLocation.file("font/RomanNumerals.woff2").getURI(context, true) + "') format('woff2');" +
+                                        "   font-display: swap;" +
                                         "}";
 
             String css = this.getCSS(context);

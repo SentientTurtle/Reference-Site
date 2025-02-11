@@ -42,22 +42,24 @@ public class TypeVolume extends Component {
                     TR().content(
                         TD().content(SPAN("type_volume_span").title("Volume").content(
                             IMG(ResourceLocation.ofIconID(67, context), null, 32).className("type_volume_icon"),
-                            TEXT("Volume: "),
-                            context.sde.format_with_unit(volume, 9)
+                            TEXT("Volume:")
                         )),
+                        TD().content(context.sde.format_with_unit(volume, 9))
+                    ),
+                    TR().content(
                         TD().content(SPAN("type_volume_span").title("Packaged").content(
                             IMG(ResourceLocation.ofIconID(67, context), null, 32).className("type_volume_icon"),
-                            TEXT("Packaged Volume: "),
-                            context.sde.format_with_unit(PACKAGED_VOLUMES.get(type.typeID), 9)
-                        ))
+                            TEXT("Packaged Volume:")
+                        )),
+                        TD().content(context.sde.format_with_unit(PACKAGED_VOLUMES.get(type.typeID), 9))
                     ),
                     mass > 0.0 ?
                         TR().content(
                             TD().content(SPAN("type_volume_span").content(
                                 IMG(ResourceLocation.ofIconID(76, context), null, 32).title("Mass").className("type_volume_icon"),
-                                TEXT("Mass: "),
-                                context.sde.format_with_unit(mass, 2)
-                            ))
+                                TEXT("Mass:")
+                            )),
+                            TD().content(context.sde.format_with_unit(mass, 2))
                         )
                         : HTML.empty()
                 )

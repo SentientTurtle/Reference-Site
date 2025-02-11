@@ -140,6 +140,7 @@ public abstract non-sealed class Frame implements Document, HTML {
             width: 100%;
             display: flex;
             justify-content: space-between;
+            align-items: center;
             border-bottom: var(--border-size) solid var(--colour-theme-minor-border);
         }
         
@@ -169,7 +170,7 @@ public abstract non-sealed class Frame implements Document, HTML {
         }
         
         .header_search {
-            margin-right: 1rem;
+            margin: 1rem;
         }
         
         #sidebar {

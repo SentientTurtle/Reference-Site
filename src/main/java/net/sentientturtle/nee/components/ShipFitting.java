@@ -105,60 +105,60 @@ public class ShipFitting extends Component {
             ));
         }
         if (showPGCPU) {
-            stat_table.content(TR().content(
-                TD().content(
-                    SPAN("ship_fitting_span").content(
+            stat_table.content(
+                TR().content(
+                    TD().content(SPAN("ship_fitting_span").content(
                         IMG(ResourceLocation.ofIconID(1405, context), null, 32).className("ship_fitting_icon"),
-                        TEXT("CPU Output: "), context.sde.format_with_unit(cpuOutput, context.sde.getAttributes().get(48).unitID)
-                    )
+                        TEXT("CPU Output:")
+                    )),
+                    TD().content(context.sde.format_with_unit(cpuOutput, context.sde.getAttributes().get(48).unitID))
                 ),
-                TD().content(
-                    SPAN("ship_fitting_span").content(
+                TR().content(
+                    TD().content(SPAN("ship_fitting_span").content(
                         IMG(ResourceLocation.ofIconID(1400, context), null, 32).className("ship_fitting_icon"),
-                        TEXT("Powergrid output: "), context.sde.format_with_unit(powerGrid, context.sde.getAttributes().get(11).unitID)
-                    )
+                        TEXT("Powergrid output:")
+                    )),
+                    TD().content(context.sde.format_with_unit(powerGrid, context.sde.getAttributes().get(11).unitID))
                 )
-            ));
+            );
         }
         if (showCapacitor) {
-            stat_table.content(TR().content(
-                TD().content(
-                    SPAN("ship_fitting_span").content(
+            stat_table.content(
+                TR().content(
+                    TD().content(SPAN("ship_fitting_span").content(
                         IMG(ResourceLocation.ofIconID(1668, context), null, 32).className("ship_fitting_icon"),
-                        TEXT("Capacitor capacity: "), context.sde.format_with_unit(capacitorCapacity, context.sde.getAttributes().get(482).unitID)
-                    )
+                        TEXT("Capacitor capacity:")
+                    )),
+                    TD().content(context.sde.format_with_unit(capacitorCapacity, context.sde.getAttributes().get(482).unitID))
                 ),
-                TD().content(
-                    SPAN("ship_fitting_span").content(
+                TR().content(
+                    TD().content(SPAN("ship_fitting_span").content(
                         IMG(ResourceLocation.ofIconID(1392, context), null, 32).className("ship_fitting_icon"),
-                        TEXT("Capacitor recharge: "), context.sde.format_with_unit(capacitorRecharge, context.sde.getAttributes().get(55).unitID)
-                    )
+                        TEXT("Recharge:")
+                    )),
+                    TD().content(context.sde.format_with_unit(capacitorRecharge, context.sde.getAttributes().get(55).unitID))
                 )
-            ));
+            );
 
             assert Objects.equals(101, context.sde.getAttributes().get(55).unitID);
             double peakRecharge = 2500.0 * capacitorCapacity / capacitorRecharge;
             stat_table.content(TR().content(
-                TD().attribute("colspan", "2").content(
-                    SPAN("ship_fitting_span").content(
-                        IMG(ResourceLocation.ofIconID(1668, context), null, 32).className("ship_fitting_icon"),
-                        TEXT("Peak capacitor rate: "), context.sde.format_with_unit(peakRecharge, -3)
-                    )
-                )
+                TD().content(SPAN("ship_fitting_span").content(
+                    IMG(ResourceLocation.ofIconID(1668, context), null, 32).className("ship_fitting_icon"),
+                    TEXT("Peak capacitor rate: ")
+                )),
+                TD().content(context.sde.format_with_unit(peakRecharge, -3))
             ));
         }
         if (showSignature) {
             stat_table.content(TR().content(
-                TD().content(
-                    SPAN("ship_fitting_span").content(
+                TD().content(SPAN("ship_fitting_span").content(
                         IMG(ResourceLocation.ofIconID(1390, context), null, 32).className("ship_fitting_icon"),
-                        TEXT("Signature radius: "), context.sde.format_with_unit(signatureRadius, context.sde.getAttributes().get(552).unitID)
-                    )
-                )
+                        TEXT("Signature radius: ")
+                    )),
+                TD().content(context.sde.format_with_unit(signatureRadius, context.sde.getAttributes().get(552).unitID))
             ));
         }
-
-
 
         if (stat_table.isEmpty()) {
             return new HTML[]{
