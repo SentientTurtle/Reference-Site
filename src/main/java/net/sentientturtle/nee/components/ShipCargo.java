@@ -48,7 +48,7 @@ public class ShipCargo extends Component {
 
         attributeMap.values()
             .stream()
-            .filter(attribute -> Objects.equals(attribute.categoryID, 40) && attribute.published)
+            .filter(attribute -> (attribute.attributeID == 3020 || Objects.equals(attribute.categoryID, 40)) && attribute.published)
             .forEach(attribute -> {
                 Double value = attributeValueMap.getOrDefault(type.typeID, Map.of()).get(attribute.attributeID);
                 if (value != null) {

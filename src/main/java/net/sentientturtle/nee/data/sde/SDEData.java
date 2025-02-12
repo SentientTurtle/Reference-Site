@@ -678,6 +678,7 @@ public abstract class SDEData {
         for (Set<Integer> variants : typeVariants.values()) {
             variants.removeIf(typeID -> !types.containsKey(typeID));
         }
+        typeVariants.values().removeIf(variants -> variants.size() < 2);
 
         this.getMetaTypes().keySet().removeIf(typeID -> !types.containsKey(typeID));
 

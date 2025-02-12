@@ -92,7 +92,12 @@ public class TypeBlueprint extends Component {
                 } else {
                     table.content(TR("type_blueprint_spacer"));
                 }
-                table.content(TR().content(TH().attribute("colspan", "3").text(activity.activityType.activityName)));
+
+                if (activity.activityType != IndustryActivityType.RESEARCH_TIME) {
+                    table.content(TR().content(TH().attribute("colspan", "3").text(activity.activityType.activityName)));
+                } else {
+                    table.content(TR().content(TH().attribute("colspan", "3").text("Researching Efficiency")));
+                }
 
                 if (activity.productMap.size() > 0) {
                     String outputDisplayText = activity.productMap.size() > 1 ? "Output (select one)" : "Output";
