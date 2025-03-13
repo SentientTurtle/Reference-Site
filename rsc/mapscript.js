@@ -86,6 +86,14 @@ async function init() {
             // Anoikis region
             map_file = "./rsc/map/anoikis.json";
             jumps_file = null;
+        } else if (search_item == -1) {
+            // NEC
+            map_file = "./rsc/map/NEC.json";
+            jumps_file = "./rsc/map/NEC_jumps.json";
+        } else if (search_item == -2) {
+            // Anoikis
+            map_file = "./rsc/map/anoikis.json";
+            jumps_file = null;
         } else {
             console.log("Invalid item query parameter: " + search_item);
             map_file = "./rsc/map/NEC.json";

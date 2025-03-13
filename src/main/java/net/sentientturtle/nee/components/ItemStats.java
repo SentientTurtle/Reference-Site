@@ -716,7 +716,7 @@ public class ItemStats extends Component {
                             )
                         ),
                         TD().content(context.sde.format_with_unit(bad, 109)),
-                        TD().attribute("aria-hidden", "true").content(TEXT(order)),
+                        TD().className("no_break").attribute("aria-hidden", "true").content(TEXT(order)),
                         TD().content(context.sde.format_with_unit(good, 109))
                     ));
                 }
@@ -787,7 +787,7 @@ public class ItemStats extends Component {
     }
 
     @Override
-    protected String getCSS() { // TODO: Flex-wrap multi-row content, check http://localhost:8000/type/35928-Standup%20Arcing%20Vorton%20Projector%20I.html
+    protected String getCSS() {
         return """
             .item_stats {
                 padding: 0.5rem;

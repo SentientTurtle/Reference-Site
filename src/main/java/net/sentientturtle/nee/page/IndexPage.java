@@ -37,7 +37,6 @@ public class IndexPage extends Page {
     @Override
     protected List<HTML> headEntries(HtmlContext context) {
         return List.of(
-            // TODO: Add map-updated timestamp to DynamicMapPage
             SCRIPT_MODULE("""
                 fetch("./rsc/status.json")
                         .then(r => r.json())

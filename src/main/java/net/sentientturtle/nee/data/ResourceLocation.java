@@ -38,6 +38,16 @@ public class ResourceLocation {
         return new ResourceLocation(new ResourceData.File(Main.RES_FOLDER.resolve(path)), path);
     }
 
+    /// Use a file resource, files provided in {@link Main#RES_FOLDER}, path relative to that folder
+    public static ResourceLocation remoteURL(String url) {
+        return new ResourceLocation(new ResourceData.Remote(url), null);
+    }
+
+    /// Use a file resource, files provided in {@link Main#RES_FOLDER}, path relative to that folder
+    public static ResourceLocation localPath(Path path) {
+        return new ResourceLocation(new ResourceData.Remote(path.toString()), null);
+    }
+
     /// ResourceLocation for an item-type icon (64x64 PNG file)
     public static ResourceLocation typeIcon(int typeID, HtmlContext context) {
         if (Main.GENERATE_ICONS) {
@@ -50,14 +60,10 @@ public class ResourceLocation {
         } else {
             Type invType = context.sde.getTypes().get(typeID);
             Group group = context.sde.getGroups().get(invType.groupID);
-            try {
-                if (group.categoryID == 9) {
-                    return new ResourceLocation(new ResourceData.Remote(new URI("https://images.evetech.net/types/" + typeID + "/bp?size=64")), "type_icons/" + typeID + ".png");
-                } else {
-                    return new ResourceLocation(new ResourceData.Remote(new URI("https://images.evetech.net/types/" + typeID + "/icon?size=64")), "type_icons/" + typeID + ".png");
-                }
-            } catch (URISyntaxException e) {
-                return ExceptionUtil.sneakyThrow(e);   // Shouldn't happen as we construct the URL in this function, so we just re-throw
+            if (group.categoryID == 9) {
+                return new ResourceLocation(new ResourceData.Remote("https://images.evetech.net/types/" + typeID + "/bp?size=64"), null);
+            } else {
+                return new ResourceLocation(new ResourceData.Remote("https://images.evetech.net/types/" + typeID + "/icon?size=64"), null);
             }
         }
     }
@@ -67,14 +73,10 @@ public class ResourceLocation {
         if (Main.GENERATE_ICONS) {
             return new ResourceLocation(new ResourceData.IconProvider512(typeID), "type_renders/" + typeID + ".jpg");
         } else {
-            try {
-                return new ResourceLocation(
-                    new ResourceData.Remote(new URI("https://images.evetech.net/types/" + typeID + "/render?size=512")),
-                    "type_renders/" + typeID + ".jpg"
-                );
-            } catch (URISyntaxException e) {
-                return ExceptionUtil.sneakyThrow(e);   // Shouldn't happen as we construct the URL in this function, so we just re-throw
-            }
+            return new ResourceLocation(
+                new ResourceData.Remote("https://images.evetech.net/types/" + typeID + "/render?size=512"),
+                "type_renders/" + typeID + ".jpg"
+            );
         }
     }
 
@@ -164,51 +166,22 @@ public class ResourceLocation {
 
     /// Returns a URI to this resource, relative to specified context if {@code isAbsolute} is false, absolute from website root otherwise
     public String getURI(HtmlContext context, boolean isAbsolute, String absolutePrefix) {
-        switch (Main.REFERENCE_FORMAT) {
-            case EXTERNAL:
-                if (dataSource instanceof ResourceData.Remote(URI uri)) {
-                    return uri.toASCIIString();
+        if (dataSource instanceof ResourceData.Remote(String url)) {
+            return url;
+        } else {
+            if (!(dataSource instanceof ResourceData.NoData)) {
+                context.addFileDependency(OUTPUT_RES_FOLDER.resolve(destinationPath), dataSource);
+            }
+            if (absolutePrefix != null) {
+                return absolutePrefix + OUTPUT_RES_FOLDER.resolve(destinationPath).toString().replace("\\", "/");
+            } else {
+                if (isAbsolute) {
+                    return OUTPUT_RES_FOLDER.resolve(destinationPath).toString().replace("\\", "/");
                 } else {
-                    // Fallthrough to INTERNAL
+                    return context.pathTo(OUTPUT_RES_FOLDER.resolve(destinationPath).toString().replace("\\", "/"));
                 }
-            case INTERNAL:
-                if (!(dataSource instanceof ResourceData.NoData)) {
-                    context.addFileDependency(OUTPUT_RES_FOLDER.resolve(destinationPath), dataSource);
-                }
-                if (absolutePrefix != null) {
-                    return absolutePrefix + OUTPUT_RES_FOLDER.resolve(destinationPath).toString().replace("\\", "/");
-                } else {
-                    if (isAbsolute) {
-                        return OUTPUT_RES_FOLDER.resolve(destinationPath).toString().replace("\\", "/");
-                    } else {
-                        return context.pathTo(OUTPUT_RES_FOLDER.resolve(destinationPath).toString().replace("\\", "/"));
-                    }
-                }
-            case DATA_URI:
-                try {
-                    StringBuilder builder = new StringBuilder();
-                    builder.append("data:")
-                        .append(MIME.getType((destinationPath).substring(destinationPath.lastIndexOf('.'))))
-                        .append(";base64,");
-                    byte[] encode = Base64.getEncoder().encode(dataSource.getData(context.dataSources));    // Fail intentionally on NoData
-                    builder.append(new String(encode));
-                    return builder.toString();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            default:
-                throw new RuntimeException("ResourceLocation#getURI switch must be exhaustive!");
+            }
         }
-    }
-
-    /// Resource URI/reference format
-    public enum ReferenceFormat {
-        /// Links to external resources
-        EXTERNAL,
-        /// Copies external resources to resource files for self-hosting
-        INTERNAL,
-        /// DATA_URI; Inline in the HTML document
-        DATA_URI
     }
 
     public interface ResourceData {
@@ -225,22 +198,11 @@ public class ResourceLocation {
         }
 
         /// Remotely hosted resource, usually a URL to some web resource (e.g. EVE Online Image Service images)
-        record Remote(URI uri) implements ResourceData {
-            // Cached to avoid undue burden on external resources (getData() shouldn't be called twice, but some of the services we use are fragile, so just in case)
-            // URIs as map key, which is safe
-            private static final HashMap<URI, byte[]> remoteCache = new HashMap<>();
-
-            // Synchronized to avoid excessive load on external resources by locking simultaneous requests to 1
-            // If changed to parallelize, remoteCache must be made concurrent
+        record Remote(String url) implements ResourceData {
+            // No data for remote resources
             @Override
             public synchronized byte[] getData(DataSources sources) throws IOException {
-                return remoteCache.computeIfAbsent(uri, _ -> {
-                    try (InputStream stream = uri.toURL().openStream()) {
-                        return stream.readAllBytes();
-                    } catch (IOException e) {
-                        return ExceptionUtil.sneakyThrow(e);
-                    }
-                });
+                throw new UnsupportedOperationException();
             }
         }
 

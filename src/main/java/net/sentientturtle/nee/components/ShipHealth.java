@@ -119,8 +119,8 @@ public abstract class ShipHealth extends Component {
             }
             
             .ship_health_icon > img {
-                width: 2rem;
-                height: 2rem;
+                width: 1rem;
+                height: 1rem;
             }
             
             .ship_health_text_td {
@@ -130,7 +130,7 @@ public abstract class ShipHealth extends Component {
             }
             
             .ship_health_bar {
-                height: 1.5rem;
+                height: 1rem;
                 width: 100%;
                 padding: 0.25rem;
             }

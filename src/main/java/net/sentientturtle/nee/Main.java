@@ -3,7 +3,9 @@ package net.sentientturtle.nee;
 import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.sentientturtle.html.HasPersistentUrl;
 import net.sentientturtle.html.RenderingException;
 import net.sentientturtle.html.context.NoopHtmlContext;
 import net.sentientturtle.html.context.StringBuilderHtmlContext;
@@ -24,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -35,7 +38,6 @@ import java.util.zip.ZipOutputStream;
 
 /// Entrypoint for generating website contents
 public class Main {
-    public static final ResourceLocation.ReferenceFormat REFERENCE_FORMAT = ResourceLocation.ReferenceFormat.EXTERNAL;
     public static Path RES_FOLDER;
     public static Path TEMP_DIR;
 
@@ -47,12 +49,11 @@ public class Main {
     public static int COMPRESSION;  // No compression is moderately faster
     public static boolean GENERATE_ICONS;
     public static boolean SKIP_RESOURCES;
-    public static boolean SKIP_DEV_RESOURCES;
     public static boolean IS_DEV_BUILD;
     public static String DEPLOYMENT_URL;
     public static Set<String> PRE_COMPRESSED_FILES;
 
-    public static boolean USE_SQLITE = true;
+    public static boolean USE_SQLITE = false;
 
     // Website title as configurable variable in case a rename is needed
     public static final String WEBSITE_NAME = "New Eden Encyclopedia";
@@ -109,7 +110,6 @@ public class Main {
 
             GENERATE_ICONS = properties.getProperty("GENERATE_ICONS", "FALSE").equalsIgnoreCase("TRUE");
             SKIP_RESOURCES = properties.getProperty("SKIP_RESOURCES", "FALSE").equalsIgnoreCase("TRUE");
-            SKIP_DEV_RESOURCES = properties.getProperty("SKIP_DEV_RESOURCES", "FALSE").equalsIgnoreCase("TRUE");
             IS_DEV_BUILD = properties.getProperty("IS_DEV_BUILD", "TRUE").equalsIgnoreCase("TRUE");
 
             String files = properties.getProperty("PRE_COMPRESSED_FILES");
@@ -129,7 +129,6 @@ public class Main {
             properties.setProperty("COMPRESSION", "FALSE");
             properties.setProperty("GENERATE_ICONS", "FALSE");
             properties.setProperty("SKIP_RESOURCES", "FALSE");
-            properties.setProperty("SKIP_DEV_RESOURCES", "FALSE");
             properties.setProperty("IS_DEV_BUILD", "TRUE");
             properties.setProperty("PRE_COMPRESSED_FILES", "html,css,js,json,txt");
             properties.setProperty("DELETE_THIS_KEY", "");
@@ -144,10 +143,11 @@ public class Main {
         {
             String serverVersion;
             try {
-                record GameStatus(int players, String server_version, String start_time) {
-                }
-                GameStatus gameStatus = new ObjectMapper().readValue(new URI("https://esi.evetech.net/latest/status").toURL(), GameStatus.class);
-                serverVersion = gameStatus.server_version;
+                record GameStatus(String build) { }
+                GameStatus gameStatus = new ObjectMapper()
+                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                    .readValue(new URI("https://binaries.eveonline.com/eveclient_TQ.json").toURL(), GameStatus.class);
+                serverVersion = gameStatus.build;
             } catch (Exception e) {
                 serverVersion = ExceptionUtil.sneakyThrow(e);
             }
@@ -210,12 +210,16 @@ public class Main {
             }
 
             for (Set<Integer> mutaplasmidGroup : mutaplasmidMap.values()) {
+                Integer parentTypeID = mutaplasmidGroup.stream().min(Type.idComparator(sdeData)).orElseThrow();
+
                 for (Integer typeID : mutaplasmidGroup) {
                     sdeData.getVariants()
                         .merge(typeID, mutaplasmidGroup, (one, two) -> {
                             one.addAll(two);
                             return one;
                         });
+
+                    sdeData.getParentTypeMap().put(typeID, parentTypeID);
                 }
             }
 
@@ -265,6 +269,7 @@ public class Main {
         Set<String> css = Collections.synchronizedSet(new LinkedHashSet<>());
         Set<String> js = Collections.synchronizedSet(new LinkedHashSet<>());
 
+        ConcurrentLinkedQueue<String> redirects = new ConcurrentLinkedQueue<>();
         ConcurrentHashMap<Path, ResourceLocation.ResourceData> dependencies = new ConcurrentHashMap<>();
 
         System.out.println("Writing pages...");
@@ -278,16 +283,23 @@ public class Main {
                     page.renderTo(context);
 
                     byte[] bytes = context.getBuffer().toString().getBytes(StandardCharsets.UTF_8);
-                    String filename = page.getPath().replace('\\', '/');
-                    boolean gzip = PRE_COMPRESSED_FILES.contains(filename.substring(filename.lastIndexOf('.') + 1).toLowerCase());
+                    String filePath = page.getPath().replace('\\', '/');
 
+                    if (page instanceof HasPersistentUrl persistentUrl) {
+                        redirects.add(
+                            "/" + persistentUrl.getPersistentURL().replace('\\', '/')
+                            + " /" + page.getURLPath().replace('\\', '/') + ";"
+                        );
+                    }
+
+                    boolean gzip = PRE_COMPRESSED_FILES.contains(filePath.substring(filePath.lastIndexOf('.') + 1).toLowerCase());
                     synchronized (zipOutputStream) {
-                        zipOutputStream.putNextEntry(new ZipEntry(filename));
+                        zipOutputStream.putNextEntry(new ZipEntry(filePath));
                         zipOutputStream.write(bytes);
                         zipOutputStream.closeEntry();
 
                         if (gzip) {
-                            zipOutputStream.putNextEntry(new ZipEntry(filename + ".gz"));
+                            zipOutputStream.putNextEntry(new ZipEntry(filePath + ".gz"));
                             GZIPOutputStream gzipOutputStream = new GZIPOutputStream(zipOutputStream);
                             gzipOutputStream.write(bytes);
                             gzipOutputStream.finish();
@@ -344,6 +356,9 @@ public class Main {
                     }
                 });
         }
+
+        zipOutputStream.putNextEntry(new ZipEntry("dev_resource/"));
+        zipOutputStream.closeEntry();
 
         zipOutputStream.putNextEntry(new ZipEntry("stylesheet.css"));
         for (String segment : css) {
@@ -427,26 +442,17 @@ public class Main {
             ExceptionUtil.sneakyThrow(e);
         }
 
-        if (!SKIP_DEV_RESOURCES) {
-            System.out.println("Writing dev resources...");
-
-            DevResources.getResources(data)
-                .stream()
-                .flatMap(resourceGroup -> resourceGroup.resources().stream())
-                .forEach(resource -> {
-                    try {
-                        zipOutputStream.putNextEntry(new ZipEntry(resource.path().toString().replace('\\', '/')));
-                        resource.data().accept(data, zipOutputStream);
-                        zipOutputStream.closeEntry();
-                        System.out.println("\t" + resource.name());
-                    } catch (IOException e) {
-                        ExceptionUtil.sneakyThrow(e);
-                    }
-                });
-        }
-
         System.out.println("Finalizing zip file...");
         zipOutputStream.close();
+
+        System.out.println("Writing webserver files...");
+        FileWriter redirectWriter = new FileWriter(OUTPUT_DIR.resolve("redirects.map").toFile());
+        boolean first = true;
+        for (String redirect : redirects) {
+            if (first) { first = false; } else { redirectWriter.write('\n'); }
+            redirectWriter.write(redirect);
+        }
+        redirectWriter.flush();
 
         System.out.println("Took: " + TimeUnit.SECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS) + " seconds.");
         System.out.println("Generated: " + pageCount.get() + " pages.");

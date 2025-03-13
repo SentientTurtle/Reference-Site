@@ -22,4 +22,9 @@ public interface Document {
     default String getPath() {
         return this.getPageKind().getPageFilePath(this.filename());
     }
+
+    /// URL-escaped path to this document
+    default String getURLPath() {
+        return this.getPageKind().getPageURLPath(this.filename());
+    }
 }

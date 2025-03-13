@@ -597,6 +597,11 @@ public abstract non-sealed class Frame implements Document, HTML {
             display: block;
         }
         
+        /* Stop icons being smudged on high-dpi screens */
+        img {
+            image-rendering: pixelated;
+        }
+        
         fieldset {
             border-color: var(--colour-theme-border);
         }

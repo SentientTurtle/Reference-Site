@@ -8,7 +8,6 @@ import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.page.DynamicMapPage;
 import net.sentientturtle.nee.page.MapPage;
 import net.sentientturtle.nee.page.TypePage;
-import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Objects;

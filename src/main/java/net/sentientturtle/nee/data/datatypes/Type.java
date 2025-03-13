@@ -41,12 +41,13 @@ public class Type implements HasPage {
         this.marketGroupID = marketGroupID;
     }
 
-    public static Comparator<Type> comparator(SDEData data) {
+    public static Comparator<Integer> idComparator(SDEData data) {
         Map<Integer, Integer> metaTypes = data.getMetaTypes();
         Map<Integer, Map<Integer, Double>> typeAttributes = data.getTypeAttributes();
 
         return (t1, t2) -> {
-            int m1 = metaTypes.getOrDefault(t1.typeID, 1);
+            // Structure meta groups have their ordering reversed
+            int m1 = metaTypes.getOrDefault(t1, 1);
             m1 = switch (m1) {
                 case 52 -> 54;
                 case 53 -> 53;
@@ -54,7 +55,7 @@ public class Type implements HasPage {
                 default -> m1;
             };
 
-            int m2 = metaTypes.getOrDefault(t2.typeID, 1);
+            int m2 = metaTypes.getOrDefault(t2, 1);
             m2 = switch (m2) {
                 case 52 -> 54;
                 case 53 -> 53;
@@ -66,12 +67,12 @@ public class Type implements HasPage {
             int i = Integer.compare(m1, m2);
             if (i == 0) {
                 // Compare by meta level
-                int l1 = (int) (double) typeAttributes.getOrDefault(t1.typeID, Map.of()).getOrDefault(633, 0.0);
-                int l2 = (int) (double) typeAttributes.getOrDefault(t2.typeID, Map.of()).getOrDefault(633, 0.0);
+                int l1 = (int) (double) typeAttributes.getOrDefault(t1, Map.of()).getOrDefault(633, 0.0);
+                int l2 = (int) (double) typeAttributes.getOrDefault(t2, Map.of()).getOrDefault(633, 0.0);
                 i = Integer.compare(l1, l2);
                 if (i == 0) {
                     // If no other ordering, order by typeID
-                    return Integer.compare(t1.typeID, t2.typeID);
+                    return Integer.compare(t1, t2);
                 } else {
                     return i;
                 }
@@ -79,6 +80,10 @@ public class Type implements HasPage {
                 return i;
             }
         };
+    }
+
+    public static Comparator<Type> comparator(SDEData data) {
+        return Comparator.comparing(type -> type.typeID, idComparator(data));
     }
 
 

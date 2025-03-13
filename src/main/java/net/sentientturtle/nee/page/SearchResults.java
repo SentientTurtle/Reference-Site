@@ -61,7 +61,7 @@ public class SearchResults extends Page {
                 "import searchindex from \"/" + ResourceLocation.searchIndex().getURI(context) + "\";\n"
                 +
                 """
-                    const query = (new URLSearchParams(window.location.search).get("search") ?? "").toLowerCase();
+                    const query = (new URLSearchParams(window.location.search).get("search") ?? "").toLowerCase().trim();
                     
                     document.getElementsByClassName('item_title_text')[0].innerHTML = 'Search results: ' + query;
                     document.getElementById('search_input').value = query;

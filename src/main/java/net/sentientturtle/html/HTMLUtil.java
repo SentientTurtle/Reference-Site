@@ -2,6 +2,9 @@ package net.sentientturtle.html;
 
 import org.jspecify.annotations.NonNull;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 /// HTML Utilities
 public class HTMLUtil {
     /**
@@ -35,6 +38,10 @@ public class HTMLUtil {
                 .replace(">", "&gt;");
     }
 
+    /// Hack-y percent-encoding, correct but to be replaced with proper encoding
+    public static String urlQuasiEscape(@NonNull String string) {
+        return URLEncoder.encode(string, StandardCharsets.UTF_8).replace("+", "%20");
+    }
 
     /**
      * Maps a name to a safe filename and URL filename; Not true "escaping"

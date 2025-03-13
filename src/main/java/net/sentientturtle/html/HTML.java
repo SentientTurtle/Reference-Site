@@ -10,6 +10,7 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 
@@ -66,6 +67,19 @@ public sealed interface HTML permits Element, HTML.EmptyHTML, HTML.MultiHTML, HT
     /// Equivalent to {@code TEXT_BOLD().content(TEXT(textContent));}
     static Element TEXT_BOLD(String textContent) {
         return new Element("b")
+                .text(textContent);
+    }
+
+    /// {@code <i></i>}
+    static Element TEXT_ITALICS() {
+        return new Element("i");
+    }
+
+    /// {@code <i>[textContent]</i>}
+    ///
+    /// Equivalent to {@code TEXT_ITALICS().content(TEXT(textContent));}
+    static Element TEXT_ITALICS(String textContent) {
+        return new Element("i")
                 .text(textContent);
     }
 
@@ -264,9 +278,21 @@ public sealed interface HTML permits Element, HTML.EmptyHTML, HTML.MultiHTML, HT
                 .text(title);
     }
 
+    /// {@code <ol></ol> }
+    static Element OL() {
+        return new Element("ol");
+    }
+    /// {@code <ol> items... </ol> } Convenience builder for HTML lists, wraps `items` in &lt;li&gt;
+    static Element OL(HTML... items) {
+        return OL().content(Arrays.stream(items).map(item -> LI().content(item)));
+    }
     /// {@code <ul></ul> }
     static Element UL() {
         return new Element("ul");
+    }
+    /// {@code <ul> items... </ul> } Convenience builder for HTML lists, wraps `items` in &lt;li&gt;
+    static Element UL(HTML... items) {
+        return UL().content(Arrays.stream(items).map(item -> LI().content(item)));
     }
     /// {@code <li></li> }
     static Element LI() {

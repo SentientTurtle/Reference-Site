@@ -142,6 +142,8 @@ public abstract class SDEData {
     private Map<Integer, List<Constellation>> regionConstellations;
     // Map<skill TypeID, Map<Level, Set<TypeID requiring skill>>>
     private Map<Integer, Map<Integer, Set<Integer>>> requiresSkillMap;
+    // Map<TypeID, parent TypeID>
+    private Map<Integer, Integer> parentTypeMap;
 
     // View getters
 
@@ -227,6 +229,12 @@ public abstract class SDEData {
     public Map<Integer, Map<Integer, Set<Integer>>> getRequiresSkillMap() {
         if (requiresSkillMap == null) throw new IllegalStateException("View collections not initialized!");
         return requiresSkillMap;
+    }
+
+    // Map<TypeID, parent TypeID>
+    public Map<Integer, Integer> getParentTypeMap() {
+        if (parentTypeMap == null) throw new IllegalStateException("View collections not initialized!");
+        return parentTypeMap;
     }
 
     /*
@@ -339,6 +347,16 @@ public abstract class SDEData {
                     int level = (int) (double) typeAttributes.getOrDefault(TypeSkills.LEVEL_ATTRIBUTES[i], 1.0);
                     requiresSkillMap.computeIfAbsent((int) (double) skillTypeID, this::produceMap).computeIfAbsent(level, this::produceSet).add(typeID);
                 }
+            }
+        }
+
+        parentTypeMap = produceMap();
+        for (Set<Integer> variantSet : getVariants().values()) {
+            ArrayList<Integer> types = new ArrayList<>(variantSet);
+            types.sort(Type.idComparator(this));
+            Integer parent = Objects.requireNonNull(types.get(0));
+            for (Integer type : types) {
+                parentTypeMap.put(type, parent);    // Intentionally setting the parent type's parent to itself, rather than null
             }
         }
     }
@@ -570,18 +588,41 @@ public abstract class SDEData {
     }
 
     protected void patch() {
-        // TODO: Finish comments on these IDs
         Set<Integer> publishCategories = Set.of();
         HashSet<Integer> publishCategoriesAndChildren = new HashSet<>();
         Set<Integer> publishGroups = Set.of();
         HashSet<Integer> publishGroupsAndChildren = new HashSet<>(List.of(6, 15, 1324));
-        Set<Integer> publishTypes = Set.of(30574, 30575, 30576, 30577, 30669, 30670);
+        Set<Integer> publishTypes = Set.of(
+            30574, 30575, 30576, 30577, 30669, 30670, // Wormhole space "Secondary Sun"
+            2787    // Corporate Hangar Array Blueprint
+        );
 
         Set<Integer> unpublishCategories = Set.of();
-        HashSet<Integer> unpublishCategoriesAndChildren = new HashSet<>(List.of(11, 54, 91, 2118));
+        HashSet<Integer> unpublishCategoriesAndChildren = new HashSet<>(List.of(
+            11, // Entity (NPCs)
+            54, // Lights
+            91, // SKINs
+            2118 // Personalisation (User-created skins)
+        ));
         Set<Integer> unpublishGroups = Set.of();
         HashSet<Integer> unpublishGroupsAndChildren = new HashSet<>(List.of(
-            110, 186, 316, 836, 872, 876, 920, 935, 952, 1016, 1020, 1021, 1048, 1273, 1461, 1717, 1975, 1977, 1984, 2004, 2022, 2026, 4161
+            186,    // Wreck
+            316, // "Gang Coordinator"; Warfare Link fleet boost modules
+            397, // Starbase Assembly Array
+            836, 872, 876, // Station egg
+            920, // Effect Beacon
+            935, // 'World Space'
+            952, // Mission Container
+            1016, 1020, 1021, // Infrastructure Hub Strategic Upgrades (Deprecated upgrades)
+            1273, // 'Encounter Surveillance System' (Disabled)
+            1717, // 'Unpublished Structure Modules'
+            1975, // 'Non-Interactable Object'
+            1977, // 'Trinary Data Vaults'
+            1984, // 'Outpost Conversion Rigs'; Special rigs for citadels converted from outposts, not meaningfully accessible ingame
+            2004, // 'Citizen Mining Laser'
+            2022, // 'Temporal Resources'
+            2026, // 'Triglavian Artifacts'
+            4161  // 'AIR Ore Asteroid Resources' Tutorial ore, unused elsewhere
         ));
         Set<Integer> unpublishTypes = Set.of(
             3404,   // Legacy item, other items in this group are set unpublished
@@ -591,10 +632,11 @@ public abstract class SDEData {
             35915,  // Unused FLEX structure module
             47449,  // Mission item, other items in group set unpublished
             // Defunct starbase Blueprint
-            2742, 2743, 2744, 2745, 2746, 2747, 2748, 2786, 2790, 2791, 2793, 2795, 2797, 2820, 2821, 28605, 33515, 33584, 2788, 2789, 2800, 33582,
+            2742, 2743, 2744, 2745, 2746, 2747, 2748, 2749, 2751, 2753, 2754, 2755, 2756, 2758, 2760, 2762, 2764, 2765, 2766, 2767, 2768, 2769, 2770,
+            2771, 2772, 2773, 2786, 2788, 2789, 2790, 2791, 2793, 2795, 2797, 2800, 2820, 2821, 28605, 33515, 33582, 33584,
             // Defunct starbase structure
-            12239, 14343, 16221, 16869, 17982, 20175, 22634, 24684, 25270, 25271, 25280, 25821, 30655, 30656, 16216, 24567, 28351, 32245, 33477, 33581, 33583,
-            27673, 27674, 27897
+            12239, 14343, 16216, 16221, 16869, 17982, 20175, 22634, 24567, 24657, 24684, 25270, 25271, 25280, 25821, 27673, 27674, 27897, 28351, 30655, 30656,
+            32245, 33477, 33581, 33583
         );
 
         for (Category category : getCategories().values()) {
@@ -746,10 +788,24 @@ public abstract class SDEData {
         }
 
         // Patch missing variants
-        Set<Integer> standupECMVariants = typeVariants.get(35940);
-        standupECMVariants.add(46577);
-        typeVariants.putIfAbsent(46577, standupECMVariants);
 
+        Map<Integer, Integer> map = Map.of(
+            46577, 35940,   // Dread Guristas Standup Variable Spectrum ECM
+            46575, 35925,   // Dark Blood Standup Heavy Energy Neutralizer
+            45640, 43867,   // Standup M-Set Thukker Advanced Component Manufacturing Material Efficiency
+            45544, 43870,   // Standup M-Set Thukker Basic Capital Component Manufacturing Material Efficiency
+            45641, 37174,   // Standup L-Set Thukker Advanced Component Manufacturing Efficiency
+            45546, 43718,   // Standup L-Set Thukker Basic Capital Component Manufacturing Efficiency
+            45548, 43704    // Standup XL-Set Thukker Structure and Component Manufacturing Efficiency
+        );
+
+        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+            Set<Integer> variants = typeVariants.get(entry.getValue());
+            variants.add(entry.getKey());
+            typeVariants.putIfAbsent(entry.getKey(), variants);
+        }
+
+        // Special cased as neither type has a variant set already
         Set<Integer> researchLabVariants = produceSet();
         researchLabVariants.add(35891);
         researchLabVariants.add(45550);
@@ -786,6 +842,14 @@ public abstract class SDEData {
         }
         for (Attribute attribute : getAttributes().values()) {
             if (attribute.iconID != null && attribute.iconID == 0) attribute.iconID = null;
+        }
+
+        // Patch used-with launcher/turret groups
+        for (Type type : types.values()) {
+            if (type.groupID == 4062 || type.groupID == 4061) {
+                // Vorton projector charges have their used-width set to hybrid turret instead of vorton projector; Fix that.
+                getTypeAttributes().get(type.typeID).replace(137, 74.0, 4060.0);
+            }
         }
     }
 }

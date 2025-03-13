@@ -16,10 +16,16 @@ import static net.sentientturtle.html.HTML.IMG;
  * Page title, with an optional icon
  */
 public class ItemTitle extends Component {
-    private final String text;
+    private final HTML text;
     private final ResourceLocation icon;
 
     public ItemTitle(@NonNull String text, @Nullable ResourceLocation icon) {
+        super("item_title colour_theme_minor");
+        this.text = HTML.TEXT(Objects.requireNonNull(text));
+        this.icon = icon;
+    }
+
+    public ItemTitle(@NonNull HTML text, @Nullable ResourceLocation icon) {
         super("item_title colour_theme_minor");
         this.text = Objects.requireNonNull(text);
         this.icon = icon;
@@ -30,11 +36,11 @@ public class ItemTitle extends Component {
         if (icon != null) {
             return new HTML[]{
                 IMG(this.icon, null, 64).className("item_title_icon"),
-                HTML.TEXT_BOLD(this.text).className("font_header item_title_text")
+                HTML.TEXT_BOLD().content(this.text).className("font_header item_title_text")
             };
         } else {
             return new HTML[]{
-                HTML.TEXT_BOLD(this.text).className("font_header item_title_text")
+                HTML.TEXT_BOLD().content(this.text).className("font_header item_title_text")
             };
         }
     }
@@ -48,7 +54,7 @@ public class ItemTitle extends Component {
                 align-items: center;
             }
             
-            .item_title:has(:only-child) {
+            .item_title:has(> *:only-child) {
                 justify-content: center;
             }
             

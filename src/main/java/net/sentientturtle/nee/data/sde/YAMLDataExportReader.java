@@ -481,6 +481,8 @@ public class YAMLDataExportReader implements AutoCloseable {
     public record SdeFaction(
         @Nullable Integer corporationID,
         @JsonProperty(required = true) LocalizedString descriptionID,
+        @Nullable String flatLogo,
+        @Nullable String flatLogoWithName,
         @JsonProperty(required = true) int iconID,
         @JsonProperty(required = true) int[] memberRaces,
         @Nullable Integer militiaCorporationID,

@@ -2,7 +2,6 @@ package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.Frame;
 import net.sentientturtle.html.HTMLUtil;
-import net.sentientturtle.nee.Main;
 import net.sentientturtle.nee.data.sde.SDEData;
 import net.sentientturtle.nee.data.datatypes.MapItem;
 import net.sentientturtle.nee.data.datatypes.Cluster;
@@ -33,6 +32,13 @@ public enum PageKind {
             .filter(type -> type.groupID != 15)
             .map(TypePage::new)
     ),
+    Comparison(data ->
+        data.getParentTypeMap().values()
+            .stream()
+            .distinct()
+            .map(typeID -> data.getTypes().get(typeID))
+            .map(ComparisonPage::new)
+    ),
     ITEM_TREE(_ -> Stream.of(new ShipTreePage(), new StructureTreePage())),
     MARKET_GROUP(data ->
         data.getMarketGroups()
@@ -51,8 +57,7 @@ public enum PageKind {
             .flatMap((Function<Stream<? extends MapItem>, Stream<? extends MapItem>>) stream -> stream)
             .map(MapPage::new)
     ),
-    DEV_RESOURCE(_ -> Stream.ofNullable(Main.SKIP_DEV_RESOURCES ? null : new DevResourcePage())),
-    STATIC(_ -> Stream.of(new IndexPage(), new SearchResults(), new DynamicMapPage(), new TermsOfServicePage())) {
+    STATIC(_ -> Stream.of(new IndexPage(), new SearchResults(), new DynamicMapPage(), new TermsOfServicePage(), new DevResourcePage())) {
         @Override
         public String getPageFilePath(String pageName) {
             return pageName + ".html";
@@ -95,7 +100,24 @@ public enum PageKind {
      * @return File path for the given page name
      */
     public String getPageFilePath(String pageName) {
-        return this.name().toLowerCase() + "/" + HTMLUtil.escapeFileNameURL(pageName) + ".html";
+        return getFileFolder() + "/" + HTMLUtil.escapeFileNameURL(pageName) + ".html";
+    }
+
+    /**
+     * Returns the file path for a page of this type with the given name
+     *
+     * @param pageName Name for the page
+     * @return File path for the given page name
+     */
+    public String getPageURLPath(String pageName) {
+        return HTMLUtil.urlQuasiEscape(getFileFolder()) + "/" + HTMLUtil.urlQuasiEscape(HTMLUtil.escapeFileNameURL(pageName)) + ".html";
+    }
+
+    /**
+     * @return The output folder for this PageKind
+     */
+    public String getFileFolder() {
+        return this.name().toLowerCase();
     }
 
     public int getFolderDepth() {

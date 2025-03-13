@@ -5,6 +5,7 @@ import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.Component;
 import net.sentientturtle.nee.data.datatypes.MetaGroup;
+import net.sentientturtle.nee.page.ComparisonPage;
 import net.sentientturtle.nee.page.TypePage;
 import net.sentientturtle.nee.data.ResourceLocation;
 import net.sentientturtle.nee.data.datatypes.Type;
@@ -51,7 +52,7 @@ public class TypeVariants extends Component {
                 ))
                 .forEach(entry -> {
                     table.content(TR().content(TH().attribute("colspan", "2").text(metaGroups.get(entry.getKey()).metaGroupName)));
-                    for (Integer variantID : (Iterable<? extends Integer>) entry.getValue().stream().sorted()::iterator) {
+                    for (Integer variantID : (Iterable<? extends Integer>) entry.getValue().stream().sorted(Type.idComparator(context.sde))::iterator) {
                         table.content(TR().content(
                             TD().content(IMG(ResourceLocation.typeIcon(variantID, context), null, 64).className("type_variants_icon")),
                             TD().content(new PageLink(new TypePage(context.sde.getTypes().get(variantID))))
@@ -60,7 +61,7 @@ public class TypeVariants extends Component {
                 });
         } else {
             for (Set<Integer> value : metaVariants.values()) {
-                for (Integer variantID : (Iterable<? extends Integer>) value.stream().sorted()::iterator) {
+                for (Integer variantID : (Iterable<? extends Integer>) value.stream().sorted(Type.idComparator(context.sde))::iterator) {
                     table.content(TR().content(
                         TD().content(IMG(ResourceLocation.typeIcon(variantID, context), null, 64).className("type_variants_icon")),
                         TD().content(SPAN().content(new PageLink(new TypePage(context.sde.getTypes().get(variantID)))))
@@ -69,8 +70,14 @@ public class TypeVariants extends Component {
             }
         }
 
+        Integer parentTypeID = Objects.requireNonNull(context.sde.getParentTypeMap().get(type.typeID));
+        Type parentType = context.sde.getTypes().get(parentTypeID);
+
         return new HTML[]{
-            HEADER("font_header").text("Variants"),
+            DIV("type_variants_header").content(
+                HEADER("font_header").text("Variants"),
+                new PageLink(new ComparisonPage(parentType), "[Compare]")
+            ),
             table
         };
     }
@@ -90,6 +97,12 @@ public class TypeVariants extends Component {
             .type_variants_icon {
                 width: 2rem;
                 height: 2rem;
+            }
+            
+            .type_variants_header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
             }""";
     }
 }

@@ -59,13 +59,12 @@ public class TypeSkills extends Component {
             }
             
             .type_skills_text {
+                display: flex;
                 flex-grow: 1;
             }
             
             .type_skills_level {
-                float: right;
                 white-space: pre;
-                display: inline;
             }
             
             .type_skills_indicator {
@@ -91,7 +90,7 @@ public class TypeSkills extends Component {
                 row.content(
                     HTML.repeat(indent, DIV("type_skills_spacer")),
                     SPAN("type_skills_text").content(
-                        sdeData.format_with_unit(skill, 116), // 116 = typeID unit
+                        SPAN("type_skills_text").content(sdeData.format_with_unit(skill, 116)), // 116 = typeID unit
                         SPAN("type_skills_level font_roman_numeral").text(" " + level + " ").content(
                             SPAN("type_skills_indicator").text(levelBoxes)
                         )

@@ -1,6 +1,7 @@
 package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
+import net.sentientturtle.html.HasPersistentUrl;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.Main;
 import net.sentientturtle.nee.data.datatypes.Attribute;
@@ -20,7 +21,7 @@ import static net.sentientturtle.html.HTML.DIV;
 /**
  * Page for a {@link Type}
  */
-public class TypePage extends Page {
+public class TypePage extends Page implements HasPersistentUrl {
     public static final int[] CAN_BE_FITTED_TO_GROUP_ATTRIBUTES = {1298, 1299, 1300, 1301, 1872, 1879, 1880, 1881, 2065, 2396, 2476, 2477, 2478, 2479, 2480, 2481, 2482, 2483, 2484, 2485};
     public static final int[] CAN_BE_FITTED_TO_TYPE_ATTRIBUTES = {1302, 1303, 1304, 1305, 1380, 1944, 2103, 2463, 2486, 2487, 2488, 2758};
     public static final int[] USED_WITH_GROUP_ATTRIBUTES = {137, 602, 603, 604, 605, 606, 609, 610, 2076, 2077, 2078};
@@ -38,6 +39,11 @@ public class TypePage extends Page {
     @Override
     public String filename() {
         return type.typeID + "-" + name();
+    }
+
+    @Override
+    public String persistentName() {
+        return String.valueOf(type.typeID);
     }
 
     @Nullable
@@ -74,14 +80,13 @@ public class TypePage extends Page {
 
     @Override
     protected HTML getContent(HtmlContext context) {
-        var dataSupplier = context.sde;
+        var data = context.sde;
 
-//        var grid = DIV("type_page_grid");
         var left = DIV("type_page_column");
         var mid = DIV("type_page_column");
         var right = DIV("type_page_column");
 
-        Group group = dataSupplier.getGroups().get(type.groupID);
+        Group group = data.getGroups().get(type.groupID);
         if (group == null) {
             throw new NullPointerException("Missing group for type: " + type.name + " (" + type.typeID + ")");
         }
@@ -121,11 +126,11 @@ public class TypePage extends Page {
         if (type.description != null && type.description.length() > 0)
             left.content(new ItemDescription(EVEText.escape(type.description, context.sde, false)));
 
-        if (dataSupplier.getTypeTraits().get(type.typeID) != null)
+        if (data.getTypeTraits().get(type.typeID) != null)
             left.content(new TypeTraitInfo(type));
 
-        Map<Integer, Attribute> attributes = dataSupplier.getAttributes();
-        Map<Integer, Double> typeAttributes = dataSupplier.getTypeAttributes().getOrDefault(type.typeID, Map.of());
+        Map<Integer, Attribute> attributes = data.getAttributes();
+        Map<Integer, Double> typeAttributes = data.getTypeAttributes().getOrDefault(type.typeID, Map.of());
 
         // Type is a ship or structure
         if (
@@ -158,7 +163,7 @@ public class TypePage extends Page {
                 mid.content(new ShipFitting(type));
             }
 
-            if (typeAttributes.getOrDefault(37, 0.0) > 0) // Max velocity > 0
+            if (typeAttributes.getOrDefault(37, 0.0) > 0 && categoryID != 18 && categoryID != 22) // Max velocity > 0 && not a drone or deployable
                 mid.content(new ShipPropulsion(type));
 
             // Has targeting range or sensor strength
@@ -188,7 +193,7 @@ public class TypePage extends Page {
 
         if (type.groupID == 1964) { // If item type is a Mutaplasmid
             mid.content(new ItemStats(type));
-        } else if (categoryID == 7 || categoryID == 32 || categoryID == 66 || categoryID == 8 || categoryID == 20 || categoryID == 22) {    // If module, subsystem, structure module, charge, implant, or deployable
+        } else if (categoryID == 7 || categoryID == 8 || categoryID == 18 || categoryID == 20 || categoryID == 22 || categoryID == 32 || categoryID == 66) {    // If module, subsystem, structure module, charge, implant, drone, or deployable
             for (int listedAttribute : ItemStats.INCLUDED_ATTRIBUTES) {
                 if (typeAttributes.containsKey(listedAttribute) && listedAttribute != 9) {
                     mid.content(new ItemStats(type));
@@ -214,7 +219,7 @@ public class TypePage extends Page {
         }
 
         if (canBeFittedToGroups.size() > 0 || canBeFittedToTypes.size() > 0) {
-            mid.content(new UsedWith("Can be fitted to", canBeFittedToGroups, canBeFittedToTypes));
+            mid.content(new UsedWith("Can be fitted to", canBeFittedToGroups, canBeFittedToTypes, Map.of()));
         }
 
         HashSet<Integer> usedWithGroups = new HashSet<>();
@@ -227,24 +232,24 @@ public class TypePage extends Page {
 
         Double targetChargeSize = typeAttributes.get(128);
 
-        Set<Integer> usedWithTypes = usedWithGroups.stream()
-            .flatMap(g -> dataSupplier.getGroupTypes().getOrDefault(g, Set.of()).stream())
+        Map<Integer, Double> usedWithTypes = usedWithGroups.stream()
+            .flatMap(g -> data.getGroupTypes().getOrDefault(g, Set.of()).stream())
             .filter(t -> {
                 HashSet<Integer> targetUsedWithGroups = new HashSet<>();
                 for (int attributeID : USED_WITH_GROUP_ATTRIBUTES) {
-                    Double groupID = dataSupplier.getTypeAttributes().getOrDefault(t.typeID, Map.of()).get(attributeID);
+                    Double groupID = data.getTypeAttributes().getOrDefault(t.typeID, Map.of()).get(attributeID);
                     if (groupID != null) {
                         targetUsedWithGroups.add((int) (double) groupID);
                     }
                 }
 
                 // Exclude charges which cannot fit the module
-                if (categoryID == 7 && t.volume > type.capacity) return false;
+                if ((categoryID == 7 || categoryID == 66) && t.volume > type.capacity) return false;
                 if (categoryID == 8 && t.capacity < type.volume) return false;
 
                 // Exclude charges which do not have the module type set as usedWith
                 if (targetUsedWithGroups.contains(type.groupID)) {
-                    Double chargeSize = dataSupplier.getTypeAttributes().get(t.typeID).get(128);
+                    Double chargeSize = data.getTypeAttributes().get(t.typeID).get(128);
                     // exclude charges with a different chargeSize as this module
                     if (chargeSize != null && targetChargeSize != null) {
                         return (double) chargeSize == (double) targetChargeSize;
@@ -255,32 +260,38 @@ public class TypePage extends Page {
                     return false;
                 }
             })
-            .map(t -> t.typeID)
-            .collect(Collectors.toSet());
+            .collect(Collectors.toMap(
+                t -> t.typeID,
+                t -> {
+                    if (categoryID == 7 || categoryID == 66) return type.capacity / t.volume;
+                    else if (categoryID == 8) return t.capacity / type.volume;
+                    else throw new IllegalStateException("Invalid category");
+                }
+            ));
 
         if (usedWithTypes.size() > 0) {
-            mid.content(new UsedWith("Used with", Set.of(), usedWithTypes));
+            mid.content(new UsedWith("Used with", Set.of(), Set.of(), usedWithTypes));
         }
 
-        if (dataSupplier.getBpActivities().containsKey(type.typeID) || dataSupplier.getOutputSchematicMap().containsKey(type.typeID)) {
+        if (data.getBpActivities().containsKey(type.typeID) || data.getOutputSchematicMap().containsKey(type.typeID)) {
             mid.content(new TypeBlueprint(type));
         }
 
-        if (typeAttributes.containsKey(182))  // Has a skill-required-1 attribute
-            right.content(new TypeSkills(type));
+        // Has a skill-required-1 attribute
+        if (typeAttributes.containsKey(182)) right.content(new TypeSkills(type));
 
-        if (dataSupplier.getRequiresSkillMap().containsKey(type.typeID))
+        if (data.getRequiresSkillMap().containsKey(type.typeID))
             right.content(new SkillRequiredFor(type));
 
-        if (dataSupplier.getVariants().containsKey(type.typeID))  // If type has variants
+        if (data.getVariants().containsKey(type.typeID))  // If type has variants
             right.content(new TypeVariants(type));
 
         // If produced by a blueprint, used in PI, used in a blueprint, or has reprocessing output
-        if (dataSupplier.getProductActivityMap().containsKey(type.typeID)
-            || dataSupplier.getReprocessingMaterials().containsKey(type.typeID)
-            || dataSupplier.getMaterialActivityMap().containsKey(type.typeID)
-            || dataSupplier.getInputSchematicMap().containsKey(type.typeID)
-            || dataSupplier.getOreReprocessingMap().containsKey(type.typeID)) {
+        if (data.getProductActivityMap().containsKey(type.typeID)
+            || data.getReprocessingMaterials().containsKey(type.typeID)
+            || data.getMaterialActivityMap().containsKey(type.typeID)
+            || data.getInputSchematicMap().containsKey(type.typeID)
+            || data.getOreReprocessingMap().containsKey(type.typeID)) {
             right.content(new TypeIndustry(type));
         }
 

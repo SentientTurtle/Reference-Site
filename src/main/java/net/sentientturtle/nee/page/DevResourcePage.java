@@ -1,6 +1,7 @@
 package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
+import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.components.TextBox;
 import net.sentientturtle.nee.data.DevResources;
@@ -27,7 +28,7 @@ public class DevResourcePage extends Page {
 
     @Override
     public PageKind getPageKind() {
-        return PageKind.DEV_RESOURCE;
+        return PageKind.STATIC;
     }
 
     @Override
@@ -72,11 +73,20 @@ public class DevResourcePage extends Page {
                             .stream()
                             .map(resource ->
                                 TR().content(
-                                    TD().content(A(context.pathTo(resource.path().toString()), TEXT(resource.name()))),
-                                    TD().content(A(resource.README().getURI(context), TEXT("[README]"))))
+                                    TD().content(A(context.pathTo(resource.file().getURI(context)), TEXT(resource.name()))),
+                                    TD().content(resource.README() != null ? A(resource.README().getURI(context), TEXT("[README]")) : HTML.empty())
                                 )
+                            )
                     )
                 ))
+        ).content(
+            HEADER().text("Linking to this site"),
+            SPAN("text_box_text font_text")
+                .text("Not all pages are on \"permalinks\", the following redirects & url patterns are available to programmatically link to this site. NOTE: The absence of trailing slashes is mandatory."),
+            HTML.UL(
+                HTML.multi(TEXT_BOLD("Types: "), TEXT_ITALICS("/type/{type_id}"), TEXT(" e.g. `/type/648` -> "), new PageLink(new TypePage(context.sde.getTypes().get(648)))),
+                HTML.multi(TEXT_BOLD("Map: "), TEXT_ITALICS("/map.html?item={item_id}"), TEXT(" e.g. `/map.html?item=30000142` -> "), new PageLink("map.html?item=30000142", "Jita"), BR(), TEXT(" (Available: RegionID, ConstellationID, SolarSystemID, -1 for the entire New Eden Cluster, -2 for the Anoikis cluster (\"WH space\"))"))
+            )
         );
     }
 }
