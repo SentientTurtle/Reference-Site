@@ -844,8 +844,11 @@ public abstract class SDEData {
             if (attribute.iconID != null && attribute.iconID == 0) attribute.iconID = null;
         }
 
-        // Patch used-with launcher/turret groups
         for (Type type : types.values()) {
+            // Patch type names, trim whitespace and replace double spaces with single spaces
+            type.name = type.name.trim().replace("  ", " ");
+
+            // Patch used-with launcher/turret groups
             if (type.groupID == 4062 || type.groupID == 4061) {
                 // Vorton projector charges have their used-width set to hybrid turret instead of vorton projector; Fix that.
                 getTypeAttributes().get(type.typeID).replace(137, 74.0, 4060.0);

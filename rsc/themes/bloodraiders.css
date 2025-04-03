@@ -1,0 +1,15 @@
+:root {
+    --colour-text: #bbbbbb !important;
+    --colour-theme-bg: #4F1710 !important;
+    --colour-theme-border: #B03F30 !important;
+    --colour-theme-minor-bg: #0A0A0A !important;
+    --colour-theme-minor-border: #6E241B !important;
+    --colour-theme-major-bg: #993529 !important;
+    --colour-theme-major-border: #AC3D2F !important;
+    --colour-theme-highlight-bg: #953427 !important;
+    --colour-theme-highlight-border: #BC4334 !important;
+}
+
+.header_icon {
+    filter: hue-rotate(140deg);
+}

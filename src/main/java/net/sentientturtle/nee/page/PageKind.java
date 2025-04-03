@@ -57,7 +57,7 @@ public enum PageKind {
             .flatMap((Function<Stream<? extends MapItem>, Stream<? extends MapItem>>) stream -> stream)
             .map(MapPage::new)
     ),
-    STATIC(_ -> Stream.of(new IndexPage(), new SearchResults(), new DynamicMapPage(), new TermsOfServicePage(), new DevResourcePage())) {
+    STATIC(_ -> Stream.of(new IndexPage(), new SearchResults(), new DynamicMapPage(), new TermsOfServicePage(), new DevResourcePage(), new SettingsPage())) {
         @Override
         public String getPageFilePath(String pageName) {
             return pageName + ".html";

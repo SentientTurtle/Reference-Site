@@ -38,7 +38,7 @@ public class ShipShield extends ShipHealth {
     protected HTML[] getRechargeText(SDEData sdeData) {
         double recharge = sdeData.getTypeAttributes().get(super.type.typeID).getOrDefault(479, 0.0);
         if (recharge > 0 && recharge < 86400000) {    // Some types have "as good as infinite" recharge times
-            return new HTML[]{TEXT("Shield recharge time: "), sdeData.format_with_unit(recharge, sdeData.getAttributes().get(479).unitID)};
+            return new HTML[]{TEXT("Recharge time: "), sdeData.format_with_unit(recharge, sdeData.getAttributes().get(479).unitID)};
         } else {
             return null;
         }
@@ -53,7 +53,7 @@ public class ShipShield extends ShipHealth {
         double sustain = 2500.0 * HP / recharge;
 
         if (recharge > 0 && (recharge < 86400000 || sustain > 10.0)) {        // Some types have "as good as infinite" recharge times; If they have relevant sustain show regenerated HP
-            return new HTML[]{TEXT("Shield peak recharge: "), sdeData.format_with_unit(sustain, -4)};
+            return new HTML[]{TEXT("Peak recharge: "), sdeData.format_with_unit(sustain, -4)};
         } else {
             return null;
         }

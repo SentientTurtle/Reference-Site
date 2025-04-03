@@ -140,6 +140,7 @@ public class TypeSensors extends Component {
             
             .type_sensors_span {
                 display: flex;
+                flex-wrap: flex;
                 align-items: center;
                 gap: 0.25rem;
             }

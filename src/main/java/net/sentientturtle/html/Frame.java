@@ -45,9 +45,10 @@ public abstract non-sealed class Frame implements Document, HTML {
     public void renderTo(HtmlContext context) throws RenderingException {
         var head = HEAD().content(
             META().attribute("charset", "UTF-8"),
-            META().attribute("name", "viewport").attribute("content", "width=device-width, initial-scale=1"),
+            META().attribute("name", "viewport").attribute("content", "width=device-width, initial-scale=1, minimum-scale=1"),
             TITLE(this.title()),
-            LINK().attribute("rel", "stylesheet").attribute("href", c -> c.pathTo("stylesheet.css")),
+            LINK().attribute("rel", "stylesheet").attribute("href", c -> c.pathTo("stylesheet.css") + "?v=" + Main.BUILD_NUMBER),
+            LINK().attribute("rel", "stylesheet").attribute("href", c -> c.pathTo("theme.css")).id(context.tryID("theme_stylesheet")),
             LINK().attribute("rel", "icon").attribute("href", c -> ResourceLocation.file("bookicon.png").getURI(c))
         );
 
@@ -146,6 +147,14 @@ public abstract non-sealed class Frame implements Document, HTML {
         
         #header_text {
             font-size: 2.25rem;
+        }
+        
+        #header_text > a {
+            color: var(--colour-theme-major-border);
+        }
+        
+        #header_text > a:active, #header_text > a:hover {
+            color: var(--colour-theme-highlight-border);
         }
         
         @media (max-width: 47.5rem) {
@@ -544,23 +553,13 @@ public abstract non-sealed class Frame implements Document, HTML {
             font-size: 1.25em;
         }
         
-        a:link {
+        a:link, a:visited {
             color: #B3B3D0;
             text-decoration: none;
         }
         
-        a:visited {
-            color: #B3B3D0;
-            text-decoration: none;
-        }
-        
-        a:hover {
+        a:hover, a:active {
             color: #80a480;
-            text-decoration: none;
-        }
-        
-        a:active {
-            color: #80dc80;
             text-decoration: none;
         }
         
@@ -595,11 +594,6 @@ public abstract non-sealed class Frame implements Document, HTML {
         /* This fixes a td height issue */
         td img {
             display: block;
-        }
-        
-        /* Stop icons being smudged on high-dpi screens */
-        img {
-            image-rendering: pixelated;
         }
         
         fieldset {

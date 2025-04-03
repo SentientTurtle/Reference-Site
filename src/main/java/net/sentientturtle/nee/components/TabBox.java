@@ -38,12 +38,14 @@ public class TabBox extends Component {
             ids[i] = context.nextIDsWithPrefixes("tab_box_button:", "tab_box_container:");
         }
 
-        var bar = DIV("tab_box_bar");
+        var bar_js = DIV("tab_box_bar tab_box_bar_js");
+        var bar_nojs = DIV("tab_box_bar tab_box_bar_nojs");
         var tabContents = DIV("tab_box_content");
         List<Tab> tabs = this.content;
         for (int i = 0; i < tabs.size(); i++) {
             Tab tab = tabs.get(i);
-            bar.content(BUTTON(i == 0 ? "tab_box_button_selected tab_box_button" : "tab_box_button", ids[i][0]).content(tab.button));
+            bar_js.content(BUTTON(i == 0 ? "tab_box_button_selected tab_box_button" : "tab_box_button", ids[i][0]).content(tab.button));
+            bar_nojs.content(HTML.A("#" + ids[i][1], tab.button).className("tab_box_button"));
 
             tabContents.content(
                 DIV(i == 0 ? " tab_box_container_selected tab_box_container" : "tab_box_container", ids[i][1])
@@ -52,9 +54,12 @@ public class TabBox extends Component {
         }
 
         // Fallback for noscript; Set all content to visible
+        // TODO: Replace hidden navigation bar with #id links
         var noscript_style = HTML.RAW("""
             <noscript>
                 <style>
+                    .tab_box_bar_js { display: none !important; }
+                    .tab_box_bar_nojs { display: flex !important; }
                     .tab_box_container {
                         visibility: visible !important;
                         display: block !important;
@@ -62,7 +67,7 @@ public class TabBox extends Component {
                 </style>
             </noscript>""");
 
-        return new HTML[]{noscript_style, bar, tabContents};
+        return new HTML[]{noscript_style, bar_js, bar_nojs, tabContents};
     }
 
     @Override
@@ -72,9 +77,9 @@ public class TabBox extends Component {
                 display: flex;
                 flex-direction: column;
             }
-            
+            .tab_box_bar_js { display: flex; }
+            .tab_box_bar_nojs { display: none; }
             .tab_box_bar {
-                display: flex;
                 flex-direction: row;
                 flex-wrap: wrap;
                 justify-content: center;

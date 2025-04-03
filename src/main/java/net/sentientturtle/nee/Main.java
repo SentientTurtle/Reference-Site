@@ -59,6 +59,9 @@ public class Main {
     public static final String WEBSITE_NAME = "New Eden Encyclopedia";
     public static final String WEBSITE_ABBREVIATION = "NEE";
 
+    // Browser cache busting variable
+    public static final String BUILD_NUMBER = String.valueOf(TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis()) % (3600 * 24 * 7));
+
     static {
         System.setProperty("sqlite4java.library.path", "./native");
     }
@@ -374,6 +377,22 @@ public class Main {
             }
             gzipOutputStream.finish();
             zipOutputStream.closeEntry();
+        }
+
+        try (Stream<Path> themes = Files.list(RES_FOLDER.resolve("themes"))) {
+            for (Path theme: ((Iterable<Path>) themes::iterator)) {
+                zipOutputStream.putNextEntry(new ZipEntry("themes/" + theme.getFileName()));
+                Files.copy(theme, zipOutputStream);
+                zipOutputStream.closeEntry();
+
+                if (PRE_COMPRESSED_FILES.contains("css")) {
+                    zipOutputStream.putNextEntry(new ZipEntry("themes/" + theme.getFileName() + ".gz"));
+                    GZIPOutputStream gzipOutputStream = new GZIPOutputStream(zipOutputStream);
+                    Files.copy(theme, gzipOutputStream);
+                    gzipOutputStream.finish();
+                    zipOutputStream.closeEntry();
+                }
+            };
         }
 
         zipOutputStream.putNextEntry(new ZipEntry("script.js"));

@@ -131,6 +131,13 @@ public sealed interface HTML permits Element, HTML.EmptyHTML, HTML.MultiHTML, HT
                 .id(id);
     }
 
+    ///  {@code <fieldset class='[className]'><legend>{legend}</legend></fieldset>}
+    static @NonNull Element FIELDSET(String classname, String legend) {
+        return new Element("fieldset")
+            .className(classname)
+            .content(new Element("legend").text(legend));
+    }
+
     /// {@code <head></head>}
     static Element HEAD() {
         return new Element("head");

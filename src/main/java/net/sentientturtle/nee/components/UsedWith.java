@@ -61,7 +61,7 @@ public class UsedWith extends Component {
                         return DIV("used_with_entry").content(
                             (icon != null) ? IMG(icon, null, 32).className("used_with_icon") : DIV("used_with_icon"),
                             new PageLink(page).className("used_with_type font_header"),
-                            SPAN("no_break").content(TEXT("("), context.sde.format_with_unit(entry.getValue(), -1), TEXT("×)"))
+                            SPAN("no_break").content(TEXT("("), context.sde.format_with_unit(Math.floor(entry.getValue()), -1), TEXT("×)"))
                         );
                     })
                     .toArray(HTML[]::new)

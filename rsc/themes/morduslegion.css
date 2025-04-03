@@ -1,0 +1,15 @@
+:root {
+    --colour-text: #bbbbbb !important;
+    --colour-theme-bg: #272A32 !important;
+    --colour-theme-border: #7E869B !important;
+    --colour-theme-minor-bg: #0A0A0A !important;
+    --colour-theme-minor-border: #4D5261 !important;
+    --colour-theme-major-bg: #525766 !important;
+    --colour-theme-major-border: #7B8398 !important;
+    --colour-theme-highlight-bg: #4F5463 !important;
+    --colour-theme-highlight-border: #878FA6 !important;
+}
+
+.header_icon {
+    filter: grayscale(0.75);
+}

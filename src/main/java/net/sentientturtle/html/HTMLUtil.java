@@ -61,6 +61,7 @@ public class HTMLUtil {
             .replace("\\", "-")
             .replace("|", "-")
             .replace("?", "")
+            .replace("#", "")
             .replace("*", "");
     }
 }

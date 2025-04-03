@@ -40,6 +40,7 @@ public final class Attribute {
             case 104, 109 -> 1.0;       // Multiplier
             case 108, 111 -> 1.0;       // Inverse percentage, 1.0 = 0%
             case 142 -> 2;              // Clothing sex -> default to unisex
+            case 128 -> 0.0;            // Charge size -> default to 0.0 / "Small"
             default -> 0.0;
         };
     }

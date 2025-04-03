@@ -67,6 +67,11 @@ public class ComparisonPage extends Page {
                 max-width: calc(32rem + (2 * var(--border-size)));
                 box-sizing: border-box;
             }
+            
+            .comparison_grid > .item_title {
+                position: sticky;
+                top: 0;
+            }
             """;
     }
 
@@ -233,8 +238,7 @@ public class ComparisonPage extends Page {
                             }
                         }
 
-                        Double targetChargeSize = typeAttributes.get(128);
-
+                        double targetChargeSize = typeAttributes.getOrDefault(128, 0.0);
                         Map<Integer, Double> usedWithTypes = usedWithGroups.stream()
                             .flatMap(g -> data.getGroupTypes().getOrDefault(g, Set.of()).stream())
                             .filter(t -> {
@@ -252,13 +256,9 @@ public class ComparisonPage extends Page {
 
                                 // Exclude charges which do not have the module type set as usedWith
                                 if (targetUsedWithGroups.contains(type.groupID)) {
-                                    Double chargeSize = data.getTypeAttributes().get(t.typeID).get(128);
+                                    double chargeSize = data.getTypeAttributes().get(t.typeID).getOrDefault(128, 0.0);
                                     // exclude charges with a different chargeSize as this module
-                                    if (chargeSize != null && targetChargeSize != null) {
-                                        return (double) chargeSize == (double) targetChargeSize;
-                                    } else {
-                                        return true;
-                                    }
+                                    return chargeSize == targetChargeSize;
                                 } else {
                                     return false;
                                 }

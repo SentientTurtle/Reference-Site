@@ -1,0 +1,11 @@
+:root {
+    --colour-text: #bbbbbb !important;
+    --colour-theme-bg: #202848 !important;
+    --colour-theme-border: #6376C4 !important;
+    --colour-theme-minor-bg: #0A0A0A !important;
+    --colour-theme-minor-border: #3C487B !important;
+    --colour-theme-major-bg: #46548E !important;
+    --colour-theme-major-border: #6173C0 !important;
+    --colour-theme-highlight-bg: #44518A !important;
+    --colour-theme-highlight-border: #6A7ED1 !important;
+}

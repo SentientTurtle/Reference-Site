@@ -115,13 +115,6 @@ public class ItemTree extends Component {
                 padding: 0.5rem;
             }
             
-            .ship_tree_group_row {
-                display: flex;
-                flex-direction: row;
-                flex-wrap: wrap;
-                gap: 0.5rem;
-            }
-            
             .item_tree_column {
                 display: flex;
                 flex-direction: column;

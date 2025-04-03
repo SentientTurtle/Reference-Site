@@ -42,14 +42,12 @@ public class TypeGroup extends Component {
     protected String getCSS() {
         return """
             .type_group {
-                min-height: 3rem;
                 display: flex;
                 align-items: center;
                 padding-inline: 0.5rem;
             }
             
             .type_group_text {
-                font-size: 1.5rem;
                 flex-grow: 1;
                 flex-basis: 0;
                 text-align: center;

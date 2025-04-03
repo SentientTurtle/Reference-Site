@@ -61,7 +61,10 @@ public class SearchResults extends Page {
                 "import searchindex from \"/" + ResourceLocation.searchIndex().getURI(context) + "\";\n"
                 +
                 """
-                    const query = (new URLSearchParams(window.location.search).get("search") ?? "").toLowerCase().trim();
+                    const query = (new URLSearchParams(window.location.search).get("search") ?? "")
+                        .toLowerCase()  // Search is case-insensitive
+                        .trim()         // Discard user trailing whitespace
+                        .replaceAll("  ", " "); // Some types have/had double spaces in their names, the search index has these removed so we remove them from the query as well
                     
                     document.getElementsByClassName('item_title_text')[0].innerHTML = 'Search results: ' + query;
                     document.getElementById('search_input').value = query;

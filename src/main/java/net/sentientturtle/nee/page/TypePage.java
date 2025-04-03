@@ -230,8 +230,7 @@ public class TypePage extends Page implements HasPersistentUrl {
             }
         }
 
-        Double targetChargeSize = typeAttributes.get(128);
-
+        double targetChargeSize = typeAttributes.getOrDefault(128, 0.0);
         Map<Integer, Double> usedWithTypes = usedWithGroups.stream()
             .flatMap(g -> data.getGroupTypes().getOrDefault(g, Set.of()).stream())
             .filter(t -> {
@@ -249,13 +248,9 @@ public class TypePage extends Page implements HasPersistentUrl {
 
                 // Exclude charges which do not have the module type set as usedWith
                 if (targetUsedWithGroups.contains(type.groupID)) {
-                    Double chargeSize = data.getTypeAttributes().get(t.typeID).get(128);
+                    double chargeSize = data.getTypeAttributes().get(t.typeID).getOrDefault(128, 0.0);
                     // exclude charges with a different chargeSize as this module
-                    if (chargeSize != null && targetChargeSize != null) {
-                        return (double) chargeSize == (double) targetChargeSize;
-                    } else {
-                        return true;
-                    }
+                    return chargeSize == targetChargeSize;
                 } else {
                     return false;
                 }

@@ -59,13 +59,6 @@ public class MapPage extends Frame {
                 flex-direction: column;
                 gap: 0.5rem;
             }
-            
-            .map_security_square {
-                width: 1em;
-                height: 1em;
-                border-radius: 0.25rem;
-                margin-left: 0.5rem;
-            }
             """;
     }
 

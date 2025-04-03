@@ -50,9 +50,10 @@ public abstract class Page extends Frame {
     public void renderTo(HtmlContext context) throws RenderingException {
         var head = HEAD().content(
             META().attribute("charset", "UTF-8"),
-            META().attribute("name", "viewport").attribute("content", "width=device-width, initial-scale=1"),
+            META().attribute("name", "viewport").attribute("content", "width=device-width, initial-scale=1, minimum-scale=1"),
             TITLE(this.title()),
-            LINK().attribute("rel", "stylesheet").attribute("href", c -> c.pathTo("stylesheet.css")),
+            LINK().attribute("rel", "stylesheet").attribute("href", c -> c.pathTo("stylesheet.css") + "?v=" + Main.BUILD_NUMBER),
+            LINK().attribute("rel", "stylesheet").attribute("href", c -> c.pathTo("theme.css")).id(context.tryID("theme_stylesheet")),
             LINK().attribute("rel", "icon").attribute("href", c -> ResourceLocation.file("bookicon.png").getURI(c))
         );
 

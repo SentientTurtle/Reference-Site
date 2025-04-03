@@ -60,6 +60,7 @@ public class TypeSkills extends Component {
             
             .type_skills_text {
                 display: flex;
+                flex-wrap: flex;
                 flex-grow: 1;
             }
             
