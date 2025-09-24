@@ -6,9 +6,10 @@ import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.datatypes.Attribute;
+import net.sentientturtle.nee.data.datatypes.DynamicAttributes;
 import net.sentientturtle.nee.data.datatypes.Type;
-import net.sentientturtle.nee.data.sharedcache.FSDData;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.datatypes.WarfareBuff;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.page.TypePage;
 
 import java.util.*;
@@ -498,7 +499,7 @@ public class ItemStats extends Component {
                                 .title(attr.displayName != null ? attr.displayName : attr.attributeName)
                                 .attribute("aria-label", attr.displayName != null ? attr.displayName : attr.attributeName)
                                 .content(
-                                    iconID != null ? IMG(ResourceLocation.ofIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
+                                    iconID != null ? IMG(Resource.ofIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
                                     context.sde.format_with_unit(attributeValue, attr.unitID)
                                 );
                         })
@@ -539,7 +540,7 @@ public class ItemStats extends Component {
                     String name = attribute.displayName != null ? attribute.displayName : attribute.attributeName;
                     table.content(TR().content(
                         TD().content(SPAN("item_stats_span").title(name).content(
-                                iconID != null ? IMG(ResourceLocation.ofIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
+                                iconID != null ? IMG(Resource.ofIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
                                 TEXT(name + ":")
                             )
                         ),
@@ -558,7 +559,7 @@ public class ItemStats extends Component {
                     String name = attribute.displayName != null ? attribute.displayName : attribute.attributeName;
                     table.content(TR().content(
                         TD().content(SPAN("item_stats_span").title(name).content(
-                                iconID != null ? IMG(ResourceLocation.ofIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
+                                iconID != null ? IMG(Resource.ofIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
                                 TEXT(name + ":")
                             )
                         ),
@@ -649,7 +650,7 @@ public class ItemStats extends Component {
 
                 table.content(TR().content(
                     TD().content(SPAN("item_stats_span").title(name).content(
-                            iconID != null ? IMG(ResourceLocation.ofIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
+                            iconID != null ? IMG(Resource.ofIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
                             TEXT(name + ":")
                         )
                     ),
@@ -665,7 +666,7 @@ public class ItemStats extends Component {
             Integer iconID = types.get((int) (double) fuelType).iconID;
             table.content(TR().content(
                 TD().content(SPAN("item_stats_span").title("Fuel required").content(
-                        iconID != null ? IMG(ResourceLocation.ofIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
+                        iconID != null ? IMG(Resource.ofIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
                         TEXT("Fuel required:")
                     )
                 ),
@@ -683,10 +684,10 @@ public class ItemStats extends Component {
 
         Element mutationsTable = TABLE("item_stats_table");
         Element applicableTypeTable = TABLE("item_stats_table");
-        FSDData.DynamicAttributes dynamicAttributes = context.fsdData.dynamicAttributes.get(type.typeID);
+        DynamicAttributes dynamicAttributes = context.sde.getDynamicAttributes().get(type.typeID);
         if (dynamicAttributes != null) {
             mutationsTable.content(TR().content(TH().attribute("colspan", "4").text("Mutations")));
-            for (Map.Entry<Integer, FSDData.DyAttribute> entry : dynamicAttributes.attributeIDs().entrySet()) {
+            for (Map.Entry<Integer, DynamicAttributes.DyAttribute> entry : dynamicAttributes.attributeIDs().entrySet()) {
                 int attributeID = entry.getKey();
 
                 if (INCLUDED_ATTRIBUTES.contains(attributeID) || ModuleFitting.INCLUDED_ATTRIBUTES.contains(attributeID)) {
@@ -711,7 +712,7 @@ public class ItemStats extends Component {
 
                     mutationsTable.content(TR().content(
                         TD().content(SPAN("item_stats_span").title(name).content(
-                                iconID != null ? IMG(ResourceLocation.ofIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
+                                iconID != null ? IMG(Resource.ofIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
                                 TEXT(name + ":")
                             )
                         ),
@@ -725,14 +726,14 @@ public class ItemStats extends Component {
             applicableTypeTable.content(TR().content(TH().attribute("colspan", "4").text("Applicable to")));
             dynamicAttributes.inputOutputMapping()
                 .stream()
-                .flatMap(ioMapping -> ioMapping.applicableTypes().stream())
-                .map(types::get)
+                .flatMapToInt(ioMapping -> Arrays.stream(ioMapping.applicableTypes()))
+                .mapToObj(types::get)
                 .filter(Objects::nonNull)
                 .sorted(Type.comparator(context.sde))
                 .forEach(applicableType -> {
                     applicableTypeTable.content(TR().content(
                         TD().attribute("colspan", "4").content(SPAN("item_stats_span").content(
-                                IMG(ResourceLocation.typeIcon(applicableType.typeID, context), null, 32).className("item_stats_icon"),
+                                IMG(Resource.typeIcon(applicableType.typeID, context), null, 32).className("item_stats_icon"),
                                 new PageLink(new TypePage(applicableType))
                             )
                         )
@@ -754,20 +755,18 @@ public class ItemStats extends Component {
                     buffAmount = buffValue;
                 }
 
-                FSDData.WarfareBuff warfareBuff = context.fsdData.warfareBuffs.get(warfareBuffID);
+                WarfareBuff warfareBuff = context.sde.getWarfareBuffs().get(warfareBuffID);
                 Element valueTD = TD();
-                switch (warfareBuff.showOutputValueInUI()) {
-                    case "ShowNormal" -> valueTD.content(context.sde.format_with_unit(buffAmount, 124));
-                    case "ShowInverted" -> valueTD.content(context.sde.format_with_unit(-buffAmount, 124));
-                    default -> throw new RuntimeException("Unknown warfare buff display : " + warfareBuff.showOutputValueInUI() + " for buff: " + warfareBuffID);
+                switch (warfareBuff.showOutputValue()) {
+                    case SHOW_NORMAL -> valueTD.content(context.sde.format_with_unit(buffAmount, 124));
+                    case SHOW_INVERTED -> valueTD.content(context.sde.format_with_unit(-buffAmount, 124));
+                    default -> throw new RuntimeException("Unknown warfare buff display : " + warfareBuff.showOutputValue() + " for buff: " + warfareBuffID);
                 }
 
-                String name = context.fsdData.localizationStrings.get(warfareBuff.displayNameID());
-
                 warfareBuffTable.content(TR().content(
-                    TD().content(SPAN("item_stats_span").title(name).content(
+                    TD().content(SPAN("item_stats_span").title(Objects.requireNonNull(warfareBuff.displayName())).content(
                             DIV("item_stats_icon"),
-                            TEXT(name + ":")
+                            TEXT(Objects.requireNonNull(warfareBuff.displayName()) + ":")
                         )
                     ),
                     valueTD

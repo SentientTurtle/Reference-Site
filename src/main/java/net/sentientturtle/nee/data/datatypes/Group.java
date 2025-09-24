@@ -2,7 +2,7 @@ package net.sentientturtle.nee.data.datatypes;
 
 import net.sentientturtle.html.Frame;
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.page.GroupPage;
 import net.sentientturtle.nee.page.HasPage;
 import net.sentientturtle.nee.page.TypePage;
@@ -33,12 +33,12 @@ public class Group implements HasPage {
         this.published = published;
     }
 
-    private static final ResourceLocation UNLOADED_ICON = ResourceLocation.file("bookicon.png");
-    private ResourceLocation fallbackIcon = UNLOADED_ICON;   // We need a ternary state of "not loaded", "null/no icon" and "icon"
-    public synchronized ResourceLocation getIconWithFallback(HtmlContext context) {
+    private static final Resource UNLOADED_ICON = Resource.file("bookicon.png");
+    private Resource fallbackIcon = UNLOADED_ICON;   // We need a ternary state of "not loaded", "null/no icon" and "icon"
+    public synchronized Resource getIconWithFallback(HtmlContext context) {
         if (fallbackIcon == UNLOADED_ICON) {
             if (iconID != null && iconID != 0) {
-                fallbackIcon = ResourceLocation.ofIconID(iconID, context);
+                fallbackIcon = Resource.ofIconID(iconID, context);
             } else {
                 Set<Type> types = context.sde.getGroupTypes().getOrDefault(groupID, Set.of());
                 if (types.size() > 0) {

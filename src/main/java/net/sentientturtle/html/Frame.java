@@ -2,7 +2,7 @@ package net.sentientturtle.html;
 
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.Main;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.page.PageKind;
 import org.jspecify.annotations.Nullable;
 
@@ -21,7 +21,7 @@ public abstract non-sealed class Frame implements Document, HTML {
     public abstract @Nullable String description();
 
     /// @return The icon for this page
-    public abstract @Nullable ResourceLocation getIcon(HtmlContext context);
+    public abstract @Nullable Resource getIcon(HtmlContext context);
 
     protected @Nullable String getCSS(HtmlContext context) {
         return null;
@@ -49,7 +49,7 @@ public abstract non-sealed class Frame implements Document, HTML {
             TITLE(this.title()),
             LINK().attribute("rel", "stylesheet").attribute("href", c -> c.pathTo("stylesheet.css") + "?v=" + Main.BUILD_NUMBER),
             LINK().attribute("rel", "stylesheet").attribute("href", c -> c.pathTo("theme.css")).id(context.tryID("theme_stylesheet")),
-            LINK().attribute("rel", "icon").attribute("href", c -> ResourceLocation.file("bookicon.png").getURI(c))
+            LINK().attribute("rel", "icon").attribute("href", c -> Resource.file("bookicon.png").getURI(c))
         );
 
         head.content(META().attribute("property", "og:site_name").attribute("content", Main.WEBSITE_NAME));
@@ -58,7 +58,7 @@ public abstract non-sealed class Frame implements Document, HTML {
         if (page_description != null) {
             head.content(META().attribute("property", "og:description").attribute("content", page_description));
         }
-        ResourceLocation icon = this.getIcon(context);
+        Resource icon = this.getIcon(context);
         if (icon != null) {
             head.content(META().attribute("property", "og:image").attribute("content", icon.getURI(context, true, Main.DEPLOYMENT_URL)));
         }
@@ -76,13 +76,13 @@ public abstract non-sealed class Frame implements Document, HTML {
         try {
             String head_font = "@font-face {" +
                                "   font-family: 'Electrolize';" +
-                               "   src: url('" + ResourceLocation.file("font/Electrolize.woff2").getURI(context, true) + "') format('woff2');" +
+                               "   src: url('" + Resource.file("font/Electrolize.woff2").getURI(context, true) + "') format('woff2');" +
                                "   font-display: swap;" +
                                "}";
 
             String roman_numeral_font = "@font-face {" +
                                         "   font-family: 'RomanNumeral';" +
-                                        "   src: url('" + ResourceLocation.file("font/RomanNumerals.woff2").getURI(context, true) + "') format('woff2');" +
+                                        "   src: url('" + Resource.file("font/RomanNumerals.woff2").getURI(context, true) + "') format('woff2');" +
                                         "   font-display: swap;" +
                                         "}";
 

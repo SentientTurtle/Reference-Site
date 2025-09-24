@@ -4,7 +4,7 @@ import net.sentientturtle.html.Component;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.page.TypePage;
 
@@ -39,7 +39,7 @@ public class SkillRequiredFor extends Component {
                     .sorted(Type.comparator(context.sde))
                     .forEach(type -> {
                         table.content(TR().content(
-                            TD().content(IMG(ResourceLocation.typeIcon(type.typeID, context), null, 64).className("skill_required_icon")),
+                            TD().content(IMG(Resource.typeIcon(type.typeID, context), null, 64).className("skill_required_icon")),
                             TD().content(new PageLink(new TypePage(context.sde.getTypes().get(type.typeID))))
                         ));
                     });

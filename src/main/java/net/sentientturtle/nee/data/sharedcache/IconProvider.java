@@ -142,13 +142,13 @@ public class IconProvider {
                 }
             }
 
-            FSDData.Graphic graphic = dataSources.fsdData().graphics.get(type.graphicID != null ? type.graphicID : 0);
-            if (imageMagickCall == null && graphic != null && graphic.iconInfo() != null && !useIconInsteadOfGraphic(type.groupID)) {
+            String graphicFolder = dataSources.sdeData().getGraphicFolders().get(type.graphicID != null ? type.graphicID : 0);
+            if (imageMagickCall == null && graphicFolder != null && !useIconInsteadOfGraphic(type.groupID)) {
                 String graphicResource;
-                if (graphic.iconInfo().folder().endsWith("/")) {
-                    graphicResource = graphic.iconInfo().folder() + type.graphicID + (isBPC ? "_64_bpc.png" : "_64_bp.png");
+                if (graphicFolder.endsWith("/")) {
+                    graphicResource = graphicFolder + type.graphicID + (isBPC ? "_64_bpc.png" : "_64_bp.png");
                 } else {
-                    graphicResource = graphic.iconInfo().folder() + "/" + type.graphicID + (isBPC ? "_64_bpc.png" : "_64_bp.png");
+                    graphicResource = graphicFolder + "/" + type.graphicID + (isBPC ? "_64_bpc.png" : "_64_bp.png");
                 }
 
                 if (dataSources.sharedCache().containsResource(graphicResource)) {
@@ -245,12 +245,12 @@ public class IconProvider {
             }
         } else {    // Regular item
             String iconResource = null;
-            FSDData.Graphic graphic = dataSources.fsdData().graphics.get(type.graphicID != null ? type.graphicID : 0);
-            if (graphic != null && graphic.iconInfo() != null && !useIconInsteadOfGraphic(type.groupID)) {
-                if (graphic.iconInfo().folder().endsWith("/")) {
-                    iconResource = graphic.iconInfo().folder() + type.graphicID + "_64.png";
+            String graphicFolder = dataSources.sdeData().getGraphicFolders().get(type.graphicID != null ? type.graphicID : 0);
+            if (graphicFolder != null && !useIconInsteadOfGraphic(type.groupID)) {
+                if (graphicFolder.endsWith("/")) {
+                    iconResource = graphicFolder + type.graphicID + "_64.png";
                 } else {
-                    iconResource = graphic.iconInfo().folder() + "/" + type.graphicID + "_64.png";
+                    iconResource = graphicFolder + "/" + type.graphicID + "_64.png";
                 }
                 if (!dataSources.sharedCache().containsResource(iconResource) && type.iconID != null) {
                     iconResource = dataSources.sdeData().getEveIcons().get(type.iconID);
@@ -319,12 +319,12 @@ public class IconProvider {
             || categoryID == 87     // Fighter
         ) {
             String renderResource = null;
-            FSDData.Graphic graphic = dataSources.fsdData().graphics.get(type.graphicID != null ? type.graphicID : 0);
-            if (graphic != null && graphic.iconInfo() != null) {
-                if (graphic.iconInfo().folder().endsWith("/")) {
-                    renderResource = graphic.iconInfo().folder() + type.graphicID + "_512.jpg";
+            String graphicFolder = dataSources.sdeData().getGraphicFolders().get(type.graphicID != null ? type.graphicID : 0);
+            if (graphicFolder != null) {
+                if (graphicFolder.endsWith("/")) {
+                    renderResource = graphicFolder + type.graphicID + "_512.jpg";
                 } else {
-                    renderResource = graphic.iconInfo().folder() + "/" + type.graphicID + "_512.jpg";
+                    renderResource = graphicFolder + "/" + type.graphicID + "_512.jpg";
                 }
             }
 
@@ -339,12 +339,12 @@ public class IconProvider {
         Type type = dataSources.sdeData().getTypes().get(typeID);
 
         String renderResource;
-        FSDData.Graphic graphic = dataSources.fsdData().graphics.get(type.graphicID != null ? type.graphicID : 0);
-        if (graphic != null && graphic.iconInfo() != null) {
-            if (graphic.iconInfo().folder().endsWith("/")) {
-                renderResource = graphic.iconInfo().folder() + type.graphicID + "_512.jpg";
+        String graphicFolder = dataSources.sdeData().getGraphicFolders().get(type.graphicID != null ? type.graphicID : 0);
+        if (graphicFolder != null) {
+            if (graphicFolder.endsWith("/")) {
+                renderResource = graphicFolder + type.graphicID + "_512.jpg";
             } else {
-                renderResource = graphic.iconInfo().folder() + "/" + type.graphicID + "_512.jpg";
+                renderResource = graphicFolder + "/" + type.graphicID + "_512.jpg";
             }
         } else {
             renderResource = null;

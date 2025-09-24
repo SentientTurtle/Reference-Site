@@ -55,7 +55,7 @@ public enum PageKind {
             )
             // Load-bearing cast, otherwise Java infers Stream<?>, and we cannot cast ? to MapItem in the final stage.
             .flatMap((Function<Stream<? extends MapItem>, Stream<? extends MapItem>>) stream -> stream)
-            .map(MapPage::new)
+            .map(MapFrame::new)
     ),
     STATIC(_ -> Stream.of(new IndexPage(), new SearchResults(), new DynamicMapPage(), new TermsOfServicePage(), new DevResourcePage(), new SettingsPage())) {
         @Override

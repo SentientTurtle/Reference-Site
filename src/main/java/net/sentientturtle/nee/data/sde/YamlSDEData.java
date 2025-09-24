@@ -2,12 +2,11 @@ package net.sentientturtle.nee.data.sde;
 
 import net.sentientturtle.nee.data.datatypes.*;
 import net.sentientturtle.nee.data.sde.YAMLDataExportReader.SdeBpItem;
-import net.sentientturtle.nee.data.sde.YAMLDataExportReader.SdeTrait;
-import net.sentientturtle.nee.data.sde.YAMLDataExportReader.SdeTypeTraits;
+import net.sentientturtle.nee.data.sde.YAMLDataExportReader.SdeBonus;
+import net.sentientturtle.nee.data.sde.YAMLDataExportReader.SdeTypeBonus;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static net.sentientturtle.nee.data.sde.YAMLDataExportReader.*;
@@ -33,12 +32,16 @@ public class YamlSDEData extends SDEData {
     private final Map<Integer, Region> regions;
     private final Map<Integer, Set<Integer>> outJumps;
     private final Map<Integer, Set<Integer>> inJumps;
-    private final Map<Integer, Set<Celestial>> celestials;
+    private final Map<Integer, Set<Celestial>> systemCelestials;
+    private final Map<Integer, EnumSet<Station.Service>> operationServices;
     private final Map<Integer, Set<Station>> stations;
     private final Map<Integer, Faction> factions;
     private final Map<Integer, MarketGroup> marketGroups;
+    private final Map<Integer, WarfareBuff> warfareBuffs;
+    private final Map<Integer, DynamicAttributes> dynamicAttributes;
+    private final Map<Integer, String> graphicFolders;
 
-    public YamlSDEData(YAMLDataExportReader reader, HashMap<Integer, String> localizationStrings, boolean patch) throws IOException {
+    public YamlSDEData(YAMLDataExportReader reader, boolean patch) throws IOException {
         this.categories = this.produceMap();
         reader.readCategories((categoryID, sdeCategory) -> {
             this.categories.put(
@@ -94,39 +97,35 @@ public class YamlSDEData extends SDEData {
             if (sdeType.metaGroupID() != null) {
                 metaTypes.put(typeID, sdeType.metaGroupID());
             }
-
-            if (sdeType.traits() != null) {
-                SdeTypeTraits traits = sdeType.traits();
-
-                List<TypeTraits.Bonus> miscBonuses = this.produceList();
-                if (traits.miscBonuses() != null) {
-
-                    traits.miscBonuses()
-                        .stream()
-                        .sorted(Comparator.comparingInt(SdeTrait::importance))
-                        .forEach(bonus -> miscBonuses.add(new TypeTraits.Bonus(bonus.bonus(), bonus.bonusText().en(), bonus.unitID())));
-                }
-                List<TypeTraits.Bonus> roleBonuses = this.produceList();
-                if (traits.roleBonuses() != null) {
-                    traits.roleBonuses()
-                        .stream()
-                        .sorted(Comparator.comparingInt(SdeTrait::importance))
-                        .forEach(bonus -> roleBonuses.add(new TypeTraits.Bonus(bonus.bonus(), bonus.bonusText().en(), bonus.unitID())));
-                }
-                Map<Integer, List<TypeTraits.Bonus>> skillBonuses = this.produceMap();
-                if (traits.types() != null) {
-                    for (Map.Entry<Integer, ArrayList<SdeTrait>> entry : traits.types().entrySet()) {
-                        List<TypeTraits.Bonus> bonusList = skillBonuses.computeIfAbsent(entry.getKey(), this::produceList);
-
-                        entry.getValue()
-                            .stream()
-                            .sorted(Comparator.comparingInt(SdeTrait::importance))
-                            .forEach(bonus -> bonusList.add(new TypeTraits.Bonus(bonus.bonus(), bonus.bonusText().en(), bonus.unitID())));
-                    }
-                }
-
-                this.typeTraits.put(typeID, new TypeTraits(miscBonuses, roleBonuses, skillBonuses));
+        });
+        reader.readTypeBonuses((typeID, typeBonus) -> {
+            List<TypeTraits.Bonus> miscBonuses = this.produceList();
+            if (typeBonus.miscBonuses() != null) {
+                typeBonus.miscBonuses()
+                    .stream()
+                    .sorted(Comparator.comparingInt(SdeBonus::importance))
+                    .forEach(bonus -> miscBonuses.add(new TypeTraits.Bonus(bonus.bonus(), bonus.bonusText().en(), bonus.unitID())));
             }
+            List<TypeTraits.Bonus> roleBonuses = this.produceList();
+            if (typeBonus.roleBonuses() != null) {
+                typeBonus.roleBonuses()
+                    .stream()
+                    .sorted(Comparator.comparingInt(SdeBonus::importance))
+                    .forEach(bonus -> roleBonuses.add(new TypeTraits.Bonus(bonus.bonus(), bonus.bonusText().en(), bonus.unitID())));
+            }
+            Map<Integer, List<TypeTraits.Bonus>> skillBonuses = this.produceMap();
+            if (typeBonus.types() != null) {
+                for (Map.Entry<Integer, ArrayList<SdeBonus>> entry : typeBonus.types().entrySet()) {
+                    List<TypeTraits.Bonus> bonusList = skillBonuses.computeIfAbsent(entry.getKey(), this::produceList);
+
+                    entry.getValue()
+                        .stream()
+                        .sorted(Comparator.comparingInt(SdeBonus::importance))
+                        .forEach(bonus -> bonusList.add(new TypeTraits.Bonus(bonus.bonus(), bonus.bonusText().en(), bonus.unitID())));
+                }
+            }
+
+            this.typeTraits.put(typeID, new TypeTraits(miscBonuses, roleBonuses, skillBonuses));
         });
 
 
@@ -146,7 +145,7 @@ public class YamlSDEData extends SDEData {
                     attributeID,
                     attribute.categoryID(),
                     attribute.name(),
-                    attribute.displayNameID() != null ? attribute.displayNameID().en() : null,
+                    attribute.displayName() != null ? attribute.displayName().en() : null,
                     attribute.unitID(),
                     attribute.iconID(),
                     attribute.published(),
@@ -258,7 +257,7 @@ public class YamlSDEData extends SDEData {
         });
 
         this.metaGroups = this.produceMap();
-        reader.readMetaGroups((metaGroupID, metagroup) -> this.metaGroups.put(metaGroupID, new MetaGroup(metaGroupID, metagroup.nameID().en())));
+        reader.readMetaGroups((metaGroupID, metagroup) -> this.metaGroups.put(metaGroupID, new MetaGroup(metaGroupID, metagroup.name().en())));
 
         this.factions = this.produceMap();
         reader.readFactions((factionID, faction) -> {
@@ -266,7 +265,7 @@ public class YamlSDEData extends SDEData {
                 factionID,
                 new Faction(
                     factionID,
-                    faction.nameID().en(),
+                    faction.name().en(),
                     faction.iconID()
                 )
             );
@@ -279,193 +278,243 @@ public class YamlSDEData extends SDEData {
                 new MarketGroup(
                     marketGroupID,
                     marketGroup.parentGroupID(),
-                    marketGroup.nameID().en(),
-                    marketGroup.descriptionID() != null ? marketGroup.descriptionID().en() : null
+                    marketGroup.name().en(),
+                    marketGroup.description() != null ? marketGroup.description().en() : null
                 )
             );
         });
 
-        this.stations = this.produceMap();
-        reader.readStations(station -> {
-            this.stations.computeIfAbsent(station.solarSystemID(), this::produceSet)
-                .add(new Station(
-                    station.stationID(),
-                    station.stationTypeID(),
-                    station.stationName(),
-                    station.operationID(),
-                    EnumSet.noneOf(Station.Service.class)
+        Map<Integer, String> operationNames = this.produceMap();
+        this.operationServices = this.produceMap();
+        reader.readStationOperations((operationID, operation) -> {
+            operationNames.put(operationID, operation.operationName().en());
+
+            EnumSet<Station.Service> services = operationServices.computeIfAbsent(operationID, _ -> EnumSet.noneOf(Station.Service.class));
+
+            for (int serviceID : operation.services()) {
+                Station.Service service = Station.Service.fromID(serviceID);
+                if (service != null) {
+                    services.add(service);
+                }
+            }
+        });
+
+        this.regions = this.produceMap();
+        reader.readRegions((regionID, region) -> {
+            this.regions.put(regionID, new Region(
+                regionID,
+                region.name().en(),
+                region.position().x(),
+                region.position().y(),
+                region.position().z(),
+                region.factionID(),
+                region.wormholeClassID()
+            ));
+        });
+
+        this.constellations = this.produceMap();
+        reader.readConstellations((constellationID, constellation) -> {
+            constellations.put(constellationID, new Constellation(
+                constellation.regionID(),
+                constellationID,
+                constellation.name().en(),
+                constellation.position().x(),
+                constellation.position().y(),
+                constellation.position().z(),
+                constellation.factionID(),
+                constellation.wormholeClassID()
+            ));
+        });
+
+        this.solarSystems = this.produceMap();
+        reader.readSolarSystems((solarSystemID, solarSystem) -> {
+            solarSystems.put(solarSystemID, new SolarSystem(
+                solarSystem.regionID(),
+                solarSystem.constellationID(),
+                solarSystemID,
+                solarSystem.name().en(),
+                solarSystem.position().x(),
+                solarSystem.position().y(),
+                solarSystem.position().z(),
+                solarSystem.securityStatus(),
+                solarSystem.factionID(),
+                null,   // Filled in when parsing mapStars later.
+                solarSystem.wormholeClassID()
+            ));
+        });
+
+        Map<Integer, Celestial> celestials = this.produceMap();
+        this.systemCelestials = this.produceMap();
+        reader.readStars((starID, star) -> {
+            solarSystems.get(star.solarSystemID()).sunTypeID = star.typeID();
+            Celestial starCelestial = new Celestial(
+                starID,
+                star.typeID(),
+                types.get(star.typeID()).groupID,
+                Objects.requireNonNull(solarSystems.get(star.solarSystemID()).solarSystemName),
+                null,
+                null,
+                null // Maybe replace with an explicit (0,0,0)
+            );
+            celestials.put(starID, starCelestial);
+            systemCelestials.computeIfAbsent(star.solarSystemID(), this::produceSet).add(starCelestial);
+        });
+
+        reader.readPlanets((planetID, planet) -> {
+            Celestial planetCelestial = new Celestial(
+                planetID,
+                planet.typeID(),
+                types.get(planet.typeID()).groupID,
+                planet.name() != null ? Objects.requireNonNull(planet.name().en()) : celestials.get(planet.orbitID()).itemName + " " + romanNumeral(planet.celestialIndex()),
+                planet.celestialIndex(),
+                null,
+                planet.position()
+            );
+            celestials.put(planetID, planetCelestial);
+            this.systemCelestials.computeIfAbsent(planet.solarSystemID(), this::produceSet).add(planetCelestial);
+        });
+        reader.readMoons((moonID, moon) -> {
+            Celestial moonCelestial = new Celestial(
+                moonID,
+                moon.typeID(),
+                types.get(moon.typeID()).groupID,
+                moon.name() != null ? Objects.requireNonNull(moon.name().en()) : celestials.get(moon.orbitID()).itemName + " - Moon " + moon.orbitIndex(),
+                moon.celestialIndex(),
+                moon.orbitIndex(),
+                moon.position()
+            );
+            celestials.put(moonID, moonCelestial);
+            this.systemCelestials.computeIfAbsent(moon.solarSystemID(), this::produceSet).add(moonCelestial);
+        });
+        reader.readAsteroidBelts((asteroidBeltID, asteroidBelt) -> {
+            this.systemCelestials.computeIfAbsent(asteroidBelt.solarSystemID(), this::produceSet)
+                .add(new Celestial(
+                    asteroidBeltID,
+                    asteroidBelt.typeID(),
+                    types.get(asteroidBelt.typeID()).groupID,
+                    asteroidBelt.name() != null ? Objects.requireNonNull(asteroidBelt.name().en()) : celestials.get(asteroidBelt.orbitID()).itemName + " - Asteroid Belt " + asteroidBelt.orbitIndex(),
+                    asteroidBelt.celestialIndex(),
+                    asteroidBelt.orbitIndex(),
+                    asteroidBelt.position()
                 ));
         });
 
-        HashMap<Integer, String> itemNames = new HashMap<>();
-        reader.readItemNames(itemName -> itemNames.put(itemName.itemID(), itemName.itemName()));
+        Map<Integer, String> corporationNames = this.produceMap();
+        reader.readNpcCorporations((corporationID, corporation) -> corporationNames.put(corporationID, corporation.name().en()));
 
-        this.regions = this.produceMap();
-        this.constellations = this.produceMap();
-        this.solarSystems = this.produceMap();
-        this.celestials = this.produceMap();
+        this.stations = this.produceMap();
+        reader.readStations((stationID, station) -> {
 
-
-        HashMap<Integer, Integer> stargateSystemMap = new HashMap<>();
-        HashMap<Integer, Integer> stargateDestinationMap = new HashMap<>();
-        reader.readUniverseMap(
-            region -> this.regions.put(
-                region.regionID(),
-                new Region(
-                    region.regionID(),
-                    Objects.requireNonNull(localizationStrings.get(region.nameID())),
-                    region.center()[0],
-                    region.center()[1],
-                    region.center()[2],
-                    region.min()[0],
-                    region.min()[1],
-                    region.min()[2],
-                    region.max()[0],
-                    region.max()[1],
-                    region.max()[2],
-                    region.factionID(),
-                    region.wormholeClassID()
-                )
-            ),
-            (regionID, constellation) -> this.constellations.put(
-                constellation.constellationID(),
-                new Constellation(
-                    regionID,
-                    constellation.constellationID(),
-                    Objects.requireNonNull(localizationStrings.get(constellation.nameID())),
-                    constellation.center()[0],
-                    constellation.center()[1],
-                    constellation.center()[2],
-                    constellation.min()[0],
-                    constellation.min()[1],
-                    constellation.min()[2],
-                    constellation.max()[0],
-                    constellation.max()[1],
-                    constellation.max()[2],
-                    constellation.factionID(),
-                    constellation.wormholeClassID()
-                )
-            ),
-            (parentIDs, system) -> {
-                this.solarSystems.put(
-                    system.solarSystemID(),
-                    new SolarSystem(
-                        parentIDs.regionID(),
-                        parentIDs.constellationID(),
-                        system.solarSystemID(),
-                        Objects.requireNonNull(localizationStrings.get(system.solarSystemNameID())),
-                        system.center()[0],
-                        system.center()[1],
-                        system.center()[2],
-                        system.security(),
-                        system.factionID(),
-                        system.sunTypeID(),
-                        system.wormholeClassID()
-                    )
-                );
-
-                if (system.secondarySun() != null) {
-                    Type type = types.get(system.secondarySun().typeID());
-                    this.celestials.computeIfAbsent(system.solarSystemID(), this::produceSet)
-                        .add(new Celestial(
-                            system.secondarySun().itemID(),
-                            type.typeID,
-                            type.groupID,
-                            type.name,
-                            null,
-                            null
-                        ));
-                }
-
-                for (Map.Entry<Integer, SdePlanet> planetEntry : system.planets().entrySet()) {
-                    Type type = types.get(planetEntry.getValue().typeID());
-
-                    String planetName = itemNames.get(planetEntry.getKey());
-                    if (planetEntry.getValue().planetNameID() != null) {
-                        planetName = localizationStrings.get(planetEntry.getValue().planetNameID());
-                    }
-
-                    this.celestials.computeIfAbsent(system.solarSystemID(), this::produceSet)
-                        .add(new Celestial(
-                            planetEntry.getKey(),
-                            type.typeID,
-                            type.groupID,
-                            Objects.requireNonNull(planetName),
-                            planetEntry.getValue().celestialIndex(),
-                            null
-                        ));
-
-                    if (planetEntry.getValue().asteroidBelts() != null) {
-                        AtomicInteger orbitIndex = new AtomicInteger();
-                        planetEntry.getValue().asteroidBelts()
-                            .entrySet()
-                            .stream()
-                            .sorted(Comparator.comparingInt(Map.Entry::getKey))
-                            .forEach(asteroidBeltEntry -> {
-                                String asteroidBeltName = itemNames.get(asteroidBeltEntry.getKey());
-                                if (asteroidBeltEntry.getValue().asteroidBeltNameID() != null) {
-                                    asteroidBeltName = localizationStrings.get(asteroidBeltEntry.getValue().asteroidBeltNameID());
-                                }
-
-                                Type beltType = types.get(asteroidBeltEntry.getValue().typeID());
-                                this.celestials.computeIfAbsent(system.solarSystemID(), this::produceSet)
-                                    .add(new Celestial(
-                                        asteroidBeltEntry.getKey(),
-                                        beltType.typeID,
-                                        beltType.groupID,
-                                        Objects.requireNonNull(asteroidBeltName),
-                                        planetEntry.getValue().celestialIndex(),
-                                        orbitIndex.incrementAndGet()
-                                    ));
-                            });
-                    }
-                    if (planetEntry.getValue().moons() != null) {
-                        AtomicInteger orbitIndex = new AtomicInteger();
-                        planetEntry.getValue().moons()
-                            .entrySet()
-                            .stream()
-                            .sorted(Comparator.comparingInt(Map.Entry::getKey))
-                            .forEachOrdered(moonEntry -> {
-                                String moonName = itemNames.get(moonEntry.getKey());
-                                if (moonEntry.getValue().moonNameID() != null) {
-                                    moonName = localizationStrings.get(moonEntry.getValue().moonNameID());
-                                }
-
-                                Type moonType = types.get(moonEntry.getValue().typeID());
-                                this.celestials.computeIfAbsent(system.solarSystemID(), this::produceSet)
-                                    .add(new Celestial(
-                                        moonEntry.getKey(),
-                                        moonType.typeID,
-                                        moonType.groupID,
-                                        Objects.requireNonNull(moonName),
-                                        planetEntry.getValue().celestialIndex(),
-                                        orbitIndex.incrementAndGet()
-                                    ));
-                            });
-                    }
-                }
-
-                for (Map.Entry<Integer, SdeStargate> stargateEntry : system.stargates().entrySet()) {
-                    stargateSystemMap.put(stargateEntry.getKey(), system.solarSystemID());
-                    stargateDestinationMap.put(stargateEntry.getKey(), stargateEntry.getValue().destination());
-
-                    int destinationSystemID = stargateEntry.getValue().destination();
-                }
+            String name;
+            String orbitName = Objects.requireNonNull(celestials.get(station.orbitID()).itemName);
+            String corporationName = Objects.requireNonNull(corporationNames.get(station.ownerID()));
+            if (station.useOperationName()) {
+                String operationName = Objects.requireNonNull(operationNames.get(station.operationID()));
+                name = orbitName + " - " + corporationName + " " + operationName;
+            } else {
+                name = orbitName + " - " + corporationName;
             }
-        );
+
+            this.stations.computeIfAbsent(station.solarSystemID(), this::produceSet)
+                .add(new Station(
+                    stationID,
+                    station.typeID(),
+                    name,
+                    station.operationID(),
+                    this.operationServices.getOrDefault(station.operationID(), EnumSet.noneOf(Station.Service.class))
+                ));
+        });
+
+//        reader.readUniverseMap(
+//                if (system.secondarySun() != null) {
+//                    Type type = types.get(system.secondarySun().typeID());
+//                    this.celestials.computeIfAbsent(system.solarSystemID(), this::produceSet)
+//                        .add(new Celestial(
+//                            system.secondarySun().itemID(),
+//                            type.typeID,
+//                            type.groupID,
+//                            type.name,
+//                            null,
+//                            null,
+//                            null
+//                        ));
+//                }
+//
+//                for (Map.Entry<Integer, SdeStargate> stargateEntry : system.stargates().entrySet()) {
+//                    stargateSystemMap.put(stargateEntry.getKey(), system.solarSystemID());
+//                    stargateDestinationMap.put(stargateEntry.getKey(), stargateEntry.getValue().destination());
+//                }
+//            }
+//        );
 
         this.outJumps = this.produceMap();
         this.inJumps = this.produceMap();
-        for (Map.Entry<Integer, Integer> entry : stargateDestinationMap.entrySet()) {
-            int k = stargateSystemMap.get(entry.getKey());
-            int v = stargateSystemMap.get(entry.getValue());
+        reader.readStargates((_, stargate) -> {
+            // TODO: Celestial object for stargates
+            outJumps.computeIfAbsent(stargate.solarSystemID(), this::produceSet)
+                .add(stargate.destination().solarSystemID());
+            inJumps.computeIfAbsent(stargate.destination().solarSystemID(), this::produceSet)
+                .add(stargate.solarSystemID());
+        });
 
-            outJumps.computeIfAbsent(k, this::produceSet).add(v);
-            inJumps.computeIfAbsent(v, this::produceSet).add(k);
-        }
+        this.warfareBuffs = this.produceMap();
+        reader.readDbuffs((buffID, buff) -> {
+            this.warfareBuffs.put(buffID, new WarfareBuff(
+                buff.displayName() != null ? buff.displayName().en() : null,
+                switch (buff.showOutputValueInUI()) {
+                    case "ShowNormal" -> WarfareBuff.ShowOutputValue.SHOW_NORMAL;
+                    case "ShowInverted" -> WarfareBuff.ShowOutputValue.SHOW_INVERTED;
+                    case "Hide" -> WarfareBuff.ShowOutputValue.HIDE;
+                    default -> throw new IllegalStateException("Unexpected warfare buff display mode: " + buff.showOutputValueInUI());
+                }
+            ));
+        });
+
+        this.dynamicAttributes = this.produceMap();
+        reader.readDynamicAttributes((typeID, dynamicAttributes) -> {
+            List<DynamicAttributes.IOMapping> ioMapping = Arrays.stream(dynamicAttributes.inputOutputMapping()).map(io -> new DynamicAttributes.IOMapping(io.resultingType(), io.applicableTypes())).toList();
+            LinkedHashMap<Integer, DynamicAttributes.DyAttribute> attributeIDs = new LinkedHashMap<>();
+            dynamicAttributes.attributeIDs().forEach((attributeID, dyInfo) -> {
+                attributeIDs.put(attributeID, new DynamicAttributes.DyAttribute(dyInfo.min(), dyInfo.max(), ((Integer) 1).equals(dyInfo.highIsGood())));
+            });
+            this.dynamicAttributes.put(typeID, new DynamicAttributes(ioMapping, attributeIDs));
+        });
+
+        this.graphicFolders = this.produceMap();
+        reader.readGraphics((graphicID, graphic) -> {
+            if (graphic.iconFolder() != null) {
+                this.graphicFolders.put(graphicID, graphic.iconFolder().replace('\\', '/'));
+            }
+        });
 
         if (patch) this.patch();
         this.loadViews();
+    }
+
+    private String romanNumeral(int num) {
+        return switch (num) {
+            case 1 -> "I";
+            case 2 -> "II";
+            case 3 -> "III";
+            case 4 -> "IV";
+            case 5 -> "V";
+            case 6 -> "VI";
+            case 7 -> "VII";
+            case 8 -> "VIII";
+            case 9 -> "IX";
+            case 10 -> "X";
+            case 11 -> "XI";
+            case 12 -> "XII";
+            case 13 -> "XIII";
+            case 14 -> "XIV";
+            case 15 -> "XV";
+            case 16 -> "XVI";
+            case 17 -> "XVII";
+            case 18 -> "XVIII";
+            case 19 -> "XIX";
+            case 20 -> "XX";
+            default -> throw new IllegalArgumentException("Roman numeral out of bounds: " + num);
+        };
     }
 
     private IndustryActivity mapActivity(int bpTypeID, IndustryActivityType activityType, SdeBpActivity activity) {
@@ -643,8 +692,13 @@ public class YamlSDEData extends SDEData {
     }
 
     @Override
-    public Map<Integer, Set<Celestial>> getCelestials() {
-        return celestials;
+    public Map<Integer, Set<Celestial>> getSystemCelestials() {
+        return systemCelestials;
+    }
+
+    @Override
+    public Map<Integer, EnumSet<Station.Service>> getOperationServices() {
+        return operationServices;
     }
 
     @Override
@@ -660,5 +714,20 @@ public class YamlSDEData extends SDEData {
     @Override
     public Map<Integer, MarketGroup> getMarketGroups() {
         return marketGroups;
+    }
+
+    @Override
+    public Map<Integer, WarfareBuff> getWarfareBuffs() {
+        return warfareBuffs;
+    }
+
+    @Override
+    public Map<Integer, DynamicAttributes> getDynamicAttributes() {
+        return dynamicAttributes;
+    }
+
+    @Override
+    public Map<Integer, String> getGraphicFolders() {
+        return graphicFolders;
     }
 }

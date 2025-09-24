@@ -7,7 +7,7 @@ import net.sentientturtle.nee.data.sde.SDEData;
 import net.sentientturtle.nee.data.datatypes.Category;
 import net.sentientturtle.nee.data.datatypes.Group;
 import net.sentientturtle.nee.data.datatypes.Type;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
@@ -35,7 +35,7 @@ public class StructureTreePage extends Page {
     }
 
     @Override
-    public @Nullable ResourceLocation getIcon(HtmlContext context) {
+    public @Nullable Resource getIcon(HtmlContext context) {
         return null;
     }
 

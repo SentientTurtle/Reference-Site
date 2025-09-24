@@ -3,7 +3,7 @@ package net.sentientturtle.nee.page;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.Main;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.util.ExceptionUtil;
 import org.jspecify.annotations.Nullable;
 
@@ -112,7 +112,7 @@ public class SettingsPage extends Page {
 
     @Nullable
     @Override
-    public ResourceLocation getIcon(HtmlContext context) {
+    public Resource getIcon(HtmlContext context) {
         return null;
     }
 }

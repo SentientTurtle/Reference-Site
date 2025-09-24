@@ -6,7 +6,7 @@ import net.sentientturtle.html.PageLink;
 import net.sentientturtle.nee.data.sde.SDEData;
 import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.page.DynamicMapPage;
-import net.sentientturtle.nee.page.MapPage;
+import net.sentientturtle.nee.page.MapFrame;
 import net.sentientturtle.nee.page.TypePage;
 
 import java.util.ArrayList;
@@ -85,9 +85,9 @@ public class EVEText {
                     int itemID = Integer.parseInt(splitInfo[1]);
                     Frame page = switch (typeID) {
                         case 2 -> null; // Corporation: TODO link NPC corps once/if they get pages
-                        case 3 -> new MapPage(Objects.requireNonNull(sdeData.getRegions().get(itemID)));
-                        case 4 -> new MapPage(Objects.requireNonNull(sdeData.getConstellations().get(itemID)));
-                        case 5 -> new MapPage(Objects.requireNonNull(sdeData.getSolarSystems().get(itemID)));
+                        case 3 -> new MapFrame(Objects.requireNonNull(sdeData.getRegions().get(itemID)));
+                        case 4 -> new MapFrame(Objects.requireNonNull(sdeData.getConstellations().get(itemID)));
+                        case 5 -> new MapFrame(Objects.requireNonNull(sdeData.getSolarSystems().get(itemID)));
                         case 14 -> null;    // Moon, used only for Molea memorial site which is an unpublished type
                         case 30 -> null;    // Faction: TODO link NPC factions once/if they get pages
                         case 1373, 1374, 1375, 1376, 1377, 1378, 1379, 1380, 1381, 1382, 1383, 1384, 1385, 1386 -> null;    // Individual character
@@ -97,8 +97,8 @@ public class EVEText {
                         default -> throw new RuntimeException("Unknown itemID type: " + typeID);
                     };
                     if (page != null) {
-                        if (page instanceof MapPage mapPage) {
-                            String dynamicMapPagePath = new DynamicMapPage().getPath() + "?item=" + mapPage.mapItem.getID();
+                        if (page instanceof MapFrame mapFrame) {
+                            String dynamicMapPagePath = new DynamicMapPage().getPath() + "?item=" + mapFrame.mapItem.getID();
                             htmlContent.add(new PageLink(dynamicMapPagePath, textContent));
                         } else {
                             htmlContent.add(new PageLink(page, textContent));

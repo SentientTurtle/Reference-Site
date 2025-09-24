@@ -13,7 +13,6 @@ The New Eden Encyclopedia project is a set of tools to automatically generate a 
 This repo contains materials under various licenses:  
 All rights reserved on original work.  
 Fonts (`./rsc/font`) under Open Font License. (See `./rsc/font/OFL.txt`)  
-Python standard library (`./rsc/pythonlib`) under python software foundation license (See `./rsc/pythonlib/LICENSE.txt`)  
 THREE.js (`./rsc/three`) under MIT license (See `./rsc/three/THREE - LICENSE.txt`)  
 EVE Online content (`./rsc/EVE/` + other files) subject to copyright and trademark notices below.
 

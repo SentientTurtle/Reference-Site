@@ -2,7 +2,7 @@ package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.components.GroupList;
 import net.sentientturtle.nee.components.ItemTitle;
 import net.sentientturtle.nee.data.datatypes.Group;
@@ -50,7 +50,7 @@ public class GroupPage extends Page {
 
     @Nullable
     @Override
-    public ResourceLocation getIcon(HtmlContext context) {
+    public Resource getIcon(HtmlContext context) {
         return group.getIconWithFallback(context);
     }
 

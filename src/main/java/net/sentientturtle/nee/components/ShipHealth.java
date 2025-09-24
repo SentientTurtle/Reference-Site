@@ -3,7 +3,7 @@ package net.sentientturtle.nee.components;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.Component;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.data.sde.SDEData;
 import net.sentientturtle.nee.data.datatypes.Type;
 
@@ -30,7 +30,7 @@ public abstract class ShipHealth extends Component {
     protected HTML[] getContent(HtmlContext context) {
         var table = TABLE("ship_health_table font_text").content(
             TR().content(
-                TD("ship_health_icon").content(IMG(ResourceLocation.ofIconID(context.sde.getAttributes().get(getHpAttribute()).iconID, context), null, 32)),
+                TD("ship_health_icon").content(IMG(Resource.ofIconID(context.sde.getAttributes().get(getHpAttribute()).iconID, context), null, 32)),
                 TD().content(TEXT(healthKindName() + " Hitpoints: "), getHp(context.sde, getHpAttribute())),
                 TD()    // Intentionally blank column
             )
@@ -41,7 +41,7 @@ public abstract class ShipHealth extends Component {
         if (rechargeText != null) {
             table.content(
                 TR().content(
-                    TD("ship_health_icon").content(IMG(ResourceLocation.ofIconID(context.sde.getAttributes().get(getHpAttribute()).iconID, context), null, 32)),
+                    TD("ship_health_icon").content(IMG(Resource.ofIconID(context.sde.getAttributes().get(getHpAttribute()).iconID, context), null, 32)),
                     TD().content(rechargeText),
                     TD()    // Intentionally blank column
                 )
@@ -52,7 +52,7 @@ public abstract class ShipHealth extends Component {
         if (sustainText != null) {
             table.content(
                 TR().content(
-                    TD("ship_health_icon").content(IMG(ResourceLocation.ofIconID(1392, context), null, 32)),
+                    TD("ship_health_icon").content(IMG(Resource.ofIconID(1392, context), null, 32)),
                     TD().content(sustainText),
                     TD()    // Intentionally blank column
                 )
@@ -63,7 +63,7 @@ public abstract class ShipHealth extends Component {
         if (resists != null) {
             table.content(
                 TR().title("Electromagnetic Damage Resistance").content(
-                    TD("ship_health_icon").content(IMG(ResourceLocation.ofIconID(1388, context), null, 32)),
+                    TD("ship_health_icon").content(IMG(Resource.ofIconID(1388, context), null, 32)),
                     TD("ship_health_bar").content(DIV("ship_health_resist_bg").content(
                         DIV("ship_health_em_resist")
                             .style("width: " + (1 - resists.EM) * 100 + "%;")
@@ -71,7 +71,7 @@ public abstract class ShipHealth extends Component {
                     TD("ship_health_text").content(context.sde.format_with_unit(resists.EM, context.sde.getAttributes().get(267).unitID))
                 ),
                 TR().title("Thermal Damage Resistance").content(
-                    TD("ship_health_icon").content(IMG(ResourceLocation.ofIconID(1386, context), null, 32)),
+                    TD("ship_health_icon").content(IMG(Resource.ofIconID(1386, context), null, 32)),
                     TD("ship_health_bar").content(DIV("ship_health_resist_bg").content(
                         DIV("ship_health_th_resist")
                             .style("width: " + (1 - resists.TH) * 100 + "%;")
@@ -79,7 +79,7 @@ public abstract class ShipHealth extends Component {
                     TD("ship_health_text").content(context.sde.format_with_unit(resists.TH, context.sde.getAttributes().get(270).unitID))
                 ),
                 TR().title("Kinetic Damage Resistance").content(
-                    TD("ship_health_icon").content(IMG(ResourceLocation.ofIconID(1385, context), null, 32)),
+                    TD("ship_health_icon").content(IMG(Resource.ofIconID(1385, context), null, 32)),
                     TD("ship_health_bar").content(DIV("ship_health_resist_bg").content(
                         DIV("ship_health_ki_resist")
                             .style("width: " + (1 - resists.KI) * 100 + "%;")
@@ -87,7 +87,7 @@ public abstract class ShipHealth extends Component {
                     TD("ship_health_text").content(context.sde.format_with_unit(resists.KI, context.sde.getAttributes().get(269).unitID))
                 ),
                 TR().title("Explosive Damage Resistance").content(
-                    TD("ship_health_icon").content(IMG(ResourceLocation.ofIconID(1387, context), null, 32)),
+                    TD("ship_health_icon").content(IMG(Resource.ofIconID(1387, context), null, 32)),
                     TD("ship_health_bar").content(DIV("ship_health_resist_bg").content(
                         DIV("ship_health_ex_resist")
                             .style("width: " + (1 - resists.EX) * 100 + "%;")

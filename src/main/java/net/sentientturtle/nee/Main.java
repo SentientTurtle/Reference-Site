@@ -1,7 +1,5 @@
 package net.sentientturtle.nee;
 
-import com.almworks.sqlite4java.SQLiteConnection;
-import com.almworks.sqlite4java.SQLiteException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,10 +8,7 @@ import net.sentientturtle.html.RenderingException;
 import net.sentientturtle.html.context.NoopHtmlContext;
 import net.sentientturtle.html.context.StringBuilderHtmlContext;
 import net.sentientturtle.nee.data.*;
-import net.sentientturtle.nee.data.datatypes.Station;
-import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.data.sde.*;
-import net.sentientturtle.nee.data.sharedcache.FSDData;
 import net.sentientturtle.nee.data.sharedcache.IconProvider;
 import net.sentientturtle.nee.page.*;
 import net.sentientturtle.nee.data.sharedcache.SharedCacheReader;
@@ -43,7 +38,6 @@ public class Main {
 
     public static Path SHARED_CACHE_PATH;
     public static Path YAML_SDE_FILE;
-    public static Path SQLITE_SDE_FILE;
     public static Path ICON_CACHE_FILE;
     public static boolean UPDATE_SDE;
     public static int COMPRESSION;  // No compression is moderately faster
@@ -52,8 +46,6 @@ public class Main {
     public static boolean IS_DEV_BUILD;
     public static String DEPLOYMENT_URL;
     public static Set<String> PRE_COMPRESSED_FILES;
-
-    public static boolean USE_SQLITE = false;
 
     // Website title as configurable variable in case a rename is needed
     public static final String WEBSITE_NAME = "New Eden Encyclopedia";
@@ -101,7 +93,6 @@ public class Main {
             RES_FOLDER = Path.of(properties.getProperty("RESOURCE_FOLDER", "./rsc/"));
             TEMP_DIR = RES_FOLDER.resolve("temp");
             YAML_SDE_FILE = RES_FOLDER.resolve("sde.zip");
-            SQLITE_SDE_FILE = RES_FOLDER.resolve("sde.db");
             ICON_CACHE_FILE = RES_FOLDER.resolve("iconcache.zip");
             UPDATE_SDE = properties.getProperty("UPDATE_SDE", "TRUE").equalsIgnoreCase("TRUE");
 
@@ -174,87 +165,54 @@ public class Main {
         System.out.println("Initializing shared cache...");
         SharedCacheReader sharedCache = new SharedCacheReader(SHARED_CACHE_PATH);
         System.out.println("\tConnected to shared cache!");
-        System.out.println("Connecting to Python FSD data...");
-        FSDData fsdData = new FSDData(sharedCache);
-        System.out.println("\tFSD data loaded!");
+//        System.out.println("Connecting to Python FSD data...");
+//        FSDData fsdData = new FSDData(sharedCache);
+//        System.out.println("\tFSD data loaded!");
 
         if (UPDATE_SDE) {
-            if (USE_SQLITE) {
-                SDEUtils.updateSqlite(SQLITE_SDE_FILE.toFile());
-            } else {
-                SDEUtils.updateYAML(YAML_SDE_FILE.toFile());
-            }
+            SDEUtils.updateYAML(YAML_SDE_FILE.toFile());
         }
 
-        SDEData sdeData;
         System.out.println("Loading SDE...");
-        if (USE_SQLITE) {
-            try {
-                sdeData = new SQLiteSDEData(new SQLiteConnection(SQLITE_SDE_FILE.toFile()), patch);
-            } catch (SQLiteException e) {
-                throw new IOException(e);
-            }
-        } else {
-            sdeData = new YamlSDEData(new YAMLDataExportReader(YAML_SDE_FILE), fsdData.localizationStrings, patch);
-        }
-        System.out.println("\tSDE loaded!");
+        long sde_start = System.nanoTime();
+        SDEData sdeData = new YamlSDEData(new YAMLDataExportReader(YAML_SDE_FILE), patch);
+        long sdeDuration = System.nanoTime() - sde_start;
+        System.out.println("\tSDE loaded! (" + (TimeUnit.NANOSECONDS.toMillis(sdeDuration) / 1000.0) +")");
         // Patch FSD into SDE data
-        {
-            Map<Integer, Set<Integer>> mutaplasmidMap = sdeData.produceMap();
-            for (Type mutaplasmid : sdeData.getGroupTypes().getOrDefault(1964, Set.of())) {
-                List<FSDData.IOMapping> ioMappings = fsdData.dynamicAttributes.get(mutaplasmid.typeID)
-                    .inputOutputMapping();
-                if (ioMappings.size() != 1) throw new IllegalStateException("Mutaplasmid IO mappings changed!");
-
-                mutaplasmidMap.computeIfAbsent(
-                    ioMappings.get(0).resultingType(),
-                    sdeData::produceSet
-                ).add(mutaplasmid.typeID);
-            }
-
-            for (Set<Integer> mutaplasmidGroup : mutaplasmidMap.values()) {
-                Integer parentTypeID = mutaplasmidGroup.stream().min(Type.idComparator(sdeData)).orElseThrow();
-
-                for (Integer typeID : mutaplasmidGroup) {
-                    sdeData.getVariants()
-                        .merge(typeID, mutaplasmidGroup, (one, two) -> {
-                            one.addAll(two);
-                            return one;
-                        });
-
-                    sdeData.getParentTypeMap().put(typeID, parentTypeID);
-                }
-            }
-
-            sdeData.getStations()
-                .values()
-                .stream()
-                .flatMap(Set::stream)
-                .forEach(station -> {
-                    for (int serviceID : fsdData.stationOperations.get(station.operationID).services()) {
-                        Station.Service service = switch (serviceID) {
-                            case 5 -> Station.Service.REPROCESSING;
-                            case 7 -> Station.Service.MARKET;
-                            case 10 -> Station.Service.CLONEBAY;
-                            case 13 -> Station.Service.REPAIRSHOP;
-                            case 14 -> Station.Service.INDUSTRY;
-                            case 17 -> Station.Service.FITTING;
-                            case 21 -> Station.Service.INSURANCE;
-                            case 25 -> Station.Service.LPSTORE;
-                            case 26 -> Station.Service.MILITIAOFFICE;
-                            default -> null;
-                        };
-                        if (service != null) station.services.add(service);
-                    }
-                });
-        }
+//        {
+//            Map<Integer, Set<Integer>> mutaplasmidMap = sdeData.produceMap();
+//            for (Type mutaplasmid : sdeData.getGroupTypes().getOrDefault(1964, Set.of())) {
+//                List<FSDData.IOMapping> ioMappings = fsdData.dynamicAttributes.get(mutaplasmid.typeID)
+//                    .inputOutputMapping();
+//                if (ioMappings.size() != 1) throw new IllegalStateException("Mutaplasmid IO mappings changed!");
+//
+//                mutaplasmidMap.computeIfAbsent(
+//                    ioMappings.get(0).resultingType(),
+//                    sdeData::produceSet
+//                ).add(mutaplasmid.typeID);
+//            }
+//
+//            for (Set<Integer> mutaplasmidGroup : mutaplasmidMap.values()) {
+//                Integer parentTypeID = mutaplasmidGroup.stream().min(Type.idComparator(sdeData)).orElseThrow();
+//
+//                for (Integer typeID : mutaplasmidGroup) {
+//                    sdeData.getVariants()
+//                        .merge(typeID, mutaplasmidGroup, (one, two) -> {
+//                            one.addAll(two);
+//                            return one;
+//                        });
+//
+//                    sdeData.getParentTypeMap().put(typeID, parentTypeID);
+//                }
+//            }
+//        }
         System.out.println("Loading icon cache...");
         IconProvider.readIconCache();
         Runtime.getRuntime().addShutdownHook(new Thread(IconProvider::writeIconCache));
         System.out.println("\tIcon cache loaded");
 
         System.out.println("Data initialized, game version: " + gameVersion);
-        return (initializedData = new DataSources(sdeData, sharedCache, fsdData, gameVersion));
+        return (initializedData = new DataSources(sdeData, sharedCache, gameVersion));
     }
 
     public static Path OUTPUT_DIR = Path.of("./output");
@@ -273,7 +231,7 @@ public class Main {
         Set<String> js = Collections.synchronizedSet(new LinkedHashSet<>());
 
         ConcurrentLinkedQueue<String> redirects = new ConcurrentLinkedQueue<>();
-        ConcurrentHashMap<Path, ResourceLocation.ResourceData> dependencies = new ConcurrentHashMap<>();
+        ConcurrentHashMap<Path, Resource.ResourceData> dependencies = new ConcurrentHashMap<>();
 
         System.out.println("Writing pages...");
         final AtomicInteger pageCount = new AtomicInteger(0);
@@ -422,16 +380,16 @@ public class Main {
 
         String dynamicMapPagePath = new DynamicMapPage().getPath() + "?item=";
         List<IndexEntry> indexEntries = PageKind.pageStream(data.sdeData())
-            .filter(page -> (page instanceof MapPage || page instanceof TypePage))
+            .filter(page -> (page instanceof MapFrame || page instanceof TypePage))
             .map(page -> {
                 String path;
-                if (page instanceof MapPage mapPage) {
+                if (page instanceof MapFrame mapPage) {
                     path = dynamicMapPagePath + mapPage.mapItem.getID();
                 } else {
                     path = page.getPath();
                 }
 
-                ResourceLocation pageIcon = page.getIcon(searchContext);
+                Resource pageIcon = page.getIcon(searchContext);
                 return new IndexEntry(
                     page.name(),
                     path,
@@ -444,13 +402,13 @@ public class Main {
             String searchJson = "const searchindex = " + objectMapper.writeValueAsString(indexEntries) + ";\nexport default searchindex;";
             byte[] bytes = searchJson.getBytes(StandardCharsets.UTF_8);
 
-            zipOutputStream.putNextEntry(new ZipEntry(ResourceLocation.searchIndex().getURI(searchContext).replace('\\', '/')));
+            zipOutputStream.putNextEntry(new ZipEntry(Resource.searchIndex().getURI(searchContext).replace('\\', '/')));
             zipOutputStream.write(bytes);
             zipOutputStream.closeEntry();
 
             if (PRE_COMPRESSED_FILES.contains("json")) {
                 zipOutputStream.putNextEntry(new ZipEntry(
-                    ResourceLocation.searchIndex().getURI(new NoopHtmlContext(0, data)).replace('\\', '/') + ".gz"
+                    Resource.searchIndex().getURI(new NoopHtmlContext(0, data)).replace('\\', '/') + ".gz"
                 ));
                 GZIPOutputStream gzipOutputStream = new GZIPOutputStream(zipOutputStream);
                 gzipOutputStream.write(bytes);

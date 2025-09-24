@@ -3,7 +3,7 @@ package net.sentientturtle.nee.page;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.components.ItemTitle;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
@@ -58,7 +58,7 @@ public class SearchResults extends Page {
     protected List<HTML> headEntries(HtmlContext context) {
         return List.of(
             HTML.SCRIPT_MODULE(
-                "import searchindex from \"/" + ResourceLocation.searchIndex().getURI(context) + "\";\n"
+                "import searchindex from \"/" + Resource.searchIndex().getURI(context) + "\";\n"
                 +
                 """
                     const query = (new URLSearchParams(window.location.search).get("search") ?? "")
@@ -115,7 +115,7 @@ public class SearchResults extends Page {
 
     @Nullable
     @Override
-    public ResourceLocation getIcon(HtmlContext context) {
+    public Resource getIcon(HtmlContext context) {
         return null;
     }
 }

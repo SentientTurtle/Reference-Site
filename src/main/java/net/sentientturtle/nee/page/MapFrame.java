@@ -3,7 +3,7 @@ package net.sentientturtle.nee.page;
 import net.sentientturtle.html.Frame;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.components.*;
 import net.sentientturtle.nee.data.datatypes.MapItem;
 import net.sentientturtle.nee.data.datatypes.SolarSystem;
@@ -17,14 +17,12 @@ import java.util.Set;
 import static net.sentientturtle.html.HTML.DIV;
 
 /**
- * Map page for a {@link MapItem}
- * <br>
- * To be replaced by dynamic map
+ * Map frame for a {@link MapItem}
  */
-public class MapPage extends Frame {
+public class MapFrame extends Frame {
     public final MapItem mapItem;
 
-    public MapPage(MapItem mapItem) {
+    public MapFrame(MapItem mapItem) {
         this.mapItem = mapItem;
     }
 
@@ -45,9 +43,13 @@ public class MapPage extends Frame {
 
     @Override
     protected List<HTML> headEntries(HtmlContext context) {
-        // Let the parent window know iframe has reached document-loaded (Which happens immediately before script execution for module scripts)
-        // Iframe's onload event is the full window load event, which happens after images/etc load, so we manually create our own
-        return List.of(HTML.SCRIPT_MODULE("window.parent.postMessage('MAPFRAME-DOMLOADED');"));
+        return List.of(
+            // Disable search engine indexing as these documents are intended to be shown in an iframe on the dynamic map page
+            HTML.META().attribute("name", "robots").attribute("content", "noindex,nofollow"),
+            // Let the parent window know iframe has reached document-loaded (Which happens immediately before script execution for module scripts)
+            // Iframe's onload event is the full window load event, which happens after images/etc load, so we manually create our own
+            HTML.SCRIPT_MODULE("window.parent.postMessage('MAPFRAME-DOMLOADED');")
+        );
     }
 
     @Override
@@ -88,9 +90,9 @@ public class MapPage extends Frame {
             grid.content(new MapSovereignty(mapItem, null, null));
         } else if (mapItem instanceof SolarSystem solarSystem) {
             if (solarSystem.regionID <= 10001000 && solarSystem.regionID != 10000004) {
-                grid.content(new MapSovereignty(mapItem, "[Capsuleer Alliance]", ResourceLocation.fromSharedCache("res:/ui/texture/alliance/1_128_1.png", context)));
+                grid.content(new MapSovereignty(mapItem, "[Capsuleer Alliance]", Resource.fromSharedCache("res:/ui/texture/alliance/1_128_1.png", context)));
             } else if (solarSystem.regionID >= 11000001 && solarSystem.regionID <= 11000030 && !(solarSystem.solarSystemID >= 31002505 && solarSystem.solarSystemID <= 31002604)) {
-                grid.content(new MapSovereignty(mapItem, "[Disputed]", ResourceLocation.fromSharedCache("res:/ui/texture/alliance/1_128_1.png", context)));
+                grid.content(new MapSovereignty(mapItem, "[Disputed]", Resource.fromSharedCache("res:/ui/texture/alliance/1_128_1.png", context)));
             }
         }
 
@@ -115,7 +117,7 @@ public class MapPage extends Frame {
 
     @Nullable
     @Override
-    public ResourceLocation getIcon(HtmlContext context) {
+    public Resource getIcon(HtmlContext context) {
         return mapItem.getIcon(context);
     }
 }

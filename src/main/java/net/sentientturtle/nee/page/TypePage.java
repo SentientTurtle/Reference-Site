@@ -8,7 +8,7 @@ import net.sentientturtle.nee.data.datatypes.Attribute;
 import net.sentientturtle.nee.data.datatypes.Group;
 import net.sentientturtle.nee.data.sharedcache.IconProvider;
 import net.sentientturtle.nee.util.EVEText;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.components.*;
 import net.sentientturtle.nee.data.datatypes.Type;
 import org.jspecify.annotations.Nullable;
@@ -22,9 +22,13 @@ import static net.sentientturtle.html.HTML.DIV;
  * Page for a {@link Type}
  */
 public class TypePage extends Page implements HasPersistentUrl {
-    public static final int[] CAN_BE_FITTED_TO_GROUP_ATTRIBUTES = {1298, 1299, 1300, 1301, 1872, 1879, 1880, 1881, 2065, 2396, 2476, 2477, 2478, 2479, 2480, 2481, 2482, 2483, 2484, 2485};
+    // Attributes on a module, signalling that it can only be fitted to any of the ship/structure types & groups specified by these attributes
     public static final int[] CAN_BE_FITTED_TO_TYPE_ATTRIBUTES = {1302, 1303, 1304, 1305, 1380, 1944, 2103, 2463, 2486, 2487, 2488, 2758};
-    public static final int[] USED_WITH_GROUP_ATTRIBUTES = {137, 602, 603, 604, 605, 606, 609, 610, 2076, 2077, 2078};
+    public static final int[] CAN_BE_FITTED_TO_GROUP_ATTRIBUTES = {1298, 1299, 1300, 1301, 1872, 1879, 1880, 1881, 2065, 2396, 2476, 2477, 2478, 2479, 2480, 2481, 2482, 2483, 2484, 2485};
+    public static final int[] USED_WITH_GROUP_ATTRIBUTES = {
+        137, 602, 603, 2076, 2077, 2078,    // Launcher groups
+        604, 605, 606, 609, 610             // Charge/ammo groups
+    };
     public final Type type;
 
     public TypePage(Type type) {
@@ -48,8 +52,8 @@ public class TypePage extends Page implements HasPersistentUrl {
 
     @Nullable
     @Override
-    public ResourceLocation getIcon(HtmlContext context) {
-        return ResourceLocation.typeIcon(type.typeID, context);
+    public Resource getIcon(HtmlContext context) {
+        return Resource.typeIcon(type.typeID, context);
     }
 
     @Override

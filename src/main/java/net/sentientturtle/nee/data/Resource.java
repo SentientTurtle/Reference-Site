@@ -5,22 +5,16 @@ import net.sentientturtle.nee.Main;
 import net.sentientturtle.nee.data.datatypes.Group;
 import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.data.sharedcache.IconProvider;
-import net.sentientturtle.nee.util.MIME;
-import net.sentientturtle.nee.util.ExceptionUtil;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
 
 /**
  * Object for various web file "resources" such as images/scripts/etc, which can be linked to or included inline
  */
 @SuppressWarnings("WeakerAccess")
-public class ResourceLocation {
+public class Resource {
     public static final Path OUTPUT_RES_FOLDER = Path.of("rsc");              // Destination resource folder relative to website output folder
     private final ResourceData dataSource;
     private final String destinationPath;
@@ -28,52 +22,52 @@ public class ResourceLocation {
     /// Instances of ResourceLocation are created through the factory methods
     ///
     /// (See: Static methods)
-    private ResourceLocation(ResourceData resourceData, String destinationPath) {
+    private Resource(ResourceData resourceData, String destinationPath) {
         this.dataSource = resourceData;
         this.destinationPath = destinationPath;
     }
 
     /// Use a file resource, files provided in {@link Main#RES_FOLDER}, path relative to that folder
-    public static ResourceLocation file(String path) {
-        return new ResourceLocation(new ResourceData.File(Main.RES_FOLDER.resolve(path)), path);
+    public static Resource file(String path) {
+        return new Resource(new ResourceData.File(Main.RES_FOLDER.resolve(path)), path);
     }
 
     /// Use a file resource, files provided in {@link Main#RES_FOLDER}, path relative to that folder
-    public static ResourceLocation remoteURL(String url) {
-        return new ResourceLocation(new ResourceData.Remote(url), null);
+    public static Resource remoteURL(String url) {
+        return new Resource(new ResourceData.Remote(url), null);
     }
 
     /// Use a file resource, files provided in {@link Main#RES_FOLDER}, path relative to that folder
-    public static ResourceLocation localPath(Path path) {
-        return new ResourceLocation(new ResourceData.Remote(path.toString()), null);
+    public static Resource localPath(Path path) {
+        return new Resource(new ResourceData.Remote(path.toString()), null);
     }
 
     /// ResourceLocation for an item-type icon (64x64 PNG file)
-    public static ResourceLocation typeIcon(int typeID, HtmlContext context) {
+    public static Resource typeIcon(int typeID, HtmlContext context) {
         if (Main.GENERATE_ICONS) {
             Type invType = context.sde.getTypes().get(typeID);
             Group group = context.sde.getGroups().get(invType.groupID);
             int metaGroup = context.sde.getMetaTypes().getOrDefault(typeID, 1);
             boolean isBPC = group.categoryID == 9 && metaGroup != 1 && metaGroup != 54;
 
-            return new ResourceLocation(new ResourceData.IconProvider64(typeID, isBPC, true), "type_icons/" + typeID + ".png");
+            return new Resource(new ResourceData.IconProvider64(typeID, isBPC, true), "type_icons/" + typeID + ".png");
         } else {
             Type invType = context.sde.getTypes().get(typeID);
             Group group = context.sde.getGroups().get(invType.groupID);
             if (group.categoryID == 9) {
-                return new ResourceLocation(new ResourceData.Remote("https://images.evetech.net/types/" + typeID + "/bp?size=64"), null);
+                return new Resource(new ResourceData.Remote("https://images.evetech.net/types/" + typeID + "/bp?size=64"), null);
             } else {
-                return new ResourceLocation(new ResourceData.Remote("https://images.evetech.net/types/" + typeID + "/icon?size=64"), null);
+                return new Resource(new ResourceData.Remote("https://images.evetech.net/types/" + typeID + "/icon?size=64"), null);
             }
         }
     }
 
     /// ResourceLocation for an item-type render (512x512 JPG file)
-    public static ResourceLocation typeRender(int typeID) {
+    public static Resource typeRender(int typeID) {
         if (Main.GENERATE_ICONS) {
-            return new ResourceLocation(new ResourceData.IconProvider512(typeID), "type_renders/" + typeID + ".jpg");
+            return new Resource(new ResourceData.IconProvider512(typeID), "type_renders/" + typeID + ".jpg");
         } else {
-            return new ResourceLocation(
+            return new Resource(
                 new ResourceData.Remote("https://images.evetech.net/types/" + typeID + "/render?size=512"),
                 "type_renders/" + typeID + ".jpg"
             );
@@ -93,27 +87,27 @@ public class ResourceLocation {
     }
 
     /// ResourceLocation for a file from the Shared Cache (Unknown/Variable file type, usually PNG images)
-    public static ResourceLocation fromSharedCache(String resource, HtmlContext context) {
+    public static Resource fromSharedCache(String resource, HtmlContext context) {
             if (context.sharedCache.containsResource(resource)) {
-                return new ResourceLocation(new ResourceData.SharedCache(resource), sharedCacheFile(resource, context));
+                return new Resource(new ResourceData.SharedCache(resource), sharedCacheFile(resource, context));
             } else {
                 throw new IllegalStateException("Missing sharedcache entry: " + resource);
             }
     }
 
     /// ResourceLocation for an iconID-specified icon (Variable size PNG file)
-    public static ResourceLocation ofIconID(int iconID, HtmlContext context) {
+    public static Resource ofIconID(int iconID, HtmlContext context) {
         if (iconID == 0) throw new IllegalArgumentException("iconID 0 should be patched out!");
         String iconResource = context.sde.getEveIcons().get(iconID);
         if (context.sharedCache.containsResource(iconResource)) {
-            return new ResourceLocation(new ResourceData.SharedCache(iconResource), sharedCacheFile(iconResource, context));
+            return new Resource(new ResourceData.SharedCache(iconResource), sharedCacheFile(iconResource, context));
         } else {
             throw new IllegalStateException("Missing sharedcache entry: " + iconResource);
         }
     }
 
     /// ResourceLocation for an EVE faction's logo icon (128x128 PNG file)
-    public static ResourceLocation factionLogo(int factionID) {
+    public static Resource factionLogo(int factionID) {
         String resource = switch (factionID) {
             case 500001 -> "res:/ui/texture/icons/19_128_1.png";
             case 500002 -> "res:/ui/texture/icons/19_128_2.png";
@@ -144,15 +138,19 @@ public class ResourceLocation {
 
             default -> throw new IllegalArgumentException("Unknown faction: " + factionID);
         };
-        return new ResourceLocation(
+        return new Resource(
             new ResourceData.SharedCache(resource),
             "faction_logos/" + factionID + ".png"
         );
     }
 
     /// ResourceLocation for the search index data-script file
-    public static ResourceLocation searchIndex() {
-        return new ResourceLocation(new ResourceData.NoData(), "searchindex.js");
+    public static Resource searchIndex() {
+        return new Resource(new ResourceData.NoData(), "searchindex.js");
+    }
+
+    public ResourceData getData() {
+        return this.dataSource;
     }
 
     /// Returns a URI to this resource from the specified context
@@ -227,6 +225,7 @@ public class ResourceLocation {
             }
         }
 
+        /// Game file
         record SharedCache(String resource) implements ResourceData {
             @Override
             public byte[] getData(DataSources sources) throws IOException {

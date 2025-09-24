@@ -5,7 +5,7 @@ import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.components.TextBox;
 import net.sentientturtle.nee.data.DevResources;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import org.jspecify.annotations.Nullable;
 
 import static net.sentientturtle.html.HTML.*;
@@ -32,7 +32,7 @@ public class DevResourcePage extends Page {
     }
 
     @Override
-    public @Nullable ResourceLocation getIcon(HtmlContext context) {
+    public @Nullable Resource getIcon(HtmlContext context) {
         return null;
     }
 

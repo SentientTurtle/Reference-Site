@@ -4,7 +4,7 @@ import net.sentientturtle.html.*;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.Main;
 import net.sentientturtle.nee.components.Sidebar;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 
 import static net.sentientturtle.html.HTML.*;
 
@@ -17,7 +17,7 @@ public abstract class Page extends Frame {
     private HTML getHeader(HtmlContext context) {
         return DIV().id(context.tryID("header")).content(
             SPAN("header_span").content(
-                IMG(ResourceLocation.file("bookicon.png"), null, 64).className("header_icon"),
+                IMG(Resource.file("bookicon.png"), null, 64).className("header_icon"),
                 TEXT_BOLD().className("font_header").id(context.tryID("header_text")).content(new PageLink(new IndexPage()))
             ),
             SPAN("header_span header_search").content(
@@ -54,7 +54,7 @@ public abstract class Page extends Frame {
             TITLE(this.title()),
             LINK().attribute("rel", "stylesheet").attribute("href", c -> c.pathTo("stylesheet.css") + "?v=" + Main.BUILD_NUMBER),
             LINK().attribute("rel", "stylesheet").attribute("href", c -> c.pathTo("theme.css")).id(context.tryID("theme_stylesheet")),
-            LINK().attribute("rel", "icon").attribute("href", c -> ResourceLocation.file("bookicon.png").getURI(c))
+            LINK().attribute("rel", "icon").attribute("href", c -> Resource.file("bookicon.png").getURI(c))
         );
 
         head.content(META().attribute("property", "og:site_name").attribute("content", Main.WEBSITE_NAME));
@@ -63,7 +63,7 @@ public abstract class Page extends Frame {
         if (page_description != null) {
             head.content(META().attribute("property", "og:description").attribute("content", page_description));
         }
-        ResourceLocation icon = this.getIcon(context);
+        Resource icon = this.getIcon(context);
         if (icon != null) {
             head.content(META().attribute("property", "og:image").attribute("content", icon.getURI(context, true, Main.DEPLOYMENT_URL)));
         }
@@ -87,13 +87,13 @@ public abstract class Page extends Frame {
         try {
             String head_font = "@font-face {" +
                                "   font-family: 'Electrolize';" +
-                               "   src: url('" + ResourceLocation.file("font/Electrolize.woff2").getURI(context, true) + "') format('woff2');" +
+                               "   src: url('" + Resource.file("font/Electrolize.woff2").getURI(context, true) + "') format('woff2');" +
                                "   font-display: swap;" +
                                "}";
 
             String roman_numeral_font = "@font-face {" +
                                         "   font-family: 'RomanNumeral';" +
-                                        "   src: url('" + ResourceLocation.file("font/RomanNumerals.woff2").getURI(context, true) + "') format('woff2');" +
+                                        "   src: url('" + Resource.file("font/RomanNumerals.woff2").getURI(context, true) + "') format('woff2');" +
                                         "   font-display: swap;" +
                                         "}";
 

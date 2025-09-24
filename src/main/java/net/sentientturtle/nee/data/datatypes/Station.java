@@ -40,6 +40,21 @@ public class Station {
             this.displayName = displayName;
             this.iconResource = iconResource;
         }
+
+        public static @Nullable Service fromID(int serviceID) {
+            return switch (serviceID) {
+                case 5 -> Station.Service.REPROCESSING;
+                case 7 -> Station.Service.MARKET;
+                case 10 -> Station.Service.CLONEBAY;
+                case 13 -> Station.Service.REPAIRSHOP;
+                case 14 -> Station.Service.INDUSTRY;
+                case 17 -> Station.Service.FITTING;
+                case 21 -> Station.Service.INSURANCE;
+                case 25 -> Station.Service.LPSTORE;
+                case 26 -> Station.Service.MILITIAOFFICE;
+                default -> null;
+            };
+        }
     }
 
     @Override

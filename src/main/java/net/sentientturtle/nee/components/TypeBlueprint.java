@@ -10,7 +10,7 @@ import net.sentientturtle.nee.data.datatypes.IndustryActivityType;
 import net.sentientturtle.nee.data.datatypes.PlanetSchematic;
 import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.nee.page.TypePage;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 
 import java.util.Comparator;
 import java.util.EnumMap;
@@ -110,7 +110,7 @@ public class TypeBlueprint extends Component {
                         }
 
                         table.content(TR().content(
-                            TD().content(IMG(ResourceLocation.typeIcon(entry.getKey(), context), null, 64).className("type_blueprint_icon")),
+                            TD().content(IMG(Resource.typeIcon(entry.getKey(), context), null, 64).className("type_blueprint_icon")),
                             TD().content(new PageLink(new TypePage(context.sde.getTypes().get(entry.getKey())))),
                             quantityTD
                         ));
@@ -125,7 +125,7 @@ public class TypeBlueprint extends Component {
                         .sorted(Comparator.<Map.Entry<Integer, Integer>>comparingInt(Map.Entry::getValue).reversed())
                         .forEach(entry -> {
                             table.content(TR().content(
-                                TD().content(IMG(ResourceLocation.typeIcon(entry.getKey(), context), null, 64).className("type_blueprint_icon")),
+                                TD().content(IMG(Resource.typeIcon(entry.getKey(), context), null, 64).className("type_blueprint_icon")),
                                 TD().content(new PageLink(new TypePage(context.sde.getTypes().get(entry.getKey())))),
                                 TD().content(context.sde.format_with_unit(entry.getValue(), -1))
                             ));
@@ -180,7 +180,7 @@ public class TypeBlueprint extends Component {
 
             table.content(TR().content(TH("type_blueprint_subheader").attribute("colspan", "3").text("Output")));
             table.content(TR().content(
-                TD().content(IMG(ResourceLocation.typeIcon(schematic.outputTypeID, context), null, 64).className("type_blueprint_icon")),
+                TD().content(IMG(Resource.typeIcon(schematic.outputTypeID, context), null, 64).className("type_blueprint_icon")),
                 TD().content(new PageLink(new TypePage(context.sde.getTypes().get(schematic.outputTypeID)))),
                 TD().content(context.sde.format_with_unit(schematic.outputQuantity, -1))
             ));
@@ -191,7 +191,7 @@ public class TypeBlueprint extends Component {
                 .sorted(Comparator.<Map.Entry<Integer, Integer>>comparingInt(Map.Entry::getValue).reversed())
                 .forEach(entry -> {
                     table.content(TR().content(
-                        TD().content(IMG(ResourceLocation.typeIcon(entry.getKey(), context), null, 64).className("type_blueprint_icon")),
+                        TD().content(IMG(Resource.typeIcon(entry.getKey(), context), null, 64).className("type_blueprint_icon")),
                         TD().content(new PageLink(new TypePage(context.sde.getTypes().get(entry.getKey())))),
                         TD().content(context.sde.format_with_unit(entry.getValue(), -1))
                     ));

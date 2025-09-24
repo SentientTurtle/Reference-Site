@@ -6,7 +6,7 @@ import net.sentientturtle.html.Component;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.datatypes.Type;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.util.ExceptionUtil;
 
 import java.io.IOException;
@@ -41,14 +41,14 @@ public class TypeVolume extends Component {
                 TABLE("type_volume_table font_text").content(
                     TR().content(
                         TD().content(SPAN("type_volume_span").title("Volume").content(
-                            IMG(ResourceLocation.ofIconID(67, context), null, 32).className("type_volume_icon"),
+                            IMG(Resource.ofIconID(67, context), null, 32).className("type_volume_icon"),
                             TEXT("Volume:")
                         )),
                         TD().content(context.sde.format_with_unit(volume, 9))
                     ),
                     TR().content(
                         TD().content(SPAN("type_volume_span").title("Packaged").content(
-                            IMG(ResourceLocation.ofIconID(67, context), null, 32).className("type_volume_icon"),
+                            IMG(Resource.ofIconID(67, context), null, 32).className("type_volume_icon"),
                             TEXT("Packaged Volume:")
                         )),
                         TD().content(context.sde.format_with_unit(PACKAGED_VOLUMES.get(type.typeID), 9))
@@ -56,7 +56,7 @@ public class TypeVolume extends Component {
                     mass > 0.0 ?
                         TR().content(
                             TD().content(SPAN("type_volume_span").content(
-                                IMG(ResourceLocation.ofIconID(76, context), null, 32).title("Mass").className("type_volume_icon"),
+                                IMG(Resource.ofIconID(76, context), null, 32).title("Mass").className("type_volume_icon"),
                                 TEXT("Mass:")
                             )),
                             TD().content(context.sde.format_with_unit(mass, 2))
@@ -69,13 +69,13 @@ public class TypeVolume extends Component {
                 TABLE("type_volume_table font_text").content(
                     TR().content(
                         TD().content(SPAN("type_volume_span").content(
-                            IMG(ResourceLocation.ofIconID(67, context), null, 32).title("Volume").className("type_volume_icon"),
+                            IMG(Resource.ofIconID(67, context), null, 32).title("Volume").className("type_volume_icon"),
                             TEXT("Volume: "),
                             context.sde.format_with_unit(volume, 9)
                         )),
                         mass > 0.0 ?
                             TD().content(SPAN("type_volume_span").title("Mass").content(
-                                IMG(ResourceLocation.ofIconID(76, context), null, 32).className("type_volume_icon"),
+                                IMG(Resource.ofIconID(76, context), null, 32).className("type_volume_icon"),
                                 TEXT("Mass: "),
                                 context.sde.format_with_unit(mass, 2)
                             ))

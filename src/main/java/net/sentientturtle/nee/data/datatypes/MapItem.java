@@ -3,8 +3,8 @@ package net.sentientturtle.nee.data.datatypes;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.Frame;
 import net.sentientturtle.nee.page.HasPage;
-import net.sentientturtle.nee.page.MapPage;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.page.MapFrame;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.data.sde.SDEData;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -22,7 +22,8 @@ public interface MapItem extends HasPage {
 
     @Nullable MapItem getParent(HtmlContext context);
 
-    @Nullable ResourceLocation getIcon(HtmlContext context);
+    @Nullable
+    Resource getIcon(HtmlContext context);
 
     OptionalInt getSovFactionID();
     OptionalDouble getSecurity(SDEData SDEData);
@@ -37,6 +38,6 @@ public interface MapItem extends HasPage {
 
     @Override
     default @NonNull Frame getPage() {
-        return new MapPage(this);
+        return new MapFrame(this);
     }
 }

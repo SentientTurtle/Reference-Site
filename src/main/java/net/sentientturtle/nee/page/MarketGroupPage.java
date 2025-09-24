@@ -10,7 +10,7 @@ import net.sentientturtle.nee.components.ItemTitle;
 import net.sentientturtle.nee.data.sde.SDEData;
 import net.sentientturtle.nee.data.datatypes.MarketGroup;
 import net.sentientturtle.nee.data.datatypes.Type;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Comparator;
@@ -51,7 +51,7 @@ public class MarketGroupPage extends Page {
     }
 
     @Override
-    public @Nullable ResourceLocation getIcon(HtmlContext context) {
+    public @Nullable Resource getIcon(HtmlContext context) {
         return null;
     }
 

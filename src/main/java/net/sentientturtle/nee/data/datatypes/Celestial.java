@@ -1,5 +1,6 @@
 package net.sentientturtle.nee.data.datatypes;
 
+import net.sentientturtle.nee.util.Position;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
@@ -11,14 +12,16 @@ public final class Celestial {
     public final String itemName;
     public final @Nullable Integer celestialIndex;
     public final @Nullable Integer orbitIndex;
+    public final @Nullable Position position;
 
-    public Celestial(int itemID, int typeID, int groupID, String itemName, @Nullable Integer celestialIndex, @Nullable Integer orbitIndex) {
+    public Celestial(int itemID, int typeID, int groupID, String itemName, @Nullable Integer celestialIndex, @Nullable Integer orbitIndex, @Nullable Position position) {
         this.itemID = itemID;
         this.typeID = typeID;
         this.groupID = groupID;
         this.itemName = Objects.requireNonNull(itemName);
         this.celestialIndex = celestialIndex;
         this.orbitIndex = orbitIndex;
+        this.position = position;
     }
 
     @Override

@@ -1,6 +1,6 @@
 package net.sentientturtle.nee.components;
 
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.data.datatypes.Type;
 
 import java.util.Map;
@@ -29,7 +29,7 @@ public class ShipPropulsion extends AttributeList {
                     tr.content(
                         TD().content(
                             SPAN("attribute_list_span").title("Align time").content(
-                                IMG(ResourceLocation.ofIconID(1401, context), null, 32).className("attribute_list_icon"),
+                                IMG(Resource.ofIconID(1401, context), null, 32).className("attribute_list_icon"),
                                 TEXT("Align time: "),
                                 context.sde.format_with_unit(alignTime, 3)
                             )

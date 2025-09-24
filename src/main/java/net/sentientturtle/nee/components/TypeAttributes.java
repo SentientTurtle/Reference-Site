@@ -3,7 +3,7 @@ package net.sentientturtle.nee.components;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.Component;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.data.datatypes.Attribute;
 import net.sentientturtle.nee.data.datatypes.Type;
 
@@ -45,7 +45,7 @@ public class TypeAttributes extends Component {
             table.content(row);
 
             if (attribute.iconID != null) {
-                row.content(TD("type_attributes_td type_attributes_icon").content(IMG(ResourceLocation.ofIconID(attribute.iconID, context), null, 32)));
+                row.content(TD("type_attributes_td type_attributes_icon").content(IMG(Resource.ofIconID(attribute.iconID, context), null, 32)));
             } else {
                 row.content(TD("type_attributes_td type_attributes_icon"));
             }

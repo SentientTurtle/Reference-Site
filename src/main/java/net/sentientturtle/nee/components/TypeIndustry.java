@@ -7,7 +7,7 @@ import net.sentientturtle.html.PageLink;
 import net.sentientturtle.nee.data.datatypes.IndustryActivity;
 import net.sentientturtle.nee.data.datatypes.PlanetSchematic;
 import net.sentientturtle.nee.page.TypePage;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.data.datatypes.Type;
 
 import java.util.Comparator;
@@ -40,7 +40,7 @@ public class TypeIndustry extends Component {
             table.content(TR().content(TH().attribute("colspan", "3").text("Produced from")));
             for (IndustryActivity activity : outputActivities) {
                 table.content(TR().content(
-                    TD().content(IMG(ResourceLocation.typeIcon(activity.bpTypeID, context), null, 64).className("type_industry_icon")),
+                    TD().content(IMG(Resource.typeIcon(activity.bpTypeID, context), null, 64).className("type_industry_icon")),
                     TD().content(new PageLink(new TypePage(context.sde.getTypes().get(activity.bpTypeID)))),
                     TD().content(TEXT(activity.activityType.activityName))
                 ));
@@ -51,7 +51,7 @@ public class TypeIndustry extends Component {
                 .sorted(Comparator.<Type>comparingInt(type -> type.groupID).thenComparing(typeComparator))
                 .forEach(type -> {
                     table.content(TR().content(
-                        TD().content(IMG(ResourceLocation.typeIcon(type.typeID, context), null, 64).className("type_industry_icon")),
+                        TD().content(IMG(Resource.typeIcon(type.typeID, context), null, 64).className("type_industry_icon")),
                         TD().content(new PageLink(new TypePage(type))),
                         TD().content(TEXT("Reprocessing"))
                     ));
@@ -72,7 +72,7 @@ public class TypeIndustry extends Component {
                 .sorted(Type.comparator(context.sde))
                 .forEach(outputType -> {
                     table.content(TR().content(
-                        TD().content(IMG(ResourceLocation.typeIcon(outputType.typeID, context), null, 64).className("type_industry_icon")),
+                        TD().content(IMG(Resource.typeIcon(outputType.typeID, context), null, 64).className("type_industry_icon")),
                         TD().content(new PageLink(new TypePage(outputType))),
                         TD().content(TEXT("Planetary Industry"))
                     ));
@@ -80,7 +80,7 @@ public class TypeIndustry extends Component {
 
             inputActivities.stream().sorted(activityComparator).forEach(activity -> {
                 table.content(TR().content(
-                    TD().content(IMG(ResourceLocation.typeIcon(activity.bpTypeID, context), null, 64).className("type_industry_icon")),
+                    TD().content(IMG(Resource.typeIcon(activity.bpTypeID, context), null, 64).className("type_industry_icon")),
                     TD().content(new PageLink(new TypePage(context.sde.getTypes().get(activity.bpTypeID)))),
                     TD().content(TEXT(activity.activityType.activityName))
                 ));
@@ -96,7 +96,7 @@ public class TypeIndustry extends Component {
                 .sorted(Comparator.<Map.Entry<Integer, Integer>>comparingInt(Map.Entry::getValue).reversed())
                 .forEach(entry -> {
                     table.content(TR().content(
-                        TD().content(IMG(ResourceLocation.typeIcon(entry.getKey(), context), null, 64).className("type_industry_icon")),
+                        TD().content(IMG(Resource.typeIcon(entry.getKey(), context), null, 64).className("type_industry_icon")),
                         TD().content(new PageLink(new TypePage(context.sde.getTypes().get(entry.getKey())))),
                         TD().content(context.sde.format_with_unit(entry.getValue(), -1))
                     ));

@@ -3,7 +3,7 @@ package net.sentientturtle.nee.components;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.Component;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.data.datatypes.Type;
 
 
@@ -59,43 +59,43 @@ public class ShipFitting extends Component {
         if (showTurrets) {
             slot_table.content(TR().content(
                 TD().text("Turrets"),
-                TD().content(HTML.repeat(turretHardpoints, IMG(ResourceLocation.ofIconID(387, context), null, 32).className("ship_fitting_icon"))),
+                TD().content(HTML.repeat(turretHardpoints, IMG(Resource.ofIconID(387, context), null, 32).className("ship_fitting_icon"))),
                 TD().content(context.sde.format_with_unit(turretHardpoints, context.sde.getAttributes().get(102).unitID))
             ));
         }
         if (showLaunchers) {
             slot_table.content(TR().content(
                 TD().text("Launchers"),
-                TD().content(HTML.repeat(launcherHardpoints, IMG(ResourceLocation.ofIconID(168, context), null, 32).className("ship_fitting_icon"))),
+                TD().content(HTML.repeat(launcherHardpoints, IMG(Resource.ofIconID(168, context), null, 32).className("ship_fitting_icon"))),
                 TD().content(context.sde.format_with_unit(launcherHardpoints, context.sde.getAttributes().get(101).unitID))
             ));
         }
         if (showHMLSlots) {
             slot_table.content(TR().content(
                 TD().text("High power"),
-                TD().content(HTML.repeat(highSlots, IMG(ResourceLocation.ofIconID(293, context), null, 32).className("ship_fitting_icon"))),
+                TD().content(HTML.repeat(highSlots, IMG(Resource.ofIconID(293, context), null, 32).className("ship_fitting_icon"))),
                 TD().content(context.sde.format_with_unit(highSlots, context.sde.getAttributes().get(14).unitID))
             ), TR().content(
                 TD().text("Medium power"),
-                TD().content(HTML.repeat(medSlots, IMG(ResourceLocation.ofIconID(294, context), null, 32).className("ship_fitting_icon"))),
+                TD().content(HTML.repeat(medSlots, IMG(Resource.ofIconID(294, context), null, 32).className("ship_fitting_icon"))),
                 TD().content(context.sde.format_with_unit(medSlots, context.sde.getAttributes().get(13).unitID))
             ), TR().content(
                 TD().text("Low power"),
-                TD().content(HTML.repeat(lowSlots, IMG(ResourceLocation.ofIconID(295, context), null, 32).className("ship_fitting_icon"))),
+                TD().content(HTML.repeat(lowSlots, IMG(Resource.ofIconID(295, context), null, 32).className("ship_fitting_icon"))),
                 TD().content(context.sde.format_with_unit(lowSlots, context.sde.getAttributes().get(12).unitID))
             ));
         }
         if (showSubsystemSlots) {
             slot_table.content(TR().content(
                 TD().text("Subsystem"),
-                TD().content(HTML.repeat(subsystemSlots, IMG(ResourceLocation.ofIconID(3756, context), null, 32).className("ship_fitting_icon"))),
+                TD().content(HTML.repeat(subsystemSlots, IMG(Resource.ofIconID(3756, context), null, 32).className("ship_fitting_icon"))),
                 TD().content(context.sde.format_with_unit(subsystemSlots, context.sde.getAttributes().get(1367).unitID))
             ));
         }
         if (showRigSlots) {
             slot_table.content(TR().content(
                 TD().content(context.sde.format_with_unit(rigSize, context.sde.getAttributes().get(1547).unitID), TEXT(" rig")),
-                TD().content(HTML.repeat(rigSlots, IMG(ResourceLocation.ofIconID(3266, context), null, 32).className("ship_fitting_icon"))),
+                TD().content(HTML.repeat(rigSlots, IMG(Resource.ofIconID(3266, context), null, 32).className("ship_fitting_icon"))),
                 TD().content(
                     context.sde.format_with_unit(rigSlots, context.sde.getAttributes().get(1137).unitID),
                     BR(), TEXT("("),
@@ -108,14 +108,14 @@ public class ShipFitting extends Component {
             stat_table.content(
                 TR().content(
                     TD().content(SPAN("ship_fitting_span").content(
-                        IMG(ResourceLocation.ofIconID(1405, context), null, 32).className("ship_fitting_icon"),
+                        IMG(Resource.ofIconID(1405, context), null, 32).className("ship_fitting_icon"),
                         TEXT("CPU Output:")
                     )),
                     TD().content(context.sde.format_with_unit(cpuOutput, context.sde.getAttributes().get(48).unitID))
                 ),
                 TR().content(
                     TD().content(SPAN("ship_fitting_span").content(
-                        IMG(ResourceLocation.ofIconID(1400, context), null, 32).className("ship_fitting_icon"),
+                        IMG(Resource.ofIconID(1400, context), null, 32).className("ship_fitting_icon"),
                         TEXT("Powergrid output:")
                     )),
                     TD().content(context.sde.format_with_unit(powerGrid, context.sde.getAttributes().get(11).unitID))
@@ -126,14 +126,14 @@ public class ShipFitting extends Component {
             stat_table.content(
                 TR().content(
                     TD().content(SPAN("ship_fitting_span").content(
-                        IMG(ResourceLocation.ofIconID(1668, context), null, 32).className("ship_fitting_icon"),
+                        IMG(Resource.ofIconID(1668, context), null, 32).className("ship_fitting_icon"),
                         TEXT("Capacitor capacity:")
                     )),
                     TD().content(context.sde.format_with_unit(capacitorCapacity, context.sde.getAttributes().get(482).unitID))
                 ),
                 TR().content(
                     TD().content(SPAN("ship_fitting_span").content(
-                        IMG(ResourceLocation.ofIconID(1392, context), null, 32).className("ship_fitting_icon"),
+                        IMG(Resource.ofIconID(1392, context), null, 32).className("ship_fitting_icon"),
                         TEXT("Recharge:")
                     )),
                     TD().content(context.sde.format_with_unit(capacitorRecharge, context.sde.getAttributes().get(55).unitID))
@@ -144,7 +144,7 @@ public class ShipFitting extends Component {
             double peakRecharge = 2500.0 * capacitorCapacity / capacitorRecharge;
             stat_table.content(TR().content(
                 TD().content(SPAN("ship_fitting_span").content(
-                    IMG(ResourceLocation.ofIconID(1668, context), null, 32).className("ship_fitting_icon"),
+                    IMG(Resource.ofIconID(1668, context), null, 32).className("ship_fitting_icon"),
                     TEXT("Peak capacitor rate: ")
                 )),
                 TD().content(context.sde.format_with_unit(peakRecharge, -3))
@@ -153,7 +153,7 @@ public class ShipFitting extends Component {
         if (showSignature) {
             stat_table.content(TR().content(
                 TD().content(SPAN("ship_fitting_span").content(
-                        IMG(ResourceLocation.ofIconID(1390, context), null, 32).className("ship_fitting_icon"),
+                        IMG(Resource.ofIconID(1390, context), null, 32).className("ship_fitting_icon"),
                         TEXT("Signature radius: ")
                     )),
                 TD().content(context.sde.format_with_unit(signatureRadius, context.sde.getAttributes().get(552).unitID))

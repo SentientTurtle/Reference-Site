@@ -5,8 +5,8 @@ plugins {
 group 'net.sentientturtle'
 version '1.0-SNAPSHOT'
 
-sourceCompatibility = 1.22
-targetCompatibility = 1.22
+sourceCompatibility = 1.24
+targetCompatibility = 1.24
 
 applicationDefaultJvmArgs = ["--enable-native-access=ALL-UNNAMED"]
 

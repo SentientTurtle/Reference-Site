@@ -1,11 +1,10 @@
 package net.sentientturtle.nee.page;
 
-import net.sentientturtle.html.Element;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.components.*;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.data.datatypes.Attribute;
 import net.sentientturtle.nee.data.datatypes.Group;
 import net.sentientturtle.nee.data.datatypes.Type;
@@ -47,8 +46,8 @@ public class ComparisonPage extends Page {
 
     @Nullable
     @Override
-    public ResourceLocation getIcon(HtmlContext context) {
-        return ResourceLocation.typeIcon(parentType.typeID, context);
+    public Resource getIcon(HtmlContext context) {
+        return Resource.typeIcon(parentType.typeID, context);
     }
 
     @Override
@@ -103,7 +102,7 @@ public class ComparisonPage extends Page {
 
                         ArrayList<HTML> column = new ArrayList<>(NUM_ROWS);
                         column.add(
-                            new ItemTitle(new PageLink(new TypePage(type)), ResourceLocation.typeIcon(type.typeID, context))
+                            new ItemTitle(new PageLink(new TypePage(type)), Resource.typeIcon(type.typeID, context))
                                 .style(String.format("grid-column: %d; grid-row: title;", currentCol))
                         );
                         usedRows.add("title");

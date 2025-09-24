@@ -9,7 +9,7 @@ import net.sentientturtle.html.PageLink;
 import net.sentientturtle.nee.data.datatypes.Group;
 import net.sentientturtle.nee.page.GroupPage;
 import net.sentientturtle.nee.page.TypePage;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.data.datatypes.Category;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -50,7 +50,7 @@ public class GroupList extends Component {
                 .stream()
                 .sorted(Comparator.comparingInt(g -> g.groupID))
                 .map(group -> {
-                    ResourceLocation icon = group.getIconWithFallback(context);
+                    Resource icon = group.getIconWithFallback(context);
                     return DIV("group_list_entry")
                         .content(
                             icon != null ? IMG(icon, null, 64).className("group_list_icon") : DIV("group_list_icon"),
@@ -66,7 +66,7 @@ public class GroupList extends Component {
                 .map(type ->
                     DIV("group_list_entry")
                         .content(
-                            IMG(ResourceLocation.typeIcon(type.typeID, context), null, 64).className("group_list_icon"),
+                            IMG(Resource.typeIcon(type.typeID, context), null, 64).className("group_list_icon"),
                             SPAN("font_header")
                                 .content(new PageLink(new TypePage(type)))
                         )

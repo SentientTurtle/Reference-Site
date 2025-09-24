@@ -1,7 +1,7 @@
 package net.sentientturtle.nee.data.datatypes;
 
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.data.sde.SDEData;
 import org.jspecify.annotations.Nullable;
 
@@ -25,12 +25,9 @@ public final class SolarSystem implements MapItem {
     public final double z;
     public final double security;
     public @Nullable Integer factionID;
-    public final @Nullable Integer sunTypeID;
+    public @Nullable Integer sunTypeID;
     public final @Nullable Integer wormholeClassID;
 
-    /**
-     *
-     */
     public SolarSystem(
         int regionID,
         int constellationID,
@@ -78,7 +75,7 @@ public final class SolarSystem implements MapItem {
 
     @Override
     public Stream<MapItem.MapConstituent> getConstituents(SDEData sde) {
-        return sde.getCelestials().getOrDefault(this.solarSystemID, Set.of())
+        return sde.getSystemCelestials().getOrDefault(this.solarSystemID, Set.of())
             .stream()
             .sorted(
                 Comparator.<Celestial>comparingInt(celestial -> {
@@ -124,11 +121,11 @@ public final class SolarSystem implements MapItem {
     }
 
     @Override
-    public @Nullable ResourceLocation getIcon(HtmlContext context) {
+    public @Nullable Resource getIcon(HtmlContext context) {
         if (sunTypeID == null) {
             return null;
         } else {
-            return ResourceLocation.typeIcon(sunTypeID, context);
+            return Resource.typeIcon(sunTypeID, context);
         }
     }
 

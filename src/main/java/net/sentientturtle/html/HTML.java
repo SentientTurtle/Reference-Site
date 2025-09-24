@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.context.ID;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.util.ExceptionUtil;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -164,7 +164,7 @@ public sealed interface HTML permits Element, HTML.EmptyHTML, HTML.MultiHTML, HT
     /// {@code <img src='[src]' alt='[alt]'>}
     ///
     /// Alt nullable; Icons paired right next to the text name can leave this null
-    static Element IMG(ResourceLocation src, @Nullable String alt) {
+    static Element IMG(Resource src, @Nullable String alt) {
         return new Element("img", true)
                 .attribute("src", src::getURI)
                 .attribute("alt", alt != null ? alt : "");
@@ -172,15 +172,15 @@ public sealed interface HTML permits Element, HTML.EmptyHTML, HTML.MultiHTML, HT
 
     /// {@code <img src='[src]' alt='[alt]' width='[size]' height='[size]'>}
     ///
-    /// {@link #IMG(ResourceLocation, String, int, int)} override for square images
-    static Element IMG(ResourceLocation src, @Nullable String alt, int size) {
+    /// {@link #IMG(Resource, String, int, int)} override for square images
+    static Element IMG(Resource src, @Nullable String alt, int size) {
         return IMG(src, alt, size, size);
     }
 
     /// {@code <img src='[src]' alt='[alt]' width='[width]' height='[height]'>}
     ///
     /// Alt nullable; Icons paired right next to the text name can leave this null
-    static Element IMG(ResourceLocation src, @Nullable String alt, int width, int height) {
+    static Element IMG(Resource src, @Nullable String alt, int width, int height) {
         return new Element("img", true)
                 .attribute("src", src::getURI)
                 .attribute("width", String.valueOf(width))
@@ -204,7 +204,7 @@ public sealed interface HTML permits Element, HTML.EmptyHTML, HTML.MultiHTML, HT
     }
 
     /// {@code <script type='module' src='[location]'></script> }
-    static Element SCRIPT_EXTERNAL(ResourceLocation location) {
+    static Element SCRIPT_EXTERNAL(Resource location) {
         return new Element("script")
             .attribute("type", "module")
             .attribute("src", location::getURI);

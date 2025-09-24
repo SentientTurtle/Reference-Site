@@ -1,9 +1,9 @@
 package net.sentientturtle.nee.data.datatypes;
 
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.data.sde.SDEData;
-import net.sentientturtle.nee.page.MapPage;
+import net.sentientturtle.nee.page.MapFrame;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Comparator;
@@ -73,7 +73,7 @@ public interface Cluster extends MapItem {
                 .map(region -> new MapItem.MapConstituent(
                     "region.png",
                     region.regionName,
-                    new MapPage(region),
+                    new MapFrame(region),
                     0
                 ));
         }
@@ -89,8 +89,8 @@ public interface Cluster extends MapItem {
         }
 
         @Override
-        public ResourceLocation getIcon(HtmlContext context) {
-            return ResourceLocation.ofIconID(2355, context);
+        public Resource getIcon(HtmlContext context) {
+            return Resource.ofIconID(2355, context);
         }
     };
 
@@ -126,7 +126,7 @@ public interface Cluster extends MapItem {
                 .map(region -> new MapItem.MapConstituent(
                     "region.png",
                     region.regionName,
-                    new MapPage(region),
+                    new MapFrame(region),
                     0
                 ));
         }
@@ -142,8 +142,8 @@ public interface Cluster extends MapItem {
         }
 
         @Override
-        public ResourceLocation getIcon(HtmlContext context) {
-            return ResourceLocation.ofIconID(2355, context);
+        public Resource getIcon(HtmlContext context) {
+            return Resource.ofIconID(2355, context);
         }
     };
 }

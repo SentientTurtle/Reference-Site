@@ -5,7 +5,7 @@ import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.Main;
 import net.sentientturtle.nee.components.PageList;
 import net.sentientturtle.nee.components.TextBox;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
@@ -93,7 +93,7 @@ public class IndexPage extends Page {
 
     @Nullable
     @Override
-    public ResourceLocation getIcon(HtmlContext context) {
-        return ResourceLocation.file("bookicon.png");
+    public Resource getIcon(HtmlContext context) {
+        return Resource.file("bookicon.png");
     }
 }

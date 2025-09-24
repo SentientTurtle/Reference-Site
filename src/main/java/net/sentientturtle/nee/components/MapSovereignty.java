@@ -3,7 +3,7 @@ package net.sentientturtle.nee.components;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.Component;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.data.datatypes.Faction;
 import net.sentientturtle.nee.data.datatypes.MapItem;
 
@@ -17,9 +17,9 @@ import static net.sentientturtle.html.HTML.*;
 public class MapSovereignty extends Component {
     private final MapItem mapItem;
     private final String fallBackText;
-    private final ResourceLocation fallBackIcon;
+    private final Resource fallBackIcon;
 
-    public MapSovereignty(MapItem mapItem, String fallBackText, ResourceLocation fallBackIcon) {
+    public MapSovereignty(MapItem mapItem, String fallBackText, Resource fallBackIcon) {
         super("map_sovereignty colour_theme_minor");
         this.mapItem = mapItem;
         this.fallBackText = fallBackText;
@@ -35,7 +35,7 @@ public class MapSovereignty extends Component {
             return new HTML[]{
                 DIV("font_header").text("Sovereignty"),
                 DIV("map_sovereignty_faction").content(
-                    IMG(ResourceLocation.factionLogo(faction.factionID), null, 64).className("map_sovereignty_icon"),
+                    IMG(Resource.factionLogo(faction.factionID), null, 64).className("map_sovereignty_icon"),
                     TEXT_BOLD(faction.factionName).className("font_header map_sovereignty_text")
                 )
             };

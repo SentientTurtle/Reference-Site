@@ -6,7 +6,7 @@ import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.datatypes.Type;
 import net.sentientturtle.html.Frame;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 
 import java.util.Map;
 import java.util.Objects;
@@ -42,7 +42,7 @@ public class UsedWith extends Component {
                 )
                 .map(entry -> {
                     Frame page = entry.getPage();
-                    ResourceLocation icon = page.getIcon(context);
+                    Resource icon = page.getIcon(context);
                     return DIV("used_with_entry").content(
                         (icon != null) ? IMG(icon, null, 32).className("used_with_icon") : DIV("used_with_icon"),
                         new PageLink(page).className("used_with_type font_header")
@@ -57,7 +57,7 @@ public class UsedWith extends Component {
                         Type type = context.sde.getTypes().get(entry.getKey());
 
                         Frame page = type.getPage();
-                        ResourceLocation icon = page.getIcon(context);
+                        Resource icon = page.getIcon(context);
                         return DIV("used_with_entry").content(
                             (icon != null) ? IMG(icon, null, 32).className("used_with_icon") : DIV("used_with_icon"),
                             new PageLink(page).className("used_with_type font_header"),

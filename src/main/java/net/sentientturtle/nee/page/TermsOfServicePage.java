@@ -2,10 +2,8 @@ package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.nee.Main;
-import net.sentientturtle.nee.components.PageList;
 import net.sentientturtle.nee.components.TextBox;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import org.jspecify.annotations.Nullable;
 
 import static net.sentientturtle.html.HTML.*;
@@ -65,7 +63,7 @@ public class TermsOfServicePage extends Page {
 
     @Nullable
     @Override
-    public ResourceLocation getIcon(HtmlContext context) {
+    public Resource getIcon(HtmlContext context) {
         return null;
     }
 }

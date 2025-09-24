@@ -6,7 +6,7 @@ import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.Component;
 import net.sentientturtle.nee.data.datatypes.Attribute;
 import net.sentientturtle.nee.data.datatypes.Type;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
@@ -45,7 +45,7 @@ public abstract class AttributeList extends Component {
                         row.content(
                             TD().content(
                                 SPAN("attribute_list_span").title(name).content(
-                                    iconID != null ? IMG(ResourceLocation.ofIconID(iconID, context), null, 32).className("attribute_list_icon") : DIV("attribute_list_icon"),
+                                    iconID != null ? IMG(Resource.ofIconID(iconID, context), null, 32).className("attribute_list_icon") : DIV("attribute_list_icon"),
                                     TEXT(name + ": "),
                                     context.sde.format_with_unit(value, attributeMap.get(attributeID).unitID)
                                 )
@@ -58,7 +58,7 @@ public abstract class AttributeList extends Component {
                         row.content(
                             TD().content(
                                 SPAN("attribute_list_span").title(name).content(
-                                    iconID != null ? IMG(ResourceLocation.ofIconID(iconID, context), null, 32).className("attribute_list_icon") : DIV("attribute_list_icon"),
+                                    iconID != null ? IMG(Resource.ofIconID(iconID, context), null, 32).className("attribute_list_icon") : DIV("attribute_list_icon"),
                                     TEXT(name + ": "),
                                     context.sde.format_with_unit(value, attributeMap.get(attributeID).unitID)
                                 )
@@ -72,7 +72,7 @@ public abstract class AttributeList extends Component {
                             row.content(
                                 TD().content(
                                     SPAN("attribute_list_span").title(name).content(
-                                        iconID != null ? IMG(ResourceLocation.ofIconID(iconID, context), null, 32).className("attribute_list_icon") : DIV("attribute_list_icon"),
+                                        iconID != null ? IMG(Resource.ofIconID(iconID, context), null, 32).className("attribute_list_icon") : DIV("attribute_list_icon"),
                                         TEXT(name + ": "),
                                         context.sde.format_with_unit(value, attributeMap.get(attributeID).unitID)
                                     )

@@ -4,11 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.RenderingException;
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.nee.data.ResourceLocation;
-import net.sentientturtle.nee.data.datatypes.Constellation;
-import net.sentientturtle.nee.data.datatypes.Region;
-import net.sentientturtle.nee.data.datatypes.SolarSystem;
-import net.sentientturtle.nee.data.datatypes.Cluster;
+import net.sentientturtle.nee.data.Resource;
+import net.sentientturtle.nee.data.datatypes.*;
 import net.sentientturtle.nee.util.ExceptionUtil;
 import org.jspecify.annotations.Nullable;
 
@@ -43,22 +40,22 @@ public class DynamicMapPage extends Page {
     }
 
     @Override
-    public @Nullable ResourceLocation getIcon(HtmlContext context) {
-        return ResourceLocation.ofIconID(2355, context);
+    public @Nullable Resource getIcon(HtmlContext context) {
+        return Resource.ofIconID(2355, context);
     }
 
     @Override
     protected List<HTML> headEntries(HtmlContext context) {
         // Add a file-dependency on three.core
-        ResourceLocation.file("three/three.core.min.js").getURI(context);
+        Resource.file("three/three.core.min.js").getURI(context);
         return List.of(
             SCRIPT_IMPORTMAP(new ImportMap(Map.of(
-                "three", "./" + ResourceLocation.file("three/three.module.min.js").getURI(context),
-                "CSS2D", "./" + ResourceLocation.file("three/CSS2DRenderer.js").getURI(context),
-                "Orbit", "./" + ResourceLocation.file("three/OrbitControls.js").getURI(context),
-                "Stats", "./" + ResourceLocation.file("three/stats.module.js").getURI(context)
+                "three", "./" + Resource.file("three/three.module.min.js").getURI(context),
+                "CSS2D", "./" + Resource.file("three/CSS2DRenderer.js").getURI(context),
+                "Orbit", "./" + Resource.file("three/OrbitControls.js").getURI(context),
+                "Stats", "./" + Resource.file("three/stats.module.js").getURI(context)
             ))),
-            SCRIPT_EXTERNAL(ResourceLocation.file("mapscript.js"))
+            SCRIPT_EXTERNAL(Resource.file("mapscript.js"))
         );
     }
 
@@ -252,7 +249,7 @@ public class DynamicMapPage extends Page {
         selectables.put(-2, new Selectable( null, 0, 0, 0, 2.0E18, null, null,null));
 
         for (Region region : context.sde.getRegions().values()) {
-            double size = Math.max(Math.abs(region.xMax - region.xMin), Math.abs(region.zMin - region.zMax));
+            double size = 0.0 /* TODO */;
             double distance = Math.max(1.25 * (size / 2.0) / Math.tan(cameraFoV / 2.0), 5.0E17);
             List<String> systemIDs = new ArrayList<>();
             double security = 0.0;
@@ -291,7 +288,7 @@ public class DynamicMapPage extends Page {
         }
 
         for (Constellation constellation : context.sde.getConstellations().values()) {
-            double size = Math.max(Math.abs(constellation.xMax - constellation.xMin), Math.abs(constellation.zMin - constellation.zMax));
+            double size = 0.0 /* TODO */;
             double distance = Math.max(1.25 * (size / 2.0) / Math.tan(cameraFoV / 2.0), 5.0E17);
             List<String> systemIDs = new ArrayList<>();
             double security = 0.0;
@@ -349,14 +346,46 @@ public class DynamicMapPage extends Page {
                 systemKillsBytes = inputStream.readAllBytes();
             }
 
-            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/NEC.json"), _ -> NEC_bytes);
-            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/NEC_jumps.json"), _ -> NEC_jumps_bytes);
-            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/anoikis.json"), _ -> anoikisBytes);
-            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/pochven.json"), _ -> pochvenBytes);
-            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/pochven_jumps.json"), _ -> pochvenJumpsBytes);
-            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/selection.json"), _ -> selectionBytes);
-            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/system_jumps.json"), _ -> systemJumpsBytes);
-            context.addFileDependency(ResourceLocation.OUTPUT_RES_FOLDER.resolve("map/system_kills.json"), _ -> systemKillsBytes);
+            context.addFileDependency(Resource.OUTPUT_RES_FOLDER.resolve("map/NEC.json"), _ -> NEC_bytes);
+            context.addFileDependency(Resource.OUTPUT_RES_FOLDER.resolve("map/NEC_jumps.json"), _ -> NEC_jumps_bytes);
+            context.addFileDependency(Resource.OUTPUT_RES_FOLDER.resolve("map/anoikis.json"), _ -> anoikisBytes);
+            context.addFileDependency(Resource.OUTPUT_RES_FOLDER.resolve("map/pochven.json"), _ -> pochvenBytes);
+            context.addFileDependency(Resource.OUTPUT_RES_FOLDER.resolve("map/pochven_jumps.json"), _ -> pochvenJumpsBytes);
+            context.addFileDependency(Resource.OUTPUT_RES_FOLDER.resolve("map/selection.json"), _ -> selectionBytes);
+            context.addFileDependency(Resource.OUTPUT_RES_FOLDER.resolve("map/system_jumps.json"), _ -> systemJumpsBytes);
+            context.addFileDependency(Resource.OUTPUT_RES_FOLDER.resolve("map/system_kills.json"), _ -> systemKillsBytes);
+
+            String[] bracketNames = {"sun.png", "planet.png", "moon.png", "asteroidbelt.png"};
+            for (String bracketName : bracketNames) {
+                context.addFileDependency(Resource.OUTPUT_RES_FOLDER.resolve("map/brackets/" + bracketName), Resource.fromSharedCache("res:/ui/texture/shared/brackets/" + bracketName, context).getData());
+            }
+
+            record CelestialJson(double x, double y, double z, String name, String bracket){}
+            for (SolarSystem solarSystem : context.sde.getSolarSystems().values()) {
+                Set<Celestial> celestials = context.sde.getSystemCelestials().getOrDefault(solarSystem.solarSystemID, Set.of());
+                ArrayList<CelestialJson> celestialPositions = new ArrayList<>(celestials.size() + 1);
+
+                if (solarSystem.sunTypeID != null) {
+                    celestialPositions.add(new CelestialJson(0.0, 0.0, 0.0, solarSystem.solarSystemName + " - Sun", "sun"));
+                }
+
+                for (Celestial celestial : celestials) {
+                    if (celestial.position != null) {
+                        // TODO: Remove (Integer) cast once primitive patterns leave preview.
+                        String bracketName = switch ((Integer) context.sde.getTypes().get(celestial.typeID).groupID) {
+                            case 6, 995 -> "sun";
+                            case 7 -> "planet";
+                            case 8 -> "moon";
+                            case 9 -> "asteroidbelt";
+                            case Integer group -> throw new IllegalStateException("Unknown celestial group: " + group);
+                        };
+
+                        celestialPositions.add(new CelestialJson(celestial.position.x(), celestial.position.y(), celestial.position.z(), celestial.itemName, bracketName));
+                    }
+                }
+                byte[] celestialBytes = objectMapper.writeValueAsBytes(celestialPositions);
+                context.addFileDependency(Resource.OUTPUT_RES_FOLDER.resolve("map/celestials/" + solarSystem.solarSystemID + ".json"), _ -> celestialBytes);
+            }
         } catch (IOException | URISyntaxException e) {
             ExceptionUtil.sneakyThrow(e);
         }

@@ -3,7 +3,7 @@ package net.sentientturtle.nee.components;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.Component;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -17,15 +17,15 @@ import static net.sentientturtle.html.HTML.IMG;
  */
 public class ItemTitle extends Component {
     private final HTML text;
-    private final ResourceLocation icon;
+    private final Resource icon;
 
-    public ItemTitle(@NonNull String text, @Nullable ResourceLocation icon) {
+    public ItemTitle(@NonNull String text, @Nullable Resource icon) {
         super("item_title colour_theme_minor");
         this.text = HTML.TEXT(Objects.requireNonNull(text));
         this.icon = icon;
     }
 
-    public ItemTitle(@NonNull HTML text, @Nullable ResourceLocation icon) {
+    public ItemTitle(@NonNull HTML text, @Nullable Resource icon) {
         super("item_title colour_theme_minor");
         this.text = Objects.requireNonNull(text);
         this.icon = icon;

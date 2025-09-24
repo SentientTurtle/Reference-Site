@@ -1,9 +1,9 @@
 package net.sentientturtle.nee.data.datatypes;
 
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.data.sde.SDEData;
-import net.sentientturtle.nee.page.MapPage;
+import net.sentientturtle.nee.page.MapFrame;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Comparator;
@@ -22,28 +22,16 @@ public class Region implements MapItem {
     public final double x;
     public final double y;
     public final double z;
-    public final double xMin;
-    public final double yMin;
-    public final double zMin;
-    public final double xMax;
-    public final double yMax;
-    public final double zMax;
     /// Can be left null to indicate this Region does not belong to a faction
     public final @Nullable Integer factionID;
     public final @Nullable Integer wormholeClassID;
 
-    public Region(int regionID, String regionName, double x, double y, double z, double xMin, double yMin, double zMin, double xMax, double yMax, double zMax, @Nullable Integer factionID, @Nullable Integer wormholeClassID) {
+    public Region(int regionID, String regionName, double x, double y, double z, @Nullable Integer factionID, @Nullable Integer wormholeClassID) {
         this.regionID = regionID;
         this.regionName = regionName;
         this.x = x;
         this.y = y;
         this.z = z;
-        this.xMin = xMin;
-        this.yMin = yMin;
-        this.zMin = -zMax;
-        this.xMax = xMax;
-        this.yMax = yMax;
-        this.zMax = -zMin;
         this.factionID = factionID;
         this.wormholeClassID = wormholeClassID;
     }
@@ -78,7 +66,7 @@ public class Region implements MapItem {
             .map(constellation -> new MapItem.MapConstituent(
                 "constellation.png",
                 constellation.constellationName,
-                new MapPage(constellation),
+                new MapFrame(constellation),
                 0
             ));
     }
@@ -96,8 +84,8 @@ public class Region implements MapItem {
     }
 
     @Override
-    public ResourceLocation getIcon(HtmlContext context) {
-        return ResourceLocation.ofIconID(2355, context);
+    public Resource getIcon(HtmlContext context) {
+        return Resource.ofIconID(2355, context);
     }
 
     @Override

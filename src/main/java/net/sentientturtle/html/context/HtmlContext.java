@@ -3,9 +3,8 @@ package net.sentientturtle.html.context;
 import net.sentientturtle.html.Document;
 import net.sentientturtle.nee.data.DataSources;
 import net.sentientturtle.nee.data.sde.SDEData;
-import net.sentientturtle.nee.data.sharedcache.FSDData;
 import net.sentientturtle.nee.data.sharedcache.SharedCacheReader;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import org.jspecify.annotations.NonNull;
 
 import java.io.IOException;
@@ -28,13 +27,12 @@ public abstract class HtmlContext {
     private final LinkedHashSet<String> css;
     private final LinkedHashSet<String> js;
     // External files that need including in the output, keys are file paths relative to output folder, value ResourceData provides file contents
-    private final HashMap<Path, ResourceLocation.ResourceData> fileDependencies;
+    private final HashMap<Path, Resource.ResourceData> fileDependencies;
 
     // EVE-specific fields; These live here because Java generic inference breaks with generic HTML and Element, otherwise HtmlContext could have a generic type for data extension
     public final DataSources dataSources;
     public final SDEData sde;
     public final SharedCacheReader sharedCache;
-    public final FSDData fsdData;
 
 
     /**
@@ -51,7 +49,6 @@ public abstract class HtmlContext {
         this.dataSources = dataSources;
         this.sde = dataSources.sdeData();
         this.sharedCache = dataSources.sharedCache();
-        this.fsdData = dataSources.fsdData();
         this.css = new LinkedHashSet<>();
         this.js = new LinkedHashSet<>();
         this.fileDependencies = new HashMap<>();
@@ -93,11 +90,11 @@ public abstract class HtmlContext {
      * @param path Path to file (relative to website output dir)
      * @param resourceData File contents
      */
-    public void addFileDependency(Path path, ResourceLocation.ResourceData resourceData) {
+    public void addFileDependency(Path path, Resource.ResourceData resourceData) {
         this.fileDependencies.put(path, resourceData);
     }
 
-    public HashMap<Path, ResourceLocation.ResourceData> getFileDependencies() {
+    public HashMap<Path, Resource.ResourceData> getFileDependencies() {
         return fileDependencies;
     }
 

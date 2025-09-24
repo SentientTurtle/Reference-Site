@@ -1,9 +1,9 @@
 package net.sentientturtle.nee.data.datatypes;
 
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.data.sde.SDEData;
-import net.sentientturtle.nee.page.MapPage;
+import net.sentientturtle.nee.page.MapFrame;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Comparator;
@@ -22,28 +22,16 @@ public class Constellation implements MapItem {
     public final double x;
     public final double y;
     public final double z;
-    public final double xMin;
-    public final double yMin;
-    public final double zMin;
-    public final double xMax;
-    public final double yMax;
-    public final double zMax;
     public @Nullable Integer factionID;
     public final @Nullable Integer wormholeClassID;
 
-    public Constellation(int regionID, int constellationID, String constellationName, double x, double y, double z, double xMin, double yMin, double zMin, double xMax, double yMax, double zMax, @Nullable Integer factionID, @Nullable Integer wormholeClassID) {
+    public Constellation(int regionID, int constellationID, String constellationName, double x, double y, double z, @Nullable Integer factionID, @Nullable Integer wormholeClassID) {
         this.regionID = regionID;
         this.constellationID = constellationID;
         this.constellationName = constellationName;
         this.x = x;
         this.y = y;
         this.z = z;
-        this.xMin = xMin;
-        this.yMin = yMin;
-        this.zMin = zMin;
-        this.xMax = xMax;
-        this.yMax = yMax;
-        this.zMax = zMax;
         this.factionID = factionID;
         this.wormholeClassID = wormholeClassID;
     }
@@ -80,7 +68,7 @@ public class Constellation implements MapItem {
             .map(system -> new MapItem.MapConstituent(
                 "solarsystem.png",
                 system.solarSystemName,
-                new MapPage(system),
+                new MapFrame(system),
                 0
             ));
     }
@@ -96,8 +84,8 @@ public class Constellation implements MapItem {
     }
 
     @Override
-    public ResourceLocation getIcon(HtmlContext context) {
-        return ResourceLocation.ofIconID(2355, context);
+    public Resource getIcon(HtmlContext context) {
+        return Resource.ofIconID(2355, context);
     }
 
     @Override

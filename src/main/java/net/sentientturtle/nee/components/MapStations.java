@@ -3,7 +3,7 @@ package net.sentientturtle.nee.components;
 import net.sentientturtle.html.Component;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.data.datatypes.MapItem;
 import net.sentientturtle.nee.data.datatypes.Station;
 
@@ -29,12 +29,12 @@ public class MapStations extends Component {
             DIV("map_stations_list").content(
                 stations.stream().map(station ->
                     DIV("map_stations_entry").content(
-                        IMG(ResourceLocation.typeIcon(station.stationTypeID, context), null, 32).className("map_stations_icon"),
+                        IMG(Resource.typeIcon(station.stationTypeID, context), null, 32).className("map_stations_icon"),
                         DIV("map_stations_content").content(
                             SPAN().text(station.stationName),
                             DIV("map_stations_services").content(
                                 station.services.stream().map(service ->
-                                    IMG(ResourceLocation.fromSharedCache(service.iconResource, context), service.displayName, 32)
+                                    IMG(Resource.fromSharedCache(service.iconResource, context), service.displayName, 32)
                                         .attribute("title", service.displayName)
                                 )
                             )

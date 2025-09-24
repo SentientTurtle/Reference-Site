@@ -3,7 +3,7 @@ package net.sentientturtle.nee.components;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.Component;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.data.datatypes.Constellation;
 import net.sentientturtle.nee.data.datatypes.Region;
 import net.sentientturtle.nee.data.datatypes.SolarSystem;
@@ -32,7 +32,7 @@ public class MapList extends Component {
                     .map(entry ->
                         DIV("map_list_entry").content(
                             HTML.repeat(entry.indent(), DIV("map_list_icon")),
-                            IMG(ResourceLocation.fromSharedCache("res:/ui/texture/shared/brackets/" + entry.bracketName(), context), null, 64).className("map_list_icon"),
+                            IMG(Resource.fromSharedCache("res:/ui/texture/shared/brackets/" + entry.bracketName(), context), null, 64).className("map_list_icon"),
                             SPAN().content(entry.frame() != null ? new PageLink(entry.frame(), entry.name()) : TEXT(entry.name()))
                         )
                     )

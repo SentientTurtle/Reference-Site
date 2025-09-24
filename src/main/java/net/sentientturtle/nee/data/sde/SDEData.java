@@ -101,7 +101,10 @@ public abstract class SDEData {
     public abstract Map<Integer, Set<Integer>> getInJumps();
 
     /// Map<SolarSystemID, Set<Celestial in solarsystem>>
-    public abstract Map<Integer, Set<Celestial>> getCelestials();
+    public abstract Map<Integer, Set<Celestial>> getSystemCelestials();
+
+    /// Map<OperationID, Set<Station.Service in operation>>
+    public abstract Map<Integer, EnumSet<Station.Service>> getOperationServices();
 
     /// Map<SolarSystemID, Set<Station in solarsystem>>
     public abstract Map<Integer, Set<Station>> getStations();
@@ -109,8 +112,17 @@ public abstract class SDEData {
     /// Map<FactionID, Faction>
     public abstract Map<Integer, Faction> getFactions();
 
-    /// Map<MarketGroupID, Faction>
+    /// Map<MarketGroupID, MarketGroup>
     public abstract Map<Integer, MarketGroup> getMarketGroups();
+
+    /// Map<WarfareBuffID, WarfareBuff>
+    public abstract Map<Integer, WarfareBuff> getWarfareBuffs();
+
+    /// Map<TypeID, DynamicAttributes of type>
+    public abstract Map<Integer, DynamicAttributes> getDynamicAttributes();
+
+    /// Map<GraphicID, String folderPath>
+    public abstract Map<Integer, String> getGraphicFolders();
 
     // Views
     // Map<CategoryID, Set<Group>>
@@ -591,7 +603,14 @@ public abstract class SDEData {
         Set<Integer> publishCategories = Set.of();
         HashSet<Integer> publishCategoriesAndChildren = new HashSet<>();
         Set<Integer> publishGroups = Set.of();
-        HashSet<Integer> publishGroupsAndChildren = new HashSet<>(List.of(6, 15, 1324));
+        HashSet<Integer> publishGroupsAndChildren = new HashSet<>(List.of(
+            6, 995, // Suns
+            7,  // Planets
+            8,  // Moons
+            9,  // Asteroid belts
+            15, // Stations
+            1324    // FLEX structure service module
+        ));
         Set<Integer> publishTypes = Set.of(
             30574, 30575, 30576, 30577, 30669, 30670, // Wormhole space "Secondary Sun"
             2787    // Corporate Hangar Array Blueprint

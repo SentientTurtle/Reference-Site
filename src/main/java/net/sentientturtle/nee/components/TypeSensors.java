@@ -5,7 +5,7 @@ import net.sentientturtle.html.Component;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.datatypes.Attribute;
 import net.sentientturtle.nee.data.datatypes.Type;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 
 import java.util.Map;
 
@@ -34,7 +34,7 @@ public class TypeSensors extends Component {
                 TR().content(
                     TD().content(
                         SPAN("type_sensors_span").title("Targeting Range").content(
-                            IMG(ResourceLocation.ofIconID(attributeMap.get(76).iconID, context), null, 32).className("type_sensors_icon"),
+                            IMG(Resource.ofIconID(attributeMap.get(76).iconID, context), null, 32).className("type_sensors_icon"),
                             TEXT("Targeting Range: "),
                             context.sde.format_with_unit(targetingRange > 1000.0 ? targetingRange / 1000.0 : targetingRange, -1),
                             TEXT(targetingRange > 1000.0 ? " km" : " m")
@@ -42,7 +42,7 @@ public class TypeSensors extends Component {
                     ),
                     TD().content(
                         SPAN("type_sensors_span").title("Scan Resolution").content(
-                            IMG(ResourceLocation.ofIconID(attributeMap.get(564).iconID, context), null, 32).className("type_sensors_icon"),
+                            IMG(Resource.ofIconID(attributeMap.get(564).iconID, context), null, 32).className("type_sensors_icon"),
                             TEXT("Scan Resolution: "),
                             context.sde.format_with_unit(typeAttributes.getOrDefault(564, 0.0), attributeMap.get(564).unitID)
                         )
@@ -51,7 +51,7 @@ public class TypeSensors extends Component {
                 TR().content(
                     TD().content(
                         SPAN("type_sensors_span").title("Maximum Targets").content(
-                            IMG(ResourceLocation.ofIconID(attributeMap.get(192).iconID, context), null, 32).className("type_sensors_icon"),
+                            IMG(Resource.ofIconID(attributeMap.get(192).iconID, context), null, 32).className("type_sensors_icon"),
                             TEXT("Maximum Targets: "),
                             context.sde.format_with_unit(typeAttributes.getOrDefault(192, 0.0), attributeMap.get(192).unitID)
                         )
@@ -100,13 +100,13 @@ public class TypeSensors extends Component {
             table.content(TR().content(
                 TD().content(
                     SPAN("type_sensors_span").title("Sensor Type").content(
-                        IMG(ResourceLocation.ofIconID(attributeMap.get(sensorAttribute).iconID, context), null, 32).className("type_sensors_icon"),
+                        IMG(Resource.ofIconID(attributeMap.get(sensorAttribute).iconID, context), null, 32).className("type_sensors_icon"),
                         TEXT("Sensor Type: " + sensorType)
                     )
                 ),
                 TD().content(
                     SPAN("type_sensors_span").title("Sensor Strength").content(
-                        IMG(ResourceLocation.ofIconID(attributeMap.get(sensorAttribute).iconID, context), null, 32).className("type_sensors_icon"),
+                        IMG(Resource.ofIconID(attributeMap.get(sensorAttribute).iconID, context), null, 32).className("type_sensors_icon"),
                         TEXT("Sensor Strength: "),
                         context.sde.format_with_unit(sensorStrength, attributeMap.get(sensorAttribute).unitID)
                     )

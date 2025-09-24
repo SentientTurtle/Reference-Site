@@ -2,7 +2,7 @@ package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.components.GroupList;
 import net.sentientturtle.nee.components.ItemTitle;
 import net.sentientturtle.nee.data.datatypes.Category;
@@ -50,8 +50,8 @@ public class CategoryPage extends Page {
 
     @Nullable
     @Override
-    public ResourceLocation getIcon(HtmlContext context) {
-        return category.iconID != null ? ResourceLocation.ofIconID(category.iconID, context) : null;
+    public Resource getIcon(HtmlContext context) {
+        return category.iconID != null ? Resource.ofIconID(category.iconID, context) : null;
     }
 
 }

@@ -1,18 +1,17 @@
 package net.sentientturtle.nee.data.sde;
 
-import com.almworks.sqlite4java.SQLiteException;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import net.sentientturtle.nee.Main;
-import net.sentientturtle.nee.data.DataSources;
+import net.sentientturtle.nee.util.Position;
 import org.jspecify.annotations.Nullable;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -27,7 +26,6 @@ public class YAMLDataExportReader implements AutoCloseable {
     private final ZipFile zipFile;
     private final ObjectMapper yamlMapper;
 
-    @SuppressWarnings("Convert2Diamond")
     public YAMLDataExportReader(Path sdePath) throws IOException {
         zipFile = new ZipFile(sdePath.toFile());
         yamlMapper = new ObjectMapper(new YAMLFactory())
@@ -57,7 +55,7 @@ public class YAMLDataExportReader implements AutoCloseable {
         @Nullable Integer iconID
     ) {}
     public void readCategories(BiConsumer<Integer, SdeCategory> consumer) throws IOException {
-        ZipEntry entry = zipFile.getEntry("fsd/categories.yaml");
+        ZipEntry entry = zipFile.getEntry("categories.yaml");
 
         yamlMapper.readValue(
             new String(zipFile.getInputStream(entry).readAllBytes(), StandardCharsets.UTF_8),
@@ -77,7 +75,7 @@ public class YAMLDataExportReader implements AutoCloseable {
         @JsonProperty(required = true) boolean useBasePrice
     ) {}
     public void readGroups(BiConsumer<Integer, SdeGroup> consumer) throws IOException {
-        ZipEntry entry = zipFile.getEntry("fsd/groups.yaml");
+        ZipEntry entry = zipFile.getEntry("groups.yaml");
 
         yamlMapper.readValue(
             new String(zipFile.getInputStream(entry).readAllBytes(), StandardCharsets.UTF_8),
@@ -86,20 +84,51 @@ public class YAMLDataExportReader implements AutoCloseable {
             .forEach(consumer);
     }
 
-    public record SdeTrait (
+    public record SdeBonus(
         @Nullable Double bonus,
         @JsonProperty(required = true) LocalizedString bonusText,
         @JsonProperty(required = true) int importance,
         @Nullable Integer unitID,
         @Nullable Boolean isPositive
     ) {}
-
-    public record SdeTypeTraits(
-        @Nullable ArrayList<SdeTrait> miscBonuses,
-        @Nullable ArrayList<SdeTrait> roleBonuses,
-        @Nullable HashMap<Integer, ArrayList<SdeTrait>> types,
+    public record SdeTypeBonus(
+        @Nullable ArrayList<SdeBonus> miscBonuses,
+        @Nullable ArrayList<SdeBonus> roleBonuses,
+        @Nullable HashMap<Integer, ArrayList<SdeBonus>> types,
         @Nullable Integer iconID
     ) {}
+    public void readTypeBonuses(BiConsumer<Integer, SdeTypeBonus> consumer) throws IOException {
+        ZipEntry entry = zipFile.getEntry("typeBonus.yaml");
+
+        // Split yaml document into individual entries to improve performance & handle format errors more cleanly
+        StringBuilder typeBuffer = new StringBuilder();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (!line.isEmpty()) {
+                char first = line.charAt(0);
+                if (first >= '0' && first <= '9' && !typeBuffer.isEmpty()) {
+                    Map.Entry<Integer, SdeTypeBonus> mapEntry = yamlMapper.readValue(
+                        typeBuffer.toString(),
+                        new TypeReference<Map.Entry<Integer, SdeTypeBonus>>() {}
+                    );
+                    consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+                    typeBuffer.setLength(0);
+                }
+            }
+            if (!typeBuffer.isEmpty()) typeBuffer.append('\n');
+            typeBuffer.append(line);
+        }
+
+        if (!typeBuffer.isEmpty()) {
+            Map.Entry<Integer, SdeTypeBonus> mapEntry = yamlMapper.readValue(
+                typeBuffer.toString(),
+                new TypeReference<Map.Entry<Integer, SdeTypeBonus>>() {}
+            );
+            consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+        }
+    }
+
     public record SdeType(
         @JsonProperty(required = true) int groupID,
         @JsonProperty(required = true) boolean published,
@@ -115,17 +144,13 @@ public class YAMLDataExportReader implements AutoCloseable {
         @Nullable Integer iconID,
         @Nullable Integer raceID,
         @Nullable Integer metaGroupID,
-        @Nullable String sofFactionName,
         @Nullable Double basePrice,
         @Nullable Integer marketGroupID,
         @Nullable Integer variationParentTypeID,
-        @Nullable Integer factionID,
-        @Nullable LinkedHashMap<Integer, ArrayList<Integer>> masteries,
-        @Nullable SdeTypeTraits traits,
-        @Nullable Integer sofMaterialSetID
+        @Nullable Integer factionID
     ) {}
     public void readTypes(BiConsumer<Integer, SdeType> consumer) throws IOException {
-        ZipEntry entry = zipFile.getEntry("fsd/types.yaml");
+        ZipEntry entry = zipFile.getEntry("types.yaml");
 
         // Split yaml document into individual entries to improve performance & handle format errors more cleanly
         StringBuilder typeBuffer = new StringBuilder();
@@ -166,9 +191,9 @@ public class YAMLDataExportReader implements AutoCloseable {
         @JsonProperty(required = true) String name,
         @JsonProperty(required = true) boolean published,
         @JsonProperty(required = true) boolean stackable,
-        @Nullable LocalizedString displayNameID,
-        @Nullable LocalizedString tooltipDescriptionID,
-        @Nullable LocalizedString tooltipTitleID,
+        @Nullable LocalizedString displayName,
+        @Nullable LocalizedString tooltipDescription,
+        @Nullable LocalizedString tooltipTitle,
         @Nullable Integer iconID,
         @Nullable Integer unitID,
         @Nullable Integer chargeRechargeTimeID,
@@ -177,7 +202,7 @@ public class YAMLDataExportReader implements AutoCloseable {
         @Nullable Boolean displayWhenZero
     ) {}
     public void readAttributes(BiConsumer<Integer, SdeAttribute> consumer) throws IOException {
-        ZipEntry entry = zipFile.getEntry("fsd/dogmaAttributes.yaml");
+        ZipEntry entry = zipFile.getEntry("dogmaAttributes.yaml");
 
         // Split yaml document into individual entries to improve performance & handle format errors more cleanly
         StringBuilder buffer = new StringBuilder();
@@ -214,7 +239,7 @@ public class YAMLDataExportReader implements AutoCloseable {
         @JsonProperty(required = true) String effectName
     ) {}
     public void readEffects(BiConsumer<Integer, SdeEffect> consumer) throws IOException {
-        ZipEntry entry = zipFile.getEntry("fsd/dogmaEffects.yaml");
+        ZipEntry entry = zipFile.getEntry("dogmaEffects.yaml");
 
         // Split yaml document into individual entries to improve performance & handle format errors more cleanly
         StringBuilder buffer = new StringBuilder();
@@ -259,11 +284,11 @@ public class YAMLDataExportReader implements AutoCloseable {
         HashMap<Integer, Boolean> effects
     ) {}
     public void readDogma(Consumer<SdeTypeDogma> consumer) throws IOException {
-        ZipEntry entry = zipFile.getEntry("fsd/typeDogma.yaml");
+        ZipEntry entry = zipFile.getEntry("typeDogma.yaml");
 
         record DogmaEntry(
-            @JsonProperty(required = true) ArrayList<SdeTypeAttribute> dogmaAttributes,
-            @JsonProperty(required = true) ArrayList<SdeTypeEffect> dogmaEffects
+            @JsonSetter(nulls = Nulls.AS_EMPTY) ArrayList<SdeTypeAttribute> dogmaAttributes,
+            @JsonSetter(nulls = Nulls.AS_EMPTY) ArrayList<SdeTypeEffect> dogmaEffects
         ) {}
 
         // Split yaml document into individual entries to improve performance
@@ -314,7 +339,7 @@ public class YAMLDataExportReader implements AutoCloseable {
         @JsonProperty(required = true) String iconFile
     ) {}
     public void readIcons(BiConsumer<Integer, SdeIcon> consumer) throws IOException {
-        ZipEntry entry = zipFile.getEntry("fsd/iconIDs.yaml");
+        ZipEntry entry = zipFile.getEntry("icons.yaml");
 
         yamlMapper.readValue(
                 new String(zipFile.getInputStream(entry).readAllBytes(), StandardCharsets.UTF_8),
@@ -352,7 +377,7 @@ public class YAMLDataExportReader implements AutoCloseable {
         @JsonProperty(required = true) int maxProductionLimit
     ){}
     public void readBlueprints(Consumer<SdeBlueprint> consumer) throws IOException {
-        ZipEntry entry = zipFile.getEntry("fsd/blueprints.yaml");
+        ZipEntry entry = zipFile.getEntry("blueprints.yaml");
 
         // Split yaml document into individual entries to improve performance & handle format errors more cleanly
         StringBuilder buffer = new StringBuilder();
@@ -391,7 +416,7 @@ public class YAMLDataExportReader implements AutoCloseable {
     ) {}
     public record SdeTypeMaterials(@JsonProperty(required = true) ArrayList<SdeTypeMaterial> materials) {}
     public void readMaterials(BiConsumer<Integer, SdeTypeMaterials> consumer) throws IOException {
-        ZipEntry entry = zipFile.getEntry("fsd/typeMaterials.yaml");
+        ZipEntry entry = zipFile.getEntry("typeMaterials.yaml");
 
         // Split yaml document into individual entries to improve performance & handle format errors more cleanly
         StringBuilder buffer = new StringBuilder();
@@ -425,12 +450,12 @@ public class YAMLDataExportReader implements AutoCloseable {
     public record SdePlanetSchematicItem(@JsonProperty(required = true) boolean isInput, @JsonProperty(required = true) int quantity){}
     public record SdePlanetSchematic(
         @JsonProperty(required = true) int cycleTime,
-        @JsonProperty(required = true) LocalizedString nameID,
+        @JsonProperty(required = true) LocalizedString name,
         @JsonProperty(required = true) ArrayList<Integer> pins,
         @JsonProperty(required = true) LinkedHashMap<Integer, SdePlanetSchematicItem> types
     ) {}
     public void readSchematics(BiConsumer<Integer, SdePlanetSchematic> consumer) throws IOException {
-        ZipEntry entry = zipFile.getEntry("fsd/planetSchematics.yaml");
+        ZipEntry entry = zipFile.getEntry("planetSchematics.yaml");
 
         // Split yaml document into individual entries to improve performance & handle format errors more cleanly
         StringBuilder buffer = new StringBuilder();
@@ -461,15 +486,16 @@ public class YAMLDataExportReader implements AutoCloseable {
         }
     }
 
+    public record MetaGroupColor(@JsonProperty(required = true) double r, @JsonProperty(required = true) double g, @JsonProperty(required = true) double b) {};
     public record SdeMetaGroup(
-        @Nullable double[] color,
-        @JsonProperty(required = true) LocalizedString nameID,
+        @Nullable MetaGroupColor color,
+        @JsonProperty(required = true) LocalizedString name,
         @Nullable Integer iconID,
         @Nullable String iconSuffix,
-        @Nullable LocalizedString descriptionID
+        @Nullable LocalizedString description
     ) {}
     public void readMetaGroups(BiConsumer<Integer, SdeMetaGroup> consumer) throws IOException {
-        ZipEntry entry = zipFile.getEntry("fsd/metaGroups.yaml");
+        ZipEntry entry = zipFile.getEntry("metaGroups.yaml");
 
         yamlMapper.readValue(
                 new String(zipFile.getInputStream(entry).readAllBytes(), StandardCharsets.UTF_8),
@@ -480,20 +506,20 @@ public class YAMLDataExportReader implements AutoCloseable {
 
     public record SdeFaction(
         @Nullable Integer corporationID,
-        @JsonProperty(required = true) LocalizedString descriptionID,
+        @JsonProperty(required = true) LocalizedString description,
         @Nullable String flatLogo,
         @Nullable String flatLogoWithName,
         @JsonProperty(required = true) int iconID,
         @JsonProperty(required = true) int[] memberRaces,
         @Nullable Integer militiaCorporationID,
-        @JsonProperty(required = true) LocalizedString nameID,
-        @Nullable LocalizedString shortDescriptionID,
+        @JsonProperty(required = true) LocalizedString name,
+        @Nullable LocalizedString shortDescription,
         @JsonProperty(required = true) double sizeFactor,
         @JsonProperty(required = true) int solarSystemID,
         @JsonProperty(required = true) boolean uniqueName
     ) {}
     public void readFactions(BiConsumer<Integer, SdeFaction> consumer) throws IOException {
-        ZipEntry entry = zipFile.getEntry("fsd/factions.yaml");
+        ZipEntry entry = zipFile.getEntry("factions.yaml");
 
         yamlMapper.readValue(
                 new String(zipFile.getInputStream(entry).readAllBytes(), StandardCharsets.UTF_8),
@@ -503,14 +529,14 @@ public class YAMLDataExportReader implements AutoCloseable {
     }
 
     public record SdeMarketGroup(
-        @Nullable LocalizedString descriptionID,
-        @JsonProperty(required = true) LocalizedString nameID,
+        @Nullable LocalizedString description,
+        @JsonProperty(required = true) LocalizedString name,
         @Nullable Integer iconID,
         @JsonProperty(required = true) boolean hasTypes,
         @Nullable Integer parentGroupID
     ) {}
     public void readMarketGroups(BiConsumer<Integer, SdeMarketGroup> consumer) throws IOException {
-        ZipEntry entry = zipFile.getEntry("fsd/marketGroups.yaml");
+        ZipEntry entry = zipFile.getEntry("marketGroups.yaml");
 
         // Split yaml document into individual entries to improve performance & handle format errors more cleanly
         StringBuilder buffer = new StringBuilder();
@@ -540,245 +566,69 @@ public class YAMLDataExportReader implements AutoCloseable {
             consumer.accept(mapEntry.getKey(), mapEntry.getValue());
         }
     }
+    public record SdeStationOperation(
+        @JsonProperty(required = true) int activityID,
+        @JsonProperty(required = true) double border,
+        @JsonProperty(required = true) double corridor,
+        @JsonProperty(required = true) double fringe,
+        @JsonProperty(required = true) double hub,
+        @Nullable LocalizedString description,
+        @JsonProperty(required = true) double manufacturingFactor,
+        @JsonProperty(required = true) LocalizedString operationName,
+        @JsonProperty(required = true) double ratio,
+        @JsonProperty(required = true) double researchFactor,
+        @JsonProperty(required = true) int[] services,
+        @Nullable LinkedHashMap<Integer, Integer> stationTypes
+    ) {}
+    public void readStationOperations(BiConsumer<Integer, SdeStationOperation> consumer) throws IOException {
+        ZipEntry entry = zipFile.getEntry("stationOperations.yaml");
 
-    public record SdeRegion(
-        @JsonProperty(required = true) double[] center,
-        @Nullable Integer descriptionID,
-        @Nullable Integer factionID,
-        @JsonProperty(required = true) double[] max,
-        @JsonProperty(required = true) double[] min,
-        @JsonProperty(required = true) int nameID,
-        @JsonProperty(required = true) int nebula,
-        @JsonProperty(required = true) int regionID,
-        @Nullable Integer wormholeClassID
-    ) {}
-    public record SdeConstellation(
-        @JsonProperty(required = true) double[] center,
-        @JsonProperty(required = true) double[] max,
-        @JsonProperty(required = true) double[] min,
-        @JsonProperty(required = true) int nameID,
-        @JsonProperty(required = true) double radius,
-        @JsonProperty(required = true) int constellationID,
-        @Nullable Integer factionID,
-        @Nullable Integer wormholeClassID
-    ) {}
-    public record SdeCelestialStatistics(
-        @JsonProperty(required = true) double density,
-        @JsonProperty(required = true) double eccentricity,
-        @JsonProperty(required = true) double escapeVelocity,
-        @JsonProperty(required = true) boolean fragmented,
-        @JsonProperty(required = true) double life,
-        @JsonProperty(required = true) boolean locked,
-        @JsonProperty(required = true) double massDust,
-        @JsonProperty(required = true) double massGas,
-        @JsonProperty(required = true) double orbitPeriod,
-        @JsonProperty(required = true) double orbitRadius,
-        @JsonProperty(required = true) double pressure,
-        @JsonProperty(required = true) double radius,
-        @JsonProperty(required = true) double rotationRate,
-        @JsonProperty(required = true) String spectralClass,
-        @JsonProperty(required = true) double surfaceGravity,
-        @JsonProperty(required = true) double temperature
-    ) {}
-    public record SdeAsteroidBelt(
-        @Nullable Integer asteroidBeltNameID,
-        @JsonProperty(required = true) double[] position,
-        @Nullable SdeCelestialStatistics statistics,
-        @JsonProperty(required = true) int typeID
-    ) {}
-    public record SdePlanetAttributes(
-        @JsonProperty(required = true) int heightMap1,
-        @JsonProperty(required = true) int heightMap2,
-        @JsonProperty(required = true) boolean population,
-        @JsonProperty(required = true) int shaderPreset
-    ) {}
-    public record SdeMapStation(
-        @JsonProperty(required = true) int graphicID,
-        @JsonProperty(required = true) boolean isConquerable,
-        @JsonProperty(required = true) int operationID,
-        @JsonProperty(required = true) int ownerID,
-        @JsonProperty(required = true) double[] position,
-        @JsonProperty(required = true) double reprocessingEfficiency,
-        @JsonProperty(required = true) int reprocessingHangarFlag,
-        @JsonProperty(required = true) double reprocessingStationsTake,
-        @JsonProperty(required = true) int typeID,
-        @JsonProperty(required = true) boolean useOperationName
-    ) {}
-    public record SdeMoon(
-        @Nullable Integer moonNameID,
-        @JsonProperty(required = true) SdePlanetAttributes planetAttributes,
-        @JsonProperty(required = true) double[] position,
-        @JsonProperty(required = true) double radius,
-        @Nullable SdeCelestialStatistics statistics,
-        @JsonProperty(required = true) int typeID,
-        @Nullable LinkedHashMap<Integer, SdeMapStation> npcStations
-    ) {}
-    public record SdePlanet(
-        @Nullable Integer planetNameID,
-        @Nullable LinkedHashMap<Integer, SdeAsteroidBelt> asteroidBelts,
-        @JsonProperty(required = true) int celestialIndex,
-        @Nullable LinkedHashMap<Integer, SdeMoon> moons,
-        @JsonProperty(required = true) SdePlanetAttributes planetAttributes,
-        @JsonProperty(required = true) double[] position,
-        @JsonProperty(required = true) double radius,
-        @JsonProperty(required = true) SdeCelestialStatistics statistics,
-        @JsonProperty(required = true) int typeID,
-        @Nullable LinkedHashMap<Integer, SdeMapStation> npcStations
-    ) {}
-    public record SdeStarStatistics(
-        @JsonProperty(required = true) double age,
-        @JsonProperty(required = true) double life,
-        @JsonProperty(required = true) boolean locked,
-        @JsonProperty(required = true) double luminosity,
-        @JsonProperty(required = true) double radius,
-        @JsonProperty(required = true) String spectralClass,
-        @JsonProperty(required = true) double temperature
-    ) {}
-    public record SdeStar(
-        @JsonProperty(required = true) int id,
-        @JsonProperty(required = true) double radius,
-        @JsonProperty(required = true) int typeID,
-        @JsonProperty(required = true) SdeStarStatistics statistics
-    ) {}
-    public record SdeStargate(
-        @JsonProperty(required = true) int destination,
-        @JsonProperty(required = true) double[] position,
-        @JsonProperty(required = true) int typeID
-    ) {}
-    public record SdeSecondarySun(
-        @JsonProperty(required = true) int effectBeaconTypeID,
-        @JsonProperty(required = true) int itemID,
-        @JsonProperty(required = true) double[] position,
-        @JsonProperty(required = true) int typeID
-    ) {}
-    public record SdeSolarSystem(
-        @JsonProperty(required = true) boolean border,
-        @JsonProperty(required = true) boolean corridor,
-        @JsonProperty(required = true) boolean fringe,
-        @JsonProperty(required = true) boolean hub,
-        @JsonProperty(required = true) boolean international,
-        @JsonProperty(required = true) boolean regional,
-        @JsonProperty(required = true) double[] center,
-        @JsonProperty(required = true) double[] max,
-        @JsonProperty(required = true) double[] min,
-        @JsonProperty(required = true) double luminosity,
-        @JsonProperty(required = true) double radius,
-        @JsonProperty(required = true) double security,
-        @Nullable String securityClass,
-        @JsonProperty(required = true) int solarSystemID,
-        @JsonProperty(required = true) int solarSystemNameID,
-        @Nullable Integer sunTypeID,
-        @Nullable Integer wormholeClassID,
-        @Nullable int[] disallowedAnchorCategories,
-        @Nullable int[] disallowedAnchorGroups,
-        @Nullable Integer factionID,
-        @JsonProperty(required = true) Map<Integer, SdePlanet> planets,
-        @Nullable SdeStar star,
-        @JsonProperty(required = true) Map<Integer, SdeStargate> stargates,
-        @Nullable String visualEffect,
-        @Nullable int descriptionID,
-        @Nullable SdeSecondarySun secondarySun
-    ) {}
-    public record SystemParents(int regionID, int constellationID) {}
-    public void readUniverseMap(
-        Consumer<SdeRegion> regionConsumer,
-        BiConsumer<Integer, SdeConstellation> constellationConsumer,
-        BiConsumer<SystemParents, SdeSolarSystem> systemConsumer
-    ) throws IOException {
-        Iterable<? extends ZipEntry> iterable = () -> (Iterator<ZipEntry>) zipFile.entries().asIterator();
-
-        List<ZipEntry> regions = new ArrayList<>();
-        List<ZipEntry> constellations = new ArrayList<>();
-        List<ZipEntry> systems = new ArrayList<>();
-        for (ZipEntry entry : iterable) {
-            if (entry.getName().startsWith("universe")) {
-                String[] split = entry.getName().split("/");
-                String filename = split[split.length - 1];
-                switch (filename) {
-                    case "landmarks.yaml" -> { /* ignore */ }
-                    case "region.yaml" -> regions.add(entry);
-                    case "constellation.yaml" -> constellations.add(entry);
-                    case "solarsystem.yaml" -> systems.add(entry);
-                    default -> throw new IllegalStateException("Unknown yaml universe file: " + filename);
-                }
-            }
-        }
-
-
-        HashMap<String, Integer> idMap = new HashMap<>();
-        for (ZipEntry region : regions) {
-            String[] split = region.getName().split("/");
-            String regionName = split[split.length - 2];
-            SdeRegion sdeRegion = yamlMapper.readValue(
-                new String(zipFile.getInputStream(region).readAllBytes(), StandardCharsets.UTF_8),
-                new TypeReference<SdeRegion>() {}
-            );
-            idMap.put(regionName, sdeRegion.regionID);
-            regionConsumer.accept(sdeRegion);
-        }
-
-        for (ZipEntry constellation : constellations) {
-            String[] split = constellation.getName().split("/");
-            String regionName = split[split.length - 3];
-            String constellationName = split[split.length - 2];
-            SdeConstellation sdeConstellation = yamlMapper.readValue(
-                new String(zipFile.getInputStream(constellation).readAllBytes(), StandardCharsets.UTF_8),
-                new TypeReference<SdeConstellation>() {}
-            );
-            idMap.put(constellationName, sdeConstellation.constellationID);
-            constellationConsumer.accept(Objects.requireNonNull(idMap.get(regionName)), sdeConstellation);
-        }
-
-        for (ZipEntry system : systems) {
-            String[] split = system.getName().split("/");
-            String regionName = split[split.length - 4];
-            String constellationName = split[split.length - 3];
-            SdeSolarSystem sdeSolarSystem = yamlMapper.readValue(
-                new String(zipFile.getInputStream(system).readAllBytes(), StandardCharsets.UTF_8),
-                new TypeReference<SdeSolarSystem>() {}
-            );
-            systemConsumer.accept(
-                new SystemParents(
-                    Objects.requireNonNull(idMap.get(regionName)),
-                    Objects.requireNonNull(idMap.get(constellationName))
-                ),
-                sdeSolarSystem
-            );
-        }
+        yamlMapper.readValue(
+                new String(zipFile.getInputStream(entry).readAllBytes(), StandardCharsets.UTF_8),
+                new TypeReference<LinkedHashMap<Integer, SdeStationOperation>>() {}
+            )
+            .forEach(consumer);
     }
 
-    public record SdeStation(
-        @JsonProperty(required = true) int constellationID,
-        @JsonProperty(required = true) int corporationID,
-        @JsonProperty(required = true) double dockingCostPerVolume,
-        @JsonProperty(required = true) double maxShipVolumeDockable,
-        @JsonProperty(required = true) double officeRentalCost,
-        @JsonProperty(required = true) int operationID,
-        @JsonProperty(required = true) int regionID,
-        @JsonProperty(required = true) double reprocessingEfficiency,
-        @JsonProperty(required = true) int reprocessingHangarFlag,
-        @JsonProperty(required = true) double reprocessingStationsTake,
-        @JsonProperty(required = true) double security,
-        @JsonProperty(required = true) int solarSystemID,
-        @JsonProperty(required = true) int stationID,
-        @JsonProperty(required = true) String stationName,
-        @JsonProperty(required = true) int stationTypeID,
-        @JsonProperty(required = true) double x,
-        @JsonProperty(required = true) double y,
-        @JsonProperty(required = true) double z
-    ) {}
-    public void readStations(Consumer<SdeStation> consumer) throws IOException {
-        ZipEntry entry = zipFile.getEntry("bsd/staStations.yaml");
-        ArrayList<SdeStation> mapEntry = yamlMapper.readValue(zipFile.getInputStream(entry), new TypeReference<ArrayList<SdeStation>>() {});
-        mapEntry.forEach(consumer);
-    }
-
-    public record SdeItemName(
-        @JsonProperty(required = true) int itemID,
-        @JsonProperty(required = true) String itemName
-    ) {}
-    public void readItemNames(Consumer<SdeItemName> consumer) throws IOException {
-        ZipEntry entry = zipFile.getEntry("bsd/invNames.yaml");
+    public record SdeNpcCorporationDivision(int divisionNumber, int leaderID, int size) {}
+    public enum SdeNpcCorporationExtent { L, G, R, N, C }
+    public enum SdeNpcCorporationSize { T, H, M, L, S }
+    public record SdeNpcCorporation(
+        @Nullable int[] allowedMemberRaces,
+        @Nullable Integer ceoID,
+        @Nullable LinkedHashMap<Integer, Double> corporationTrades,
+        @JsonProperty(required = true) boolean deleted,
+        @Nullable LocalizedString description,
+        @Nullable LinkedHashMap<Integer, SdeNpcCorporationDivision> divisions,
+        @Nullable Integer enemyID,
+        @Nullable LinkedHashMap<Integer, Double> exchangeRates,
+        @JsonProperty(required = true) SdeNpcCorporationExtent extent,
+        @Nullable Integer factionID,
+        @Nullable Integer friendID,
+        @JsonProperty(required = true) boolean hasPlayerPersonnelManager,
+        @Nullable Integer iconID,
+        @JsonProperty(required = true) int initialPrice,
+        @Nullable LinkedHashMap<Integer, Integer> investors,
+        @Nullable int[] lpOfferTables,
+        @Nullable Integer mainActivityID,
+        @JsonProperty(required = true) int memberLimit,
+        @JsonProperty(required = true) double minSecurity,
+        @JsonProperty(required = true) double minimumJoinStanding,
+        @JsonProperty(required = true) LocalizedString name,
+        @Nullable Integer raceID,
+        @Nullable Integer secondaryActivityID,
+        @JsonProperty(required = true) boolean sendCharTerminationMessage,
+        @JsonProperty(required = true) long shares,
+        @JsonProperty(required = true) SdeNpcCorporationSize size,
+        @Nullable Double sizeFactor,
+        @Nullable Integer solarSystemID,
+        @Nullable Integer stationID,
+        @JsonProperty(required = true) double taxRate,
+        @JsonProperty(required = true) String tickerName,
+        @JsonProperty(required = true) String uniqueName
+    ){}
+    public void readNpcCorporations(BiConsumer<Integer, SdeNpcCorporation> consumer) throws IOException {
+        ZipEntry entry = zipFile.getEntry("npcCorporations.yaml");
 
         // Split yaml document into individual entries to improve performance & handle format errors more cleanly
         StringBuilder buffer = new StringBuilder();
@@ -787,8 +637,12 @@ public class YAMLDataExportReader implements AutoCloseable {
         while ((line = reader.readLine()) != null) {
             if (!line.isEmpty()) {
                 char first = line.charAt(0);
-                if (first == '-' && !buffer.isEmpty()) {
-                    consumer.accept(yamlMapper.readValue(buffer.toString(), new TypeReference<SdeItemName[]>() {})[0]);
+                if (first >= '0' && first <= '9' && !buffer.isEmpty()) {
+                    Map.Entry<Integer, SdeNpcCorporation> mapEntry = yamlMapper.readValue(
+                        buffer.toString(),
+                        new TypeReference<Map.Entry<Integer, SdeNpcCorporation>>() {}
+                    );
+                    consumer.accept(mapEntry.getKey(), mapEntry.getValue());
                     buffer.setLength(0);
                 }
             }
@@ -797,7 +651,436 @@ public class YAMLDataExportReader implements AutoCloseable {
         }
 
         if (!buffer.isEmpty()) {
-            consumer.accept(yamlMapper.readValue(buffer.toString(), new TypeReference<SdeItemName[]>() {})[0]);
+            Map.Entry<Integer, SdeNpcCorporation> mapEntry = yamlMapper.readValue(
+                buffer.toString(),
+                new TypeReference<Map.Entry<Integer, SdeNpcCorporation>>() {}
+            );
+            consumer.accept(mapEntry.getKey(), mapEntry.getValue());
         }
+    }
+
+    public record SdeRegion(
+        @JsonProperty(required = true) Position position,
+        @Nullable LocalizedString description,
+        @Nullable Integer factionID,
+        @JsonProperty(required = true) LocalizedString name,
+        @JsonProperty(required = true) int nebulaID,
+        @Nullable Integer wormholeClassID,
+        @JsonProperty(required = true) int[] constellationIDs
+    ) {}
+    public void readRegions(BiConsumer<Integer, SdeRegion> consumer) throws IOException {
+        ZipEntry entry = zipFile.getEntry("mapRegions.yaml");
+
+        yamlMapper.readValue(
+                new String(zipFile.getInputStream(entry).readAllBytes(), StandardCharsets.UTF_8),
+                new TypeReference<LinkedHashMap<Integer, SdeRegion>>() {}
+            )
+            .forEach(consumer);
+    }
+
+    public record SdeConstellation(
+        @JsonProperty(required = true) Position position,
+        @JsonProperty(required = true) LocalizedString name,
+        @JsonProperty(required = true) int regionID,
+        @JsonProperty(required = true) int[] solarSystemIDs,
+        @Nullable Integer factionID,
+        @Nullable Integer wormholeClassID
+    ) {}
+    public void readConstellations(BiConsumer<Integer, SdeConstellation> consumer) throws IOException {
+        ZipEntry entry = zipFile.getEntry("mapConstellations.yaml");
+
+        yamlMapper.readValue(
+                new String(zipFile.getInputStream(entry).readAllBytes(), StandardCharsets.UTF_8),
+                new TypeReference<LinkedHashMap<Integer, SdeConstellation>>() {}
+            )
+            .forEach(consumer);
+    }
+
+    public record SdeSolarSystem(
+        @JsonProperty(required = false) boolean border,
+        @JsonProperty(required = true) int constellationID,
+        @JsonProperty(required = false) boolean corridor,
+        @Nullable int[] disallowedAnchorCategories,
+        @Nullable int[] disallowedAnchorGroups,
+        @Nullable Integer factionID,
+        @JsonProperty(required = false) boolean fringe,
+        @JsonProperty(required = false) boolean hub,
+        @JsonProperty(required = false) boolean international,
+        @Nullable Double luminosity,
+        @JsonProperty(required = true) LocalizedString name,
+        @JsonSetter(nulls = Nulls.AS_EMPTY) int[] planetIDs,
+        @JsonProperty(required = true) Position position,
+        @JsonProperty(required = true) double radius,
+        @JsonProperty(required = true) int regionID,
+        @JsonProperty(required = false) boolean regional,
+        @Nullable String securityClass,
+        @JsonProperty(required = true) double securityStatus,
+        @Nullable Integer starID,
+        @JsonSetter(nulls = Nulls.AS_EMPTY) int[] stargateIDs,
+        @Nullable String visualEffect,
+        @Nullable Integer wormholeClassID
+    ) {}
+    public void readSolarSystems(BiConsumer<Integer, SdeSolarSystem> consumer) throws IOException {
+        ZipEntry entry = zipFile.getEntry("mapSolarSystems.yaml");
+
+        // Split yaml document into individual entries to improve performance & handle format errors more cleanly
+        StringBuilder buffer = new StringBuilder();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (!line.isEmpty()) {
+                char first = line.charAt(0);
+                if (first >= '0' && first <= '9' && !buffer.isEmpty()) {
+                    Map.Entry<Integer, SdeSolarSystem> mapEntry = yamlMapper.readValue(
+                        buffer.toString(),
+                        new TypeReference<Map.Entry<Integer, SdeSolarSystem>>() {}
+                    );
+                    consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+                    buffer.setLength(0);
+                }
+            }
+            if (!buffer.isEmpty()) buffer.append('\n');
+            buffer.append(line);
+        }
+
+        if (!buffer.isEmpty()) {
+            Map.Entry<Integer, SdeSolarSystem> mapEntry = yamlMapper.readValue(
+                buffer.toString(),
+                new TypeReference<Map.Entry<Integer, SdeSolarSystem>>() {}
+            );
+            consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+        }
+    }
+
+    public record SdeCelestialStatistics(
+        @JsonProperty(required = true) double density,
+        @JsonProperty(required = true) double eccentricity,
+        @JsonProperty(required = true) double escapeVelocity,
+        @JsonProperty(required = false) boolean fragmented,
+        @Nullable Double life,
+        @JsonProperty(required = true) boolean locked,
+        @JsonProperty(required = true) double massDust,
+        @Nullable Double massGas,
+        @Nullable Double orbitPeriod,
+        @Nullable Double orbitRadius,
+        @Nullable Double pressure,
+        @Nullable Double radius,
+        @JsonProperty(required = true) double rotationRate,
+        @JsonProperty(required = true) String spectralClass,
+        @Nullable Double surfaceGravity,
+        @JsonProperty(required = true) double temperature
+    ) {}
+
+    public record SdeAsteroidBelt(
+        @JsonProperty(required = true) int celestialIndex,
+        @Nullable LocalizedString name,
+        @JsonProperty(required = true) int orbitID,
+        @JsonProperty(required = true) int orbitIndex,
+        @JsonProperty(required = true) Position position,
+        @Nullable Double radius,
+        @JsonProperty(required = true) int solarSystemID,
+        @Nullable SdeCelestialStatistics statistics,
+        @JsonProperty(required = true) int typeID
+    ) {}
+    public void readAsteroidBelts(BiConsumer<Integer, SdeAsteroidBelt> consumer) throws IOException {
+        ZipEntry entry = zipFile.getEntry("mapAsteroidBelts.yaml");
+
+        // Split yaml document into individual entries to improve performance & handle format errors more cleanly
+        StringBuilder buffer = new StringBuilder();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (!line.isEmpty()) {
+                char first = line.charAt(0);
+                if (first >= '0' && first <= '9' && !buffer.isEmpty()) {
+                    Map.Entry<Integer, SdeAsteroidBelt> mapEntry = yamlMapper.readValue(
+                        buffer.toString(),
+                        new TypeReference<Map.Entry<Integer, SdeAsteroidBelt>>() {}
+                    );
+                    consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+                    buffer.setLength(0);
+                }
+            }
+            if (!buffer.isEmpty()) buffer.append('\n');
+            buffer.append(line);
+        }
+
+        if (!buffer.isEmpty()) {
+            Map.Entry<Integer, SdeAsteroidBelt> mapEntry = yamlMapper.readValue(
+                buffer.toString(),
+                new TypeReference<Map.Entry<Integer, SdeAsteroidBelt>>() {}
+            );
+            consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+        }
+    }
+
+    public record SdePlanetAttributes(
+        @JsonProperty(required = true) int heightMap1,
+        @JsonProperty(required = true) int heightMap2,
+        @JsonProperty(required = true) boolean population,
+        @JsonProperty(required = true) int shaderPreset
+    ) {}
+    public record SdePlanet(
+        @JsonSetter(nulls = Nulls.AS_EMPTY) int[] asteroidBeltIDs,
+        @JsonProperty(required = true) SdePlanetAttributes attributes,
+        @JsonProperty(required = true) int celestialIndex,
+        @JsonSetter(nulls = Nulls.AS_EMPTY) int[] moonIDs,
+        @Nullable LocalizedString name,
+        @JsonSetter(nulls = Nulls.AS_EMPTY) int[] npcStationIDs,
+        @JsonProperty(required = true) int orbitID,
+        @JsonProperty(required = true) Position position,
+        @JsonProperty(required = true) double radius,
+        @JsonProperty(required = true) int solarSystemID,
+        @JsonProperty(required = true) SdeCelestialStatistics statistics,
+        @JsonProperty(required = true) int typeID
+    ) {}
+    public void readPlanets(BiConsumer<Integer, SdePlanet> consumer) throws IOException {
+        ZipEntry entry = zipFile.getEntry("mapPlanets.yaml");
+
+        // Split yaml document into individual entries to improve performance & handle format errors more cleanly
+        StringBuilder buffer = new StringBuilder();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (!line.isEmpty()) {
+                char first = line.charAt(0);
+                if (first >= '0' && first <= '9' && !buffer.isEmpty()) {
+                    Map.Entry<Integer, SdePlanet> mapEntry = yamlMapper.readValue(
+                        buffer.toString(),
+                        new TypeReference<Map.Entry<Integer, SdePlanet>>() {}
+                    );
+                    consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+                    buffer.setLength(0);
+                }
+            }
+            if (!buffer.isEmpty()) buffer.append('\n');
+            buffer.append(line);
+        }
+
+        if (!buffer.isEmpty()) {
+            Map.Entry<Integer, SdePlanet> mapEntry = yamlMapper.readValue(
+                buffer.toString(),
+                new TypeReference<Map.Entry<Integer, SdePlanet>>() {}
+            );
+            consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+        }
+    }
+
+
+    public record SdeMoonAttributes(
+        @JsonProperty(required = true) int heightMap1,
+        @JsonProperty(required = true) int heightMap2,
+        @JsonProperty(required = true) int shaderPreset
+    ) {}
+    public record SdeMoon(
+        @Nullable Integer moonNameID,
+        @JsonProperty(required = true) SdeMoonAttributes attributes,
+        @JsonProperty(required = true) int celestialIndex,
+        @Nullable LocalizedString name,
+        @JsonSetter(nulls = Nulls.AS_EMPTY) int[] npcStationIDs,
+        @JsonProperty(required = true) int orbitID,
+        @JsonProperty(required = true) int orbitIndex,
+        @JsonProperty(required = true) Position position,
+        @JsonProperty(required = true) double radius,
+        @JsonProperty(required = true) int solarSystemID,
+        @Nullable SdeCelestialStatistics statistics,
+        @JsonProperty(required = true) int typeID
+    ) {}
+    public void readMoons(BiConsumer<Integer, SdeMoon> consumer) throws IOException {
+        ZipEntry entry = zipFile.getEntry("mapMoons.yaml");
+
+        // Split yaml document into individual entries to improve performance & handle format errors more cleanly
+        StringBuilder buffer = new StringBuilder();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (!line.isEmpty()) {
+                char first = line.charAt(0);
+                if (first >= '0' && first <= '9' && !buffer.isEmpty()) {
+                    Map.Entry<Integer, SdeMoon> mapEntry = yamlMapper.readValue(
+                        buffer.toString(),
+                        new TypeReference<Map.Entry<Integer, SdeMoon>>() {}
+                    );
+                    consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+                    buffer.setLength(0);
+                }
+            }
+            if (!buffer.isEmpty()) buffer.append('\n');
+            buffer.append(line);
+        }
+
+        if (!buffer.isEmpty()) {
+            Map.Entry<Integer, SdeMoon> mapEntry = yamlMapper.readValue(
+                buffer.toString(),
+                new TypeReference<Map.Entry<Integer, SdeMoon>>() {}
+            );
+            consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+        }
+    }
+
+    public record SdeStarStatistics(
+        @JsonProperty(required = true) double age,
+        @JsonProperty(required = true) double life,
+        @JsonProperty(required = true) double luminosity,
+        @JsonProperty(required = true) String spectralClass,
+        @JsonProperty(required = true) double temperature
+    ) {}
+    public record SdeStar(
+        @JsonProperty(required = true) double radius,
+        @JsonProperty(required = true) int solarSystemID,
+        @JsonProperty(required = true) SdeStarStatistics statistics,
+        @JsonProperty(required = true) int typeID
+    ) {}
+    public void readStars(BiConsumer<Integer, SdeStar> consumer) throws IOException {
+        ZipEntry entry = zipFile.getEntry("mapStars.yaml");
+
+        // Split yaml document into individual entries to improve performance & handle format errors more cleanly
+        StringBuilder buffer = new StringBuilder();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (!line.isEmpty()) {
+                char first = line.charAt(0);
+                if (first >= '0' && first <= '9' && !buffer.isEmpty()) {
+                    Map.Entry<Integer, SdeStar> mapEntry = yamlMapper.readValue(
+                        buffer.toString(),
+                        new TypeReference<Map.Entry<Integer, SdeStar>>() {}
+                    );
+                    consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+                    buffer.setLength(0);
+                }
+            }
+            if (!buffer.isEmpty()) buffer.append('\n');
+            buffer.append(line);
+        }
+
+        if (!buffer.isEmpty()) {
+            Map.Entry<Integer, SdeStar> mapEntry = yamlMapper.readValue(
+                buffer.toString(),
+                new TypeReference<Map.Entry<Integer, SdeStar>>() {}
+            );
+            consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+        }
+    }
+
+    public record SdeStargateDestination(int solarSystemID, int stargateID) {}
+    public record SdeStargate(
+        @JsonProperty(required = true) SdeStargateDestination destination,
+        @JsonProperty(required = true) Position position,
+        @JsonProperty(required = true) int solarSystemID,
+        @JsonProperty(required = true) int typeID
+    ) {}
+    public void readStargates(BiConsumer<Integer, SdeStargate> consumer) throws IOException {
+        ZipEntry entry = zipFile.getEntry("mapStargates.yaml");
+
+        // Split yaml document into individual entries to improve performance & handle format errors more cleanly
+        StringBuilder buffer = new StringBuilder();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (!line.isEmpty()) {
+                char first = line.charAt(0);
+                if (first >= '0' && first <= '9' && !buffer.isEmpty()) {
+                    Map.Entry<Integer, SdeStargate> mapEntry = yamlMapper.readValue(
+                        buffer.toString(),
+                        new TypeReference<Map.Entry<Integer, SdeStargate>>() {}
+                    );
+                    consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+                    buffer.setLength(0);
+                }
+            }
+            if (!buffer.isEmpty()) buffer.append('\n');
+            buffer.append(line);
+        }
+
+        if (!buffer.isEmpty()) {
+            Map.Entry<Integer, SdeStargate> mapEntry = yamlMapper.readValue(
+                buffer.toString(),
+                new TypeReference<Map.Entry<Integer, SdeStargate>>() {}
+            );
+            consumer.accept(mapEntry.getKey(), mapEntry.getValue());
+        }
+    }
+
+    /* TODO: Replace */
+    public record SdeSecondarySun(
+        @JsonProperty(required = true) int effectBeaconTypeID,
+        @JsonProperty(required = true) int itemID,
+        @JsonProperty(required = true) double[] position,
+        @JsonProperty(required = true) int typeID
+    ) {}
+
+    public record SdeStation(
+        @Nullable Integer celestialIndex,
+        @JsonProperty(required = true) int operationID,
+        @JsonProperty(required = true) int orbitID,
+        @Nullable Integer orbitIndex,
+        @JsonProperty(required = true) int ownerID,
+        @JsonProperty(required = true) Position position,
+        @JsonProperty(required = true) double reprocessingEfficiency,
+        @JsonProperty(required = true) int reprocessingHangarFlag,
+        @JsonProperty(required = true) double reprocessingStationsTake,
+        @JsonProperty(required = true) int solarSystemID,
+        @JsonProperty(required = true) int typeID,
+        @JsonProperty(required = false) boolean useOperationName
+    ) {}
+    public void readStations(BiConsumer<Integer, SdeStation> consumer) throws IOException {
+        ZipEntry entry = zipFile.getEntry("npcStations.yaml");
+        HashMap<Integer, SdeStation> stationMap = yamlMapper.readValue(zipFile.getInputStream(entry), new TypeReference<HashMap<Integer, SdeStation>>() {});
+        stationMap.forEach(consumer);
+    }
+
+    public record SdePlainModifier(@JsonProperty(required = true) int dogmaAttributeID) {}
+    public record SdeLocationGroupModifier(@JsonProperty(required = true) int dogmaAttributeID, @JsonProperty(required = true) int groupID) {}
+    public record SdeLocationSkillModifier(@JsonProperty(required = true) int dogmaAttributeID, @JsonProperty(required = true) int skillID) {}
+    public record SdeDbuff(
+        @JsonProperty(required = true) String aggregateMode,
+        @JsonProperty(required = true) String developerDescription,
+        @Nullable LocalizedString displayName,
+        @Nullable SdePlainModifier[] itemModifiers,
+        @Nullable SdeLocationGroupModifier[] locationGroupModifiers,
+        @Nullable SdePlainModifier[] locationModifiers,
+        @Nullable SdeLocationSkillModifier[] locationRequiredSkillModifiers,
+        @JsonProperty(required = true) String operationName,
+        @JsonProperty(required = true) String showOutputValueInUI
+    ) {}
+    public void readDbuffs(BiConsumer<Integer, SdeDbuff> consumer) throws IOException {
+        ZipEntry entry = zipFile.getEntry("dbuffCollections.yaml");
+        HashMap<Integer, SdeDbuff> stationMap = yamlMapper.readValue(zipFile.getInputStream(entry), new TypeReference<HashMap<Integer, SdeDbuff>>() {});
+        stationMap.forEach(consumer);
+    }
+
+    public record SdeDynamicAttribute(
+        @Nullable Integer highIsGood,
+        @JsonProperty(required = true) double max,
+        @JsonProperty(required = true) double min
+    ) {}
+    public record SdeIOMapping(
+        @JsonProperty(required = true) int[] applicableTypes,
+        @JsonProperty(required = true) int resultingType
+    ) {}
+    public record SdeDynamicAttributes(
+        @JsonProperty(required = true) LinkedHashMap<Integer, SdeDynamicAttribute> attributeIDs,
+        @JsonProperty(required = true) SdeIOMapping[] inputOutputMapping
+    ) {}
+    public void readDynamicAttributes(BiConsumer<Integer, SdeDynamicAttributes> consumer) throws IOException {
+        ZipEntry entry = zipFile.getEntry("dynamicItemAttributes.yaml");
+        HashMap<Integer, SdeDynamicAttributes> stationMap = yamlMapper.readValue(zipFile.getInputStream(entry), new TypeReference<HashMap<Integer, SdeDynamicAttributes>>() {});
+        stationMap.forEach(consumer);
+    }
+
+    public record SdeGraphic(
+        @Nullable String graphicFile,
+        @Nullable String iconFolder,
+        @Nullable String sofFactionName,
+        @Nullable String sofHullName,
+        @Nullable String[] sofLayout,
+        @Nullable Integer sofMaterialSetID,
+        @Nullable String sofRaceName
+    ) {}
+    public void readGraphics(BiConsumer<Integer, SdeGraphic> consumer) throws IOException {
+        ZipEntry entry = zipFile.getEntry("graphics.yaml");
+        HashMap<Integer, SdeGraphic> stationMap = yamlMapper.readValue(zipFile.getInputStream(entry), new TypeReference<HashMap<Integer, SdeGraphic>>() {});
+        stationMap.forEach(consumer);
     }
 }

@@ -3,7 +3,7 @@ package net.sentientturtle.nee.components;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.Component;
-import net.sentientturtle.nee.data.ResourceLocation;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.data.datatypes.Type;
 
 import static net.sentientturtle.html.HTML.IMG;
@@ -12,22 +12,22 @@ import static net.sentientturtle.html.HTML.IMG;
  * Large (512px) image render of a {@link Type}, usually a Ship, Drone, or Structure.
  */
 public class ItemRender extends Component {
-    private final ResourceLocation resourceLocation;
+    private final Resource resource;
 
     public ItemRender(Type type) {
         super("item_render colour_theme_minor");
-        resourceLocation = ResourceLocation.typeRender(type.typeID);
+        resource = Resource.typeRender(type.typeID);
     }
 
-    public ItemRender(ResourceLocation resourceLocation) {
+    public ItemRender(Resource resource) {
         super("item_render");
-        this.resourceLocation = resourceLocation;
+        this.resource = resource;
     }
 
     @Override
     protected HTML[] getContent(HtmlContext context) {
         return new HTML[]{
-            IMG(resourceLocation, null)
+            IMG(resource, null)
         };
     }
 
