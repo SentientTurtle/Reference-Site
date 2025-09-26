@@ -37,9 +37,11 @@ public class Main {
     public static Path TEMP_DIR;
 
     public static Path SHARED_CACHE_PATH;
+    public static Path JSONL_SDE_FILE;
     public static Path YAML_SDE_FILE;
     public static Path ICON_CACHE_FILE;
     public static boolean UPDATE_SDE;
+    public static boolean USE_JSONL;
     public static int COMPRESSION;  // No compression is moderately faster
     public static boolean GENERATE_ICONS;
     public static boolean SKIP_RESOURCES;
@@ -92,9 +94,11 @@ public class Main {
 
             RES_FOLDER = Path.of(properties.getProperty("RESOURCE_FOLDER", "./rsc/"));
             TEMP_DIR = RES_FOLDER.resolve("temp");
-            YAML_SDE_FILE = RES_FOLDER.resolve("sde.zip");
+            YAML_SDE_FILE = RES_FOLDER.resolve("sde_yaml.zip");
+            JSONL_SDE_FILE = RES_FOLDER.resolve("sde_jsonl.zip");
             ICON_CACHE_FILE = RES_FOLDER.resolve("iconcache.zip");
             UPDATE_SDE = properties.getProperty("UPDATE_SDE", "TRUE").equalsIgnoreCase("TRUE");
+            USE_JSONL = properties.getProperty("USE_JSONL", "TRUE").equalsIgnoreCase("TRUE");
 
             if (properties.getProperty("COMPRESSION").equalsIgnoreCase("TRUE")) {
                 COMPRESSION = Deflater.DEFAULT_COMPRESSION;
@@ -119,7 +123,8 @@ public class Main {
         } else {
             properties.setProperty("SHARED_CACHE_PATH", "???");
             properties.setProperty("RESOURCE_FOLDER", "./rsc/");
-            properties.setProperty("UPDATE_SDE", "FALSE");
+            properties.setProperty("UPDATE_SDE", "TRUE");
+            properties.setProperty("USE_JSONL", "TRUE");
             properties.setProperty("COMPRESSION", "FALSE");
             properties.setProperty("GENERATE_ICONS", "FALSE");
             properties.setProperty("SKIP_RESOURCES", "FALSE");
@@ -165,47 +170,26 @@ public class Main {
         System.out.println("Initializing shared cache...");
         SharedCacheReader sharedCache = new SharedCacheReader(SHARED_CACHE_PATH);
         System.out.println("\tConnected to shared cache!");
-//        System.out.println("Connecting to Python FSD data...");
-//        FSDData fsdData = new FSDData(sharedCache);
-//        System.out.println("\tFSD data loaded!");
 
         if (UPDATE_SDE) {
-            SDEUtils.updateYAML(YAML_SDE_FILE.toFile());
+            if (USE_JSONL) {
+                SDEUtils.updateJSONL(JSONL_SDE_FILE.toFile());
+            } else {
+                SDEUtils.updateYAML(YAML_SDE_FILE.toFile());
+            }
         }
 
-        System.out.println("Loading SDE...");
+        System.out.println("Loading SDE... (" + (USE_JSONL ? "JSONL" : "YAML") + ")");
         long sde_start = System.nanoTime();
-        SDEData sdeData = new YamlSDEData(new YAMLDataExportReader(YAML_SDE_FILE), patch);
+        SDEData sdeData;
+        if (USE_JSONL) {
+            sdeData = new CCPSDEData(new JSONLSDEReader(JSONL_SDE_FILE), patch);
+        } else {
+            sdeData = new CCPSDEData(new YAMLSDEReader(YAML_SDE_FILE), patch);
+        }
         long sdeDuration = System.nanoTime() - sde_start;
         System.out.println("\tSDE loaded! (" + (TimeUnit.NANOSECONDS.toMillis(sdeDuration) / 1000.0) +")");
-        // Patch FSD into SDE data
-//        {
-//            Map<Integer, Set<Integer>> mutaplasmidMap = sdeData.produceMap();
-//            for (Type mutaplasmid : sdeData.getGroupTypes().getOrDefault(1964, Set.of())) {
-//                List<FSDData.IOMapping> ioMappings = fsdData.dynamicAttributes.get(mutaplasmid.typeID)
-//                    .inputOutputMapping();
-//                if (ioMappings.size() != 1) throw new IllegalStateException("Mutaplasmid IO mappings changed!");
-//
-//                mutaplasmidMap.computeIfAbsent(
-//                    ioMappings.get(0).resultingType(),
-//                    sdeData::produceSet
-//                ).add(mutaplasmid.typeID);
-//            }
-//
-//            for (Set<Integer> mutaplasmidGroup : mutaplasmidMap.values()) {
-//                Integer parentTypeID = mutaplasmidGroup.stream().min(Type.idComparator(sdeData)).orElseThrow();
-//
-//                for (Integer typeID : mutaplasmidGroup) {
-//                    sdeData.getVariants()
-//                        .merge(typeID, mutaplasmidGroup, (one, two) -> {
-//                            one.addAll(two);
-//                            return one;
-//                        });
-//
-//                    sdeData.getParentTypeMap().put(typeID, parentTypeID);
-//                }
-//            }
-//        }
+
         System.out.println("Loading icon cache...");
         IconProvider.readIconCache();
         Runtime.getRuntime().addShutdownHook(new Thread(IconProvider::writeIconCache));

@@ -1,17 +1,15 @@
 package net.sentientturtle.nee.data.sde;
 
+import net.sentientturtle.nee.Main;
 import net.sentientturtle.nee.data.datatypes.*;
-import net.sentientturtle.nee.data.sde.YAMLDataExportReader.SdeBpItem;
-import net.sentientturtle.nee.data.sde.YAMLDataExportReader.SdeBonus;
-import net.sentientturtle.nee.data.sde.YAMLDataExportReader.SdeTypeBonus;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static net.sentientturtle.nee.data.sde.YAMLDataExportReader.*;
-
-public class YamlSDEData extends SDEData {
+public class CCPSDEData extends SDEData {
     private final Map<Integer, Category> categories;
     private final Map<Integer, Group> groups;
     private final Map<Integer, Attribute> attributes;
@@ -41,7 +39,18 @@ public class YamlSDEData extends SDEData {
     private final Map<Integer, DynamicAttributes> dynamicAttributes;
     private final Map<Integer, String> graphicFolders;
 
-    public YamlSDEData(YAMLDataExportReader reader, boolean patch) throws IOException {
+    public static void main(String[] args) throws IOException {
+        Main.RES_FOLDER = Path.of("./rsc");
+
+        System.out.println("Loading SDE...");
+        long sde_start = System.nanoTime();
+//        SDEData sdeData = new CCPSDEData(new YAMLSDEReader(Path.of("./rsc/sde.zip")), false);
+        SDEData sdeData = new CCPSDEData(new JSONLSDEReader(Path.of("./rsc/sde_jsonl.zip")), false);
+        long sdeDuration = System.nanoTime() - sde_start;
+        System.out.println("\tSDE loaded! (" + (TimeUnit.NANOSECONDS.toMillis(sdeDuration) / 1000.0) +")");
+    }
+
+    public CCPSDEData(SDEReader reader, boolean patch) throws IOException {
         this.categories = this.produceMap();
         reader.readCategories((categoryID, sdeCategory) -> {
             this.categories.put(
@@ -72,6 +81,7 @@ public class YamlSDEData extends SDEData {
         this.typeTraits = this.produceMap();
         this.metaTypes = this.produceMap();
         HashMap<Integer, Set<Integer>> typeVariants = new HashMap<>();
+
         reader.readTypes((typeID, sdeType) -> {
             this.types.put(
                 typeID,
@@ -98,29 +108,27 @@ public class YamlSDEData extends SDEData {
                 metaTypes.put(typeID, sdeType.metaGroupID());
             }
         });
+
         reader.readTypeBonuses((typeID, typeBonus) -> {
             List<TypeTraits.Bonus> miscBonuses = this.produceList();
             if (typeBonus.miscBonuses() != null) {
-                typeBonus.miscBonuses()
-                    .stream()
-                    .sorted(Comparator.comparingInt(SdeBonus::importance))
+                Arrays.stream(typeBonus.miscBonuses())
+                    .sorted(Comparator.comparingInt(SDEReader.SdeBonus::importance))
                     .forEach(bonus -> miscBonuses.add(new TypeTraits.Bonus(bonus.bonus(), bonus.bonusText().en(), bonus.unitID())));
             }
             List<TypeTraits.Bonus> roleBonuses = this.produceList();
             if (typeBonus.roleBonuses() != null) {
-                typeBonus.roleBonuses()
-                    .stream()
-                    .sorted(Comparator.comparingInt(SdeBonus::importance))
+                Arrays.stream(typeBonus.roleBonuses())
+                    .sorted(Comparator.comparingInt(SDEReader.SdeBonus::importance))
                     .forEach(bonus -> roleBonuses.add(new TypeTraits.Bonus(bonus.bonus(), bonus.bonusText().en(), bonus.unitID())));
             }
             Map<Integer, List<TypeTraits.Bonus>> skillBonuses = this.produceMap();
             if (typeBonus.types() != null) {
-                for (Map.Entry<Integer, ArrayList<SdeBonus>> entry : typeBonus.types().entrySet()) {
+                for (Map.Entry<Integer, SDEReader.SdeBonus[]> entry : typeBonus.types().entrySet()) {
                     List<TypeTraits.Bonus> bonusList = skillBonuses.computeIfAbsent(entry.getKey(), this::produceList);
 
-                    entry.getValue()
-                        .stream()
-                        .sorted(Comparator.comparingInt(SdeBonus::importance))
+                    Arrays.stream(entry.getValue())
+                        .sorted(Comparator.comparingInt(SDEReader.SdeBonus::importance))
                         .forEach(bonus -> bonusList.add(new TypeTraits.Bonus(bonus.bonus(), bonus.bonusText().en(), bonus.unitID())));
                 }
             }
@@ -221,10 +229,10 @@ public class YamlSDEData extends SDEData {
 
         this.reprocessingMaterials = this.produceMap();
         reader.readMaterials((typeID, materials) -> {
-            if (materials.materials().size() > 0) {
+            if (materials.materials().length > 0) {
                 var prev = this.reprocessingMaterials.put(
                     typeID,
-                    materials.materials().stream().collect(Collectors.toMap(SdeTypeMaterial::materialTypeID, SdeTypeMaterial::quantity))
+                    Arrays.stream(materials.materials()).collect(Collectors.toMap(SDEReader.SdeTypeMaterial::materialTypeID, SDEReader.SdeTypeMaterial::quantity))
                 );
                 if (prev != null) throw new IllegalStateException("Duplicate typeMaterials for type " + typeID);
             }
@@ -235,7 +243,7 @@ public class YamlSDEData extends SDEData {
             int outputQuantity = -1;
             int outputType = -1;
             LinkedHashMap<Integer, Integer> inputs = new LinkedHashMap<>();
-            for (Map.Entry<Integer, SdePlanetSchematicItem> entry : schematic.types().entrySet()) {
+            for (Map.Entry<Integer, SDEReader.SdePlanetSchematicItem> entry : schematic.types().entrySet()) {
                 if (entry.getValue().isInput()) {
                     inputs.put(entry.getKey(), entry.getValue().quantity());
                 } else {
@@ -517,17 +525,16 @@ public class YamlSDEData extends SDEData {
         };
     }
 
-    private IndustryActivity mapActivity(int bpTypeID, IndustryActivityType activityType, SdeBpActivity activity) {
+    private IndustryActivity mapActivity(int bpTypeID, IndustryActivityType activityType, SDEReader.SdeBpActivity activity) {
         return new IndustryActivity(
             bpTypeID,
             activityType,
             activity.time(),
             activity.materials() != null
-                ? activity.materials()
-                    .stream()
+                ? Arrays.stream(activity.materials())
                     .collect(Collectors.toMap(
-                        SdeBpItem::typeID,
-                        SdeBpItem::quantity,
+                        SDEReader.SdeBpItem::typeID,
+                        SDEReader.SdeBpItem::quantity,
                         (l, r) -> {
                             if ((int) l == (int) r) {
                                 return l;
@@ -539,11 +546,10 @@ public class YamlSDEData extends SDEData {
                     ))
                 : Map.of(),
             activity.products() != null
-                ? activity.products()
-                    .stream()
+                ? Arrays.stream(activity.products())
                     .collect(Collectors.toMap(
-                        SdeBpItem::typeID,
-                        SdeBpItem::quantity,
+                        SDEReader.SdeBpItem::typeID,
+                        SDEReader.SdeBpItem::quantity,
                         (l, r) -> {
                             if ((int) l == (int) r) {
                                 return l;
@@ -555,12 +561,11 @@ public class YamlSDEData extends SDEData {
                     ))
                 : Map.of(),
             activity.products() != null
-                ? activity.products()
-                    .stream()
+                ? Arrays.stream(activity.products())
                     .filter(item -> item.probability() != null)
                     .collect(Collectors.toMap(
-                        SdeBpItem::typeID,
-                        SdeBpItem::probability,
+                        SDEReader.SdeBpItem::typeID,
+                        SDEReader.SdeBpItem::probability,
                         (l, r) -> {
                             if ((double) l == (double) r) {
                                 return l;
@@ -572,11 +577,10 @@ public class YamlSDEData extends SDEData {
                     ))
                 : Map.of(),
             activity.skills() != null
-                ? activity.skills()
-                    .stream()
+                ? Arrays.stream(activity.skills())
                     .collect(Collectors.toMap(
-                        SdeBpSkill::typeID,
-                        SdeBpSkill::level,
+                        SDEReader.SdeBpSkill::typeID,
+                        SDEReader.SdeBpSkill::level,
                         (l, r) -> { // Some (unused/invalid) entries have duplicate records
                             if ((int) l == (int) r) {
                                 return l;

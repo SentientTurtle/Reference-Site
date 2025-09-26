@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * <br>
  * Implementors must call {@link SDEData#patch()} and then {@link SDEData#loadViews()} after initializing the abstract collections in this type
  *
- * @see SQLiteSDEData
+ * @see CCPSDEData
  */
 public abstract class SDEData {
     private static final DecimalFormat decimalFormat;

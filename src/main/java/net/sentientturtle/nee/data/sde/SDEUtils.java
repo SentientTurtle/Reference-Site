@@ -2,46 +2,41 @@ package net.sentientturtle.nee.data.sde;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.sentientturtle.nee.util.ExceptionUtil;
-import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
 import java.io.*;
-import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.zip.ZipFile;
 
 /**
  * Utility class to download and update the EVE Online Static Data Export
  */
 public class SDEUtils {
-
+    // If this breaks, check https://developers.eveonline.com/docs/services/static-data/
     private static final String SDE_VERSION_URL = "https://developers.eveonline.com/static-data/tranquility/latest.jsonl";
-    private static final String YAML_SDE_URL = "https://developers.eveonline.com/static-data/eve-online-static-data-latest-yaml.zip";   // If this breaks, check https://developers.eveonline.com/docs/services/static-data/
+    private static final String YAML_SDE_URL = "https://developers.eveonline.com/static-data/eve-online-static-data-latest-yaml.zip";
+    private static final String JSONL_SDE_URL = "https://developers.eveonline.com/static-data/eve-online-static-data-latest-jsonl.zip";
 
-    public static void updateYAML(File file) throws IOException {
-        System.out.println("Updating YAML SDE...");
-        int mostRecent;
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    record SDEMetadata(int buildNumber) {};
+
+    private static int getMostRecentVersion() throws IOException {
         try {
-            @JsonIgnoreProperties(ignoreUnknown = true)
-            record SDEMetadata(int buildNumber) {};
             SDEMetadata sdeMetadata = new ObjectMapper().readValue(new URI(SDE_VERSION_URL).toURL(), SDEMetadata.class);
-            mostRecent = sdeMetadata.buildNumber;
+            return sdeMetadata.buildNumber;
         } catch (URISyntaxException e) {
             throw new IOException(e);   // Should never happen, as the URI is hardcoded & correct.
         }
+    }
 
+    public static void updateYAML(File file) throws IOException {
+        System.out.println("Updating YAML SDE...");
+        int mostRecent = getMostRecentVersion();
 
         boolean download;
         if (file.exists()) {
-
             int currentVersion;
             try (ZipFile sdeZip = new ZipFile(file)) {
                 String yaml = new String(sdeZip.getInputStream(sdeZip.getEntry("_sde.yaml")).readAllBytes());
@@ -62,6 +57,36 @@ public class SDEUtils {
             System.out.println("\tSDE Outdated!");
             try {
                 download(file, new URI(YAML_SDE_URL).toURL().openStream());
+            } catch (URISyntaxException e) {
+                throw new IOException(e);
+            }
+        } else {
+            System.out.println("\tSDE Up to date!");
+        }
+    }
+
+    public static void updateJSONL(File file) throws IOException {
+        System.out.println("Updating JSONL SDE...");
+        int mostRecent = getMostRecentVersion();
+
+        boolean download;
+        if (file.exists()) {
+            int currentVersion;
+            try (ZipFile sdeZip = new ZipFile(file)) {
+                SDEMetadata sdeMetadata = new ObjectMapper().readValue(sdeZip.getInputStream(sdeZip.getEntry("_sde.jsonl")), SDEMetadata.class);
+                currentVersion = sdeMetadata.buildNumber;
+            }
+
+            System.out.println("\tCurrent JSONL SDE: " + currentVersion + "\n\tMost recent: " + mostRecent);
+            download = currentVersion != mostRecent;
+            if (download) file.delete();
+        } else {
+            download = true;
+        }
+        if (download) {
+            System.out.println("\tSDE Outdated!");
+            try {
+                download(file, new URI(JSONL_SDE_URL).toURL().openStream());
             } catch (URISyntaxException e) {
                 throw new IOException(e);
             }
