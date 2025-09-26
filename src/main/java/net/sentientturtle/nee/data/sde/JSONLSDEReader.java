@@ -48,25 +48,34 @@ public class JSONLSDEReader implements SDEReader {
     ) {}
 
     private static class JsonlMapDeserializer extends JsonDeserializer<LinkedHashMap<?, ?>> implements ContextualDeserializer {
-        private boolean isWrappedValue = false;
+        private DeserializationKind kind = DeserializationKind.NORMAL;
         private JavaType jsonType;
+
+        private enum DeserializationKind {
+            NORMAL, WRAPPED, INLINE
+        }
 
         @Override
         public LinkedHashMap<?, ?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
-            LinkedHashMap<Object, Object> map = new LinkedHashMap<>();
-            if (this.isWrappedValue) {
-                WrappedEntry<?, ?>[] keyedArray = ctxt.readValue(p, jsonType);
-                for (WrappedEntry<?, ?> keyed : keyedArray) {
-                    map.put(keyed._key, keyed._value);
+            return switch (this.kind) {
+                case NORMAL -> ctxt.readValue(p, jsonType);
+                case WRAPPED -> {
+                    LinkedHashMap<Object, Object> map = new LinkedHashMap<>();
+                    WrappedEntry<?, ?>[] keyedArray = ctxt.readValue(p, jsonType);
+                    for (WrappedEntry<?, ?> keyed : keyedArray) {
+                        map.put(keyed._key, keyed._value);
+                    }
+                    yield map;
                 }
-            } else {
-                InlineEntry<?, ?>[] inlineEntryArray = ctxt.readValue(p, jsonType);
-                for (InlineEntry<?, ?> inlineEntry : inlineEntryArray) {
-                    map.put(inlineEntry._key, inlineEntry.value);
+                case INLINE -> {
+                    LinkedHashMap<Object, Object> map = new LinkedHashMap<>();
+                    InlineEntry<?, ?>[] inlineEntryArray = ctxt.readValue(p, jsonType);
+                    for (InlineEntry<?, ?> inlineEntry : inlineEntryArray) {
+                        map.put(inlineEntry._key, inlineEntry.value);
+                    }
+                    yield map;
                 }
-            }
-
-            return map;
+            };
         }
 
         @Override
@@ -77,18 +86,24 @@ public class JSONLSDEReader implements SDEReader {
             TypeFactory typeFactory = ctxt.getTypeFactory();
 
             JavaType keyType = mapType.containedType(0);
-            JavaType valueType = mapType.containedType(1);
-            // TODO: Check if keyType is "String" & value is object, if-so apply normal deserialization?
-            if (valueType.isArrayType() || valueType.isTypeOrSubTypeOf(String.class) || valueType.isTypeOrSubTypeOf(Number.class) || valueType.isTypeOrSubTypeOf(Boolean.class)) {
-                // non-object value types are wrapped in a _value field
-                JavaType arrayMap = typeFactory.constructParametricType(WrappedEntry.class, keyType, valueType);
-                deserializer.jsonType = typeFactory.constructArrayType(arrayMap);
-                deserializer.isWrappedValue = true;
+            if (keyType.isTypeOrSubTypeOf(String.class)) {
+                // String-keyed maps are encoded as normal json objects whose keys are the map's key, and whose values are the map's values
+                deserializer.jsonType = mapType;
+                deserializer.kind = DeserializationKind.NORMAL;
             } else {
-                // json object values have their fields inlined in the map entry
-                JavaType keyedType = typeFactory.constructParametricType(InlineEntry.class, keyType, valueType);
-                deserializer.jsonType = typeFactory.constructArrayType(keyedType);
-                deserializer.isWrappedValue = false;
+                // For non-string keys, the map is an array of entries, each having the key set in the `_key` field
+                JavaType valueType = mapType.containedType(1);
+                if (valueType.isArrayType() || valueType.isTypeOrSubTypeOf(String.class) || valueType.isTypeOrSubTypeOf(Number.class) || valueType.isTypeOrSubTypeOf(Boolean.class)) {
+                    // non-object value types are wrapped in a _value field
+                    JavaType arrayMap = typeFactory.constructParametricType(WrappedEntry.class, keyType, valueType);
+                    deserializer.jsonType = typeFactory.constructArrayType(arrayMap);
+                    deserializer.kind = DeserializationKind.WRAPPED;
+                } else {
+                    // json-object values have their fields inlined in the map entry
+                    JavaType keyedType = typeFactory.constructParametricType(InlineEntry.class, keyType, valueType);
+                    deserializer.jsonType = typeFactory.constructArrayType(keyedType);
+                    deserializer.kind = DeserializationKind.INLINE;
+                }
             }
             return deserializer;
         }
