@@ -10,8 +10,8 @@ import net.sentientturtle.html.context.StringBuilderHtmlContext;
 import net.sentientturtle.nee.data.*;
 import net.sentientturtle.nee.data.sde.*;
 import net.sentientturtle.nee.data.sharedcache.IconProvider;
+import net.sentientturtle.nee.data.sharedcache.SharedCache;
 import net.sentientturtle.nee.page.*;
-import net.sentientturtle.nee.data.sharedcache.SharedCacheReader;
 import net.sentientturtle.nee.util.ExceptionUtil;
 
 import java.io.*;
@@ -36,12 +36,11 @@ public class Main {
     public static Path RES_FOLDER;
     public static Path TEMP_DIR;
 
-    public static Path SHARED_CACHE_PATH;
+    public static Path CACHE_PATH;
     public static Path JSONL_SDE_FILE;
     public static Path YAML_SDE_FILE;
     public static Path ICON_CACHE_FILE;
     public static boolean UPDATE_SDE;
-    public static boolean USE_JSONL;
     public static int COMPRESSION;  // No compression is moderately faster
     public static boolean GENERATE_ICONS;
     public static boolean SKIP_RESOURCES;
@@ -62,7 +61,7 @@ public class Main {
 
     private static DataSources initializedData = null;
 
-    public static DataSources initialize(boolean patch) throws IOException {
+    public static DataSources initialize(boolean patch) throws IOException, InterruptedException {
         if (initializedData != null) return initializedData;
         String propertyPath = System.getProperty("net.sentientturtle.nee.properties", "./nee.properties");
 
@@ -75,10 +74,10 @@ public class Main {
                 System.exit(1);
             }
 
-            if (properties.containsKey("SHARED_CACHE_PATH")) {
-                SHARED_CACHE_PATH = Path.of(properties.getProperty("SHARED_CACHE_PATH"));
+            if (properties.containsKey("CACHE_PATH")) {
+                CACHE_PATH = Path.of(properties.getProperty("CACHE_PATH"));
             } else {
-                System.out.println("Missing SHARED_CACHE_PATH property; Please configure properties in '" + propertyPath + "'");
+                System.out.println("Missing CACHE_PATH property; Please configure properties in '" + propertyPath + "'");
                 System.exit(1);
             }
 
@@ -98,7 +97,6 @@ public class Main {
             JSONL_SDE_FILE = RES_FOLDER.resolve("sde_jsonl.zip");
             ICON_CACHE_FILE = RES_FOLDER.resolve("iconcache.zip");
             UPDATE_SDE = properties.getProperty("UPDATE_SDE", "TRUE").equalsIgnoreCase("TRUE");
-            USE_JSONL = properties.getProperty("USE_JSONL", "TRUE").equalsIgnoreCase("TRUE");
 
             if (properties.getProperty("COMPRESSION").equalsIgnoreCase("TRUE")) {
                 COMPRESSION = Deflater.DEFAULT_COMPRESSION;
@@ -121,10 +119,9 @@ public class Main {
                 PRE_COMPRESSED_FILES = Set.of();
             }
         } else {
-            properties.setProperty("SHARED_CACHE_PATH", "???");
+            properties.setProperty("CACHE_PATH", "./rsc/cache/");
             properties.setProperty("RESOURCE_FOLDER", "./rsc/");
             properties.setProperty("UPDATE_SDE", "TRUE");
-            properties.setProperty("USE_JSONL", "TRUE");
             properties.setProperty("COMPRESSION", "FALSE");
             properties.setProperty("GENERATE_ICONS", "FALSE");
             properties.setProperty("SKIP_RESOURCES", "FALSE");
@@ -138,55 +135,17 @@ public class Main {
             System.exit(-1);
         }
 
-        String gameVersion;
-        {
-            String serverVersion;
-            try {
-                record GameStatus(String build) { }
-                GameStatus gameStatus = new ObjectMapper()
-                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                    .readValue(new URI("https://binaries.eveonline.com/eveclient_TQ.json").toURL(), GameStatus.class);
-                serverVersion = gameStatus.build;
-            } catch (Exception e) {
-                serverVersion = ExceptionUtil.sneakyThrow(e);
-            }
-
-            String installVersion;
-            try (Stream<String> lines = Files.lines(SHARED_CACHE_PATH.resolve("tq/start.ini"))) {
-                installVersion = lines.filter(s -> s.startsWith("build = "))
-                    .findFirst()
-                    .get()
-                    .substring("build = ".length());
-            }
-
-            if (serverVersion.equals(installVersion)) {
-                gameVersion = serverVersion;
-            } else {
-                gameVersion = serverVersion;
-                throw new IllegalStateException("Mismatch between server (" + serverVersion + ") and install (" + installVersion + ") game versions!");
-            }
-        }
-
         System.out.println("Initializing shared cache...");
-        SharedCacheReader sharedCache = new SharedCacheReader(SHARED_CACHE_PATH);
-        System.out.println("\tConnected to shared cache!");
+        SharedCache sharedCache = new SharedCache(CACHE_PATH);
+        System.out.println("\tLoaded shared cache!");
 
         if (UPDATE_SDE) {
-            if (USE_JSONL) {
-                SDEUtils.updateJSONL(JSONL_SDE_FILE.toFile());
-            } else {
-                SDEUtils.updateYAML(YAML_SDE_FILE.toFile());
-            }
+            SDEUtils.updateJSONL(JSONL_SDE_FILE.toFile());
         }
 
-        System.out.println("Loading SDE... (" + (USE_JSONL ? "JSONL" : "YAML") + ")");
+        System.out.println("Loading SDE...");
         long sde_start = System.nanoTime();
-        SDEData sdeData;
-        if (USE_JSONL) {
-            sdeData = new CCPSDEData(new JSONLSDEReader(JSONL_SDE_FILE), patch);
-        } else {
-            sdeData = new CCPSDEData(new YAMLSDEReader(YAML_SDE_FILE), patch);
-        }
+        SDEData sdeData = new CCPSDEData(new JSONLSDEReader(JSONL_SDE_FILE), patch);
         long sdeDuration = System.nanoTime() - sde_start;
         System.out.println("\tSDE loaded! (" + (TimeUnit.NANOSECONDS.toMillis(sdeDuration) / 1000.0) +")");
 
@@ -195,13 +154,13 @@ public class Main {
         Runtime.getRuntime().addShutdownHook(new Thread(IconProvider::writeIconCache));
         System.out.println("\tIcon cache loaded");
 
-        System.out.println("Data initialized, game version: " + gameVersion);
-        return (initializedData = new DataSources(sdeData, sharedCache, gameVersion));
+        System.out.println("Data initialized, game version: " + sharedCache.gameVersion);
+        return (initializedData = new DataSources(sdeData, sharedCache, sharedCache.gameVersion));
     }
 
     public static Path OUTPUT_DIR = Path.of("./output");
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         long startTime = System.nanoTime();
         DataSources data = Main.initialize(true);
 

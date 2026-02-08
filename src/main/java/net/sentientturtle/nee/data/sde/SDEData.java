@@ -31,7 +31,7 @@ public abstract class SDEData {
         symbols.setDecimalSeparator('.');   // English style number formatting to match that of the game
         symbols.setGroupingSeparator(',');
         symbols.setNaN("???");              // NaN treated as "Unknown"
-        decimalFormat = new DecimalFormat("###,##0.##", symbols);
+        decimalFormat = new DecimalFormat("###,##0.#####", symbols);
 
         // This should be replaced with more robust date formatting
         dateFormat = new SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.ENGLISH);
@@ -40,88 +40,94 @@ public abstract class SDEData {
 
     // Data
 
-    /// Map<CategoryID, Category>
+    // Map<CategoryID, Category>
     public abstract Map<Integer, Category> getCategories();
 
-    /// Map<GroupID, Group>
+    // Map<GroupID, Group>
     public abstract Map<Integer, Group> getGroups();
 
-    /// Map<TypeID, Type>
+    // Map<TypeID, Type>
     public abstract Map<Integer, Type> getTypes();
 
-    /// Map<TypeID, TypeTrait>, with special values for SkillID {-1, -2}
+    // Map<TypeID, TypeTrait>, with special values for SkillID {-1, -2}
     public abstract Map<Integer, TypeTraits> getTypeTraits();
 
-    /// Map<AttributeID, Attribute>
+    // Map<AttributeID, Attribute>
     public abstract Map<Integer, Attribute> getAttributes();
 
-    /// Map<TypeID, Map<AttributeID, AttributeValue>>
+    // Map<TypeID, Map<AttributeID, AttributeValue>>
     public abstract Map<Integer, Map<Integer, Double>> getTypeAttributes();
 
-    /// Map<EffectID, Effect>
+    // Map<EffectID, Effect>
     public abstract Map<Integer, Effect> getEffects();
 
-    /// Map<TypeID, Set<EffectID>>
+    // Map<TypeID, Set<EffectID>>
     public abstract Map<Integer, Set<Integer>> getTypeEffects();
 
-    /// Map<IconID, Icon resource>
+    // Map<IconID, Icon resource>
     public abstract Map<Integer, String> getEveIcons();
 
-    /// Map<Blueprint TypeID, Map<IndustryActivityType, IndustryActivity using blueprint>>
+    // Map<Blueprint TypeID, Map<IndustryActivityType, IndustryActivity using blueprint>>
     public abstract Map<Integer, EnumMap<IndustryActivityType, IndustryActivity>> getBpActivities();
 
-    /// Map<TypeID, Map<Material TypeID, quantity>>
+    // Map<TypeID, Map<Material TypeID, quantity>>
     public abstract Map<Integer, Map<Integer, Integer>> getReprocessingMaterials();
 
-    /// Map<SchematicID, PlanetSchematic>
+    // Map<TypeID, Map<Material TypeID, quantities RandomRange>>
+    public abstract Map<Integer, Map<Integer, RandomRange>> getReprocessingRandomMaterials();
+
+    // Map<TypeID, Compressed 'block' TypeID>
+    public abstract Map<Integer, Integer> getCompressionTypes();
+
+    // Map<SchematicID, PlanetSchematic>
     public abstract Map<Integer, PlanetSchematic> getPlanetSchematics();
 
-    /// Map<MetaGroupID, MetaGroup>
+    // Map<MetaGroupID, MetaGroup>
     public abstract Map<Integer, MetaGroup> getMetaGroups();
 
-    /// Map<TypeID, Set<TypeID>>
+    // Map<TypeID, Set<TypeID>>
     public abstract Map<Integer, Set<Integer>> getVariants();
 
-    /// Map<TypeID, MetaGroupID>
-    public abstract Map<Integer, Integer> getMetaTypes();
-
-    /// Map<SolarSystemID, SolarSystem>
+    // Map<SolarSystemID, SolarSystem>
     public abstract Map<Integer, SolarSystem> getSolarSystems();
 
-    /// Map<ConstellationID, Constellation>
+    // Map<ConstellationID, Constellation>
     public abstract Map<Integer, Constellation> getConstellations();
 
-    /// Map<RegionID, Region>
+    // Map<RegionID, Region>
     public abstract Map<Integer, Region> getRegions();
 
-    /// Map<SolarSystemID, Set<SolarSystemID>>
+    // Map<SolarSystemID, Set<SolarSystemID>>
     public abstract Map<Integer, Set<Integer>> getOutJumps();
 
-    /// Map<SolarSystemID, Set<SolarSystemID>>
+    // Map<SolarSystemID, Set<SolarSystemID>>
     public abstract Map<Integer, Set<Integer>> getInJumps();
 
-    /// Map<SolarSystemID, Set<Celestial in solarsystem>>
+    // Map<SolarSystemID, Set<Celestial in solarsystem>>
     public abstract Map<Integer, Set<Celestial>> getSystemCelestials();
 
-    /// Map<OperationID, Set<Station.Service in operation>>
+    // Map<OperationID, Set<Station.Service in operation>>
     public abstract Map<Integer, EnumSet<Station.Service>> getOperationServices();
 
-    /// Map<SolarSystemID, Set<Station in solarsystem>>
+    // Map<SolarSystemID, Set<Station in solarsystem>>
     public abstract Map<Integer, Set<Station>> getStations();
 
-    /// Map<FactionID, Faction>
+    //  Set<TypeID seeded in market by NPC corporations>
+    public abstract Set<Integer> getNpcSeededItems();
+
+    // Map<FactionID, Faction>
     public abstract Map<Integer, Faction> getFactions();
 
-    /// Map<MarketGroupID, MarketGroup>
+    // Map<MarketGroupID, MarketGroup>
     public abstract Map<Integer, MarketGroup> getMarketGroups();
 
-    /// Map<WarfareBuffID, WarfareBuff>
+    // Map<WarfareBuffID, WarfareBuff>
     public abstract Map<Integer, WarfareBuff> getWarfareBuffs();
 
-    /// Map<TypeID, DynamicAttributes of type>
+    // Map<mutaplasmid TypeID, DynamicAttributes of type>
     public abstract Map<Integer, DynamicAttributes> getDynamicAttributes();
 
-    /// Map<GraphicID, String folderPath>
+    // Map<GraphicID, String folderPath>
     public abstract Map<Integer, String> getGraphicFolders();
 
     // Views
@@ -142,6 +148,8 @@ public abstract class SDEData {
     private Map<Integer, Set<PlanetSchematic>> inputSchematicMap;
     // Map<Material TypeID, Set<TypeID yielding material>>
     private Map<Integer, Set<Integer>> oreReprocessingMap;
+    // Map<Compressed 'block' TypeID, Ore TypeID>
+    private Map<Integer, Integer> compressionReversedMap;
     // Map<MarketGroupID, Set<Type>>
     private Map<Integer, Set<Type>> marketGroupTypeMap;
     // Map<MarketGroupID, Set<child MarketGroup>>
@@ -156,88 +164,98 @@ public abstract class SDEData {
     private Map<Integer, Map<Integer, Set<Integer>>> requiresSkillMap;
     // Map<TypeID, parent TypeID>
     private Map<Integer, Integer> parentTypeMap;
+    // Map<module TypeID, Set<source mutaplasmid TypeID>>
+    private Map<Integer, Set<Integer>> moduleDynamicAttributeMap;
+    // Map<module TypeID, Set<mutaplasmid applicable-to-module TypeID>
+    private Map<Integer, Set<Integer>> moduleMutaplasmidMap;
 
     // View getters
 
-    /// Map<CategoryID, Set<Group>>
+    // Map<CategoryID, Set<Group>>
     public Map<Integer, Set<Group>> getCategoryGroups() {
         if (categoryGroups == null) throw new IllegalStateException("View collections not initialized!");
         return categoryGroups;
     }
 
-    /// Map<GroupID, Set<Type>>
+    // Map<GroupID, Set<Type>>
     public Map<Integer, Set<Type>> getGroupTypes() {
         if (groupTypes == null) throw new IllegalStateException("View collections not initialized!");
         return groupTypes;
     }
 
-    /// Map<Material TypeID, Set<IndustryActivity using material>>
+    // Map<Material TypeID, Set<IndustryActivity using material>>
     public Map<Integer, Set<IndustryActivity>> getMaterialActivityMap() {
         if (materialActivityMap == null) throw new IllegalStateException("View collections not initialized!");
         return materialActivityMap;
     }
 
-    /// Map<Product TypeID, Set<IndustryActivity producing product>>
+    // Map<Product TypeID, Set<IndustryActivity producing product>>
     public Map<Integer, Set<IndustryActivity>> getProductActivityMap() {
         if (productActivityMap == null) throw new IllegalStateException("View collections not initialized!");
         return productActivityMap;
     }
 
-    /// Map<Skill TypeID, Set<IndustryActivity using skill>>
+    // Map<Skill TypeID, Set<IndustryActivity using skill>>
     public Map<Integer, Set<IndustryActivity>> getSkillActivityMap() {
         if (skillActivityMap == null) throw new IllegalStateException("View collections not initialized!");
         return skillActivityMap;
     }
 
-    /// Map<Output TypeID, PlanetSchematic producing output>
+    // Map<Output TypeID, PlanetSchematic producing output>
     public Map<Integer, PlanetSchematic> getOutputSchematicMap() {
         if (outputSchematicMap == null) throw new IllegalStateException("View collections not initialized!");
         return outputSchematicMap;
     }
 
-    /// Map<Input TypeID, Set<PlanetSchematic using input>>
+    // Map<Input TypeID, Set<PlanetSchematic using input>>
     public Map<Integer, Set<PlanetSchematic>> getInputSchematicMap() {
         if (inputSchematicMap == null) throw new IllegalStateException("View collections not initialized!");
         return inputSchematicMap;
     }
 
-    /// Map<Material TypeID, Set<TypeID yielding material>>
+    // Map<Material TypeID, Set<TypeID yielding material>>
     public Map<Integer, Set<Integer>> getOreReprocessingMap() {
         if (oreReprocessingMap == null) throw new IllegalStateException("View collections not initialized!");
         return oreReprocessingMap;
     }
 
-    /// Map<MarketGroupID, Set<Type>>
+    // Map<Compressed 'block' TypeID, Ore TypeID>
+    public Map<Integer, Integer> getCompressionReversedMap() {
+        if (compressionReversedMap == null) throw new IllegalStateException("View collections not initialized!");
+        return compressionReversedMap;
+    }
+
+    // Map<MarketGroupID, Set<Type>>
     public Map<Integer, Set<Type>> getMarketGroupTypeMap() {
         if (marketGroupTypeMap == null) throw new IllegalStateException("View collections not initialized!");
         return marketGroupTypeMap;
     }
 
-    /// Map<MarketGroupID, Set<MarketGroup>>
+    // Map<MarketGroupID, Set<MarketGroup>>
     public Map<Integer, Set<MarketGroup>> getMarketGroupChildMap() {
         if (marketGroupChildMap == null) throw new IllegalStateException("View collections not initialized!");
         return marketGroupChildMap;
     }
 
-    /// Map<RegionID, List<Constellation>>
+    // Map<RegionID, List<Constellation>>
     public Map<Integer, List<SolarSystem>> getConstellationSolarSystemMap() {
         if (constellationSolarSystems == null) throw new IllegalStateException("View collections not initialized!");
         return constellationSolarSystems;
     }
 
-    /// Map<RegionID, List<SolarSystem>>
+    // Map<RegionID, List<SolarSystem>>
     public Map<Integer, List<SolarSystem>> getRegionSolarSystemMap() {
         if (regionSolarSystems == null) throw new IllegalStateException("View collections not initialized!");
         return regionSolarSystems;
     }
 
-    /// Map<RegionID, List<Constellation>>
+    // Map<RegionID, List<Constellation>>
     public Map<Integer, List<Constellation>> getRegionConstellationMap() {
         if (regionConstellations == null) throw new IllegalStateException("View collections not initialized!");
         return regionConstellations;
     }
 
-    /// Map<skill TypeID, Map<Level, Set<TypeID requiring skill>>>
+    // Map<skill TypeID, Map<Level, Set<TypeID requiring skill>>>
     public Map<Integer, Map<Integer, Set<Integer>>> getRequiresSkillMap() {
         if (requiresSkillMap == null) throw new IllegalStateException("View collections not initialized!");
         return requiresSkillMap;
@@ -247,6 +265,18 @@ public abstract class SDEData {
     public Map<Integer, Integer> getParentTypeMap() {
         if (parentTypeMap == null) throw new IllegalStateException("View collections not initialized!");
         return parentTypeMap;
+    }
+
+    // Map<module TypeID, Set<source mutaplasmid TypeID>>
+    public Map<Integer, Set<Integer>> getModuleDynamicAttributeMap() {
+        if (moduleDynamicAttributeMap == null) throw new IllegalStateException("View collections not initialized!");
+        return moduleDynamicAttributeMap;
+    }
+
+    // Map<module TypeID, Set<mutaplasmid applicable-to-module TypeID>
+    public Map<Integer, Set<Integer>> getmoduleMutaplasmidMap() {
+        if (moduleMutaplasmidMap == null) throw new IllegalStateException("View collections not initialized!");
+        return moduleMutaplasmidMap;
     }
 
     /*
@@ -276,7 +306,7 @@ public abstract class SDEData {
         return produceList();
     }
 
-    /// Initialize data views
+    // Initialize data views
     protected void loadViews() {
         categoryGroups = produceMap();
         for (Group group : getGroups().values()) {
@@ -321,13 +351,25 @@ public abstract class SDEData {
         oreReprocessingMap = produceMap();
         for (Map.Entry<Integer, Map<Integer, Integer>> entry : getReprocessingMaterials().entrySet()) {
             int source = entry.getKey();
-            if (getGroups().get(getTypes().get(source).groupID).categoryID == 25) {
+            Group group = getGroups().get(getTypes().get(source).groupID);
+            if (group.groupID == 4915 || group.groupID == 4932 || group.categoryID == 25) {
+                for (Integer materialID : entry.getValue().keySet()) {
+                    oreReprocessingMap.computeIfAbsent(materialID, this::produceSet).add(source);
+                }
+            }
+        }
+        for (Map.Entry<Integer, Map<Integer, RandomRange>> entry : getReprocessingRandomMaterials().entrySet()) {
+            int source = entry.getKey();
+            Group group = getGroups().get(getTypes().get(source).groupID);
+            if (group.groupID == 4915 || group.groupID == 4932 || group.categoryID == 25) {
                 for (Integer materialID : entry.getValue().keySet()) {
                     oreReprocessingMap.computeIfAbsent(materialID, this::produceSet).add(source);
                 }
             }
         }
 
+        compressionReversedMap = produceMap();
+        getCompressionTypes().forEach((key, value) -> compressionReversedMap.put(value, key));
 
         marketGroupChildMap = produceMap();
         for (MarketGroup marketGroup : this.getMarketGroups().values()) {
@@ -369,6 +411,17 @@ public abstract class SDEData {
             Integer parent = Objects.requireNonNull(types.get(0));
             for (Integer type : types) {
                 parentTypeMap.put(type, parent);    // Intentionally setting the parent type's parent to itself, rather than null
+            }
+        }
+
+        moduleDynamicAttributeMap = produceMap();
+        moduleMutaplasmidMap = produceMap();
+        for (Map.Entry<Integer, DynamicAttributes> entry : getDynamicAttributes().entrySet()) {
+            for (DynamicAttributes.IOMapping ioMapping : entry.getValue().inputOutputMapping()) {
+                moduleDynamicAttributeMap.computeIfAbsent(ioMapping.resultingType(), this::produceSet).add(entry.getKey());
+                for (int applicableType : ioMapping.applicableTypes()) {
+                    moduleMutaplasmidMap.computeIfAbsent(applicableType, this::produceSet).add(entry.getKey());
+                }
             }
         }
     }
@@ -732,16 +785,16 @@ public abstract class SDEData {
         }
         getBpActivities().values().removeIf(Map::isEmpty);
         this.getReprocessingMaterials().keySet().removeIf(typeID -> !types.containsKey(typeID));
+        this.getReprocessingRandomMaterials().keySet().removeIf(typeID -> !types.containsKey(typeID));
 
         Map<Integer, Set<Integer>> typeVariants = getVariants();
-
         typeVariants.keySet().removeIf(typeID -> !types.containsKey(typeID));
         for (Set<Integer> variants : typeVariants.values()) {
             variants.removeIf(typeID -> !types.containsKey(typeID));
         }
         typeVariants.values().removeIf(variants -> variants.size() < 2);
 
-        this.getMetaTypes().keySet().removeIf(typeID -> !types.containsKey(typeID));
+        this.getNpcSeededItems().removeIf(typeID -> !types.containsKey(typeID));
 
         // Create parent marketGroup for all without one
         Map<Integer, MarketGroup> marketGroups = this.getMarketGroups();
@@ -792,11 +845,11 @@ public abstract class SDEData {
         attributes.get(90).unitID = 114;
 
         // Patch meta level
-        for (Map.Entry<Integer, Integer> entry : getMetaTypes().entrySet()) {
+        for (Map.Entry<Integer, Type> entry : getTypes().entrySet()) {
             int typeID = entry.getKey();
             Map<Integer, Double> typeAttributes = getTypeAttributes().get(typeID);
             if (typeAttributes != null) {
-                int metaGroup = entry.getValue();
+                int metaGroup = entry.getValue().metaGroupID;
                 int minLevel = getMetaGroups().get(metaGroup).getMetaLevel();
 
                 Double metaLevel = typeAttributes.get(633);

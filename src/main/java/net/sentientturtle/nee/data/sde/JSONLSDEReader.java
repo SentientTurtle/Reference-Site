@@ -17,7 +17,6 @@ import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -32,7 +31,7 @@ public class JSONLSDEReader implements SDEReader {
             .registerModule(new SimpleModule("JSONL map override") {
                 {this.addDeserializer(LinkedHashMap.class, new JsonlMapDeserializer());}
             })
-            .configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, true);
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
     }
 
     // _key map entry with inline value
@@ -115,68 +114,62 @@ public class JSONLSDEReader implements SDEReader {
     }
 
     @Override
-    public void readCategories(BiConsumer<Integer, SdeCategory> consumer) throws IOException {
+    public void readCategories(Consumer<SdeCategory> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("categories.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeCategory>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeCategory.class));
         }
     }
 
     @Override
-    public void readGroups(BiConsumer<Integer, SdeGroup> consumer) throws IOException {
+    public void readGroups(Consumer<SdeGroup> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("groups.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeGroup>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeGroup.class));
         }
     }
 
     @Override
-    public void readTypeBonuses(BiConsumer<Integer, SdeTypeBonus> consumer) throws IOException {
+    public void readTypeBonuses(Consumer<SdeTypeBonus> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("typeBonus.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeTypeBonus>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeTypeBonus.class));
         }
     }
 
     @Override
-    public void readTypes(BiConsumer<Integer, SdeType> consumer) throws IOException {
+    public void readTypes(Consumer<SdeType> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("types.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeType>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeType.class));
         }
     }
 
     @Override
-    public void readAttributes(BiConsumer<Integer, SdeAttribute> consumer) throws IOException {
+    public void readAttributes(Consumer<SdeAttribute> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("dogmaAttributes.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeAttribute>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeAttribute.class));
         }
     }
 
     @Override
-    public void readEffects(BiConsumer<Integer, SdeEffect> consumer) throws IOException {
+    public void readEffects(Consumer<SdeEffect> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("dogmaEffects.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeEffect>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeEffect.class));
         }
     }
 
@@ -206,13 +199,12 @@ public class JSONLSDEReader implements SDEReader {
     }
 
     @Override
-    public void readIcons(BiConsumer<Integer, SdeIcon> consumer) throws IOException {
+    public void readIcons(Consumer<SdeIcon> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("icons.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeIcon>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeIcon.class));
         }
     }
 
@@ -227,212 +219,203 @@ public class JSONLSDEReader implements SDEReader {
     }
 
     @Override
-    public void readMaterials(BiConsumer<Integer, SdeTypeMaterials> consumer) throws IOException {
+    public void readMaterials(Consumer<SdeTypeMaterials> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("typeMaterials.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeTypeMaterials>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeTypeMaterials.class));
         }
     }
 
     @Override
-    public void readSchematics(BiConsumer<Integer, SdePlanetSchematic> consumer) throws IOException {
+    public void readCompressibleTypes(Consumer<SdeCompressibleType> consumer) throws IOException {
+        ZipEntry entry = zipFile.getEntry("compressibleTypes.jsonl");
+        BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
+        String line;
+        while ((line = br.readLine()) != null) {
+            consumer.accept(jsonMapper.readValue(line, SdeCompressibleType.class));
+        }
+    }
+
+    @Override
+    public void readSchematics(Consumer<SdePlanetSchematic> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("planetSchematics.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdePlanetSchematic>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdePlanetSchematic.class));
         }
     }
 
     @Override
-    public void readMetaGroups(BiConsumer<Integer, SdeMetaGroup> consumer) throws IOException {
+    public void readMetaGroups(Consumer<SdeMetaGroup> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("metaGroups.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeMetaGroup>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeMetaGroup.class));
         }
     }
 
     @Override
-    public void readFactions(BiConsumer<Integer, SdeFaction> consumer) throws IOException {
+    public void readFactions(Consumer<SdeFaction> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("factions.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeFaction>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeFaction.class));
         }
     }
 
     @Override
-    public void readMarketGroups(BiConsumer<Integer, SdeMarketGroup> consumer) throws IOException {
+    public void readMarketGroups(Consumer<SdeMarketGroup> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("marketGroups.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeMarketGroup>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeMarketGroup.class));
         }
     }
 
     @Override
-    public void readStationOperations(BiConsumer<Integer, SdeStationOperation> consumer) throws IOException {
+    public void readStationOperations(Consumer<SdeStationOperation> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("stationOperations.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeStationOperation>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeStationOperation.class));
         }
     }
 
     @Override
-    public void readNpcCorporations(BiConsumer<Integer, SdeNpcCorporation> consumer) throws IOException {
+    public void readNpcCorporations(Consumer<SdeNpcCorporation> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("npcCorporations.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeNpcCorporation>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeNpcCorporation.class));
         }
     }
 
     @Override
-    public void readRegions(BiConsumer<Integer, SdeRegion> consumer) throws IOException {
+    public void readRegions(Consumer<SdeRegion> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("mapRegions.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeRegion>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeRegion.class));
         }
     }
 
     @Override
-    public void readConstellations(BiConsumer<Integer, SdeConstellation> consumer) throws IOException {
+    public void readConstellations(Consumer<SdeConstellation> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("mapConstellations.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeConstellation>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeConstellation.class));
         }
     }
 
     @Override
-    public void readSolarSystems(BiConsumer<Integer, SdeSolarSystem> consumer) throws IOException {
+    public void readSolarSystems(Consumer<SdeSolarSystem> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("mapSolarSystems.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeSolarSystem>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeSolarSystem.class));
         }
     }
 
     @Override
-    public void readAsteroidBelts(BiConsumer<Integer, SdeAsteroidBelt> consumer) throws IOException {
+    public void readAsteroidBelts(Consumer<SdeAsteroidBelt> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("mapAsteroidBelts.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeAsteroidBelt>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeAsteroidBelt.class));
         }
     }
 
     @Override
-    public void readPlanets(BiConsumer<Integer, SdePlanet> consumer) throws IOException {
+    public void readPlanets(Consumer<SdePlanet> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("mapPlanets.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdePlanet>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdePlanet.class));
         }
     }
 
 
     @Override
-    public void readMoons(BiConsumer<Integer, SdeMoon> consumer) throws IOException {
+    public void readMoons(Consumer<SdeMoon> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("mapMoons.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeMoon>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeMoon.class));
         }
     }
 
     @Override
-    public void readStars(BiConsumer<Integer, SdeStar> consumer) throws IOException {
+    public void readStars(Consumer<SdeStar> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("mapStars.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeStar>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeStar.class));
         }
     }
 
     @Override
-    public void readStargates(BiConsumer<Integer, SdeStargate> consumer) throws IOException {
+    public void readStargates(Consumer<SdeStargate> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("mapStargates.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeStargate>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeStargate.class));
         }
     }
 
     @Override
-    public void readStations(BiConsumer<Integer, SdeStation> consumer) throws IOException {
+    public void readStations(Consumer<SdeStation> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("npcStations.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeStation>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeStation.class));
         }
     }
 
     @Override
-    public void readDbuffs(BiConsumer<Integer, SdeDbuff> consumer) throws IOException {
+    public void readDbuffs(Consumer<SdeDbuff> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("dbuffCollections.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeDbuff>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeDbuff.class));
         }
     }
 
     @Override
-    public void readDynamicAttributes(BiConsumer<Integer, SdeDynamicAttributes> consumer) throws IOException {
+    public void readDynamicAttributes(Consumer<SdeDynamicAttributes> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("dynamicItemAttributes.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeDynamicAttributes>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeDynamicAttributes.class));
         }
     }
 
     @Override
-    public void readGraphics(BiConsumer<Integer, SdeGraphic> consumer) throws IOException {
+    public void readGraphics(Consumer<SdeGraphic> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("graphics.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
         String line;
         while ((line = br.readLine()) != null) {
-            var keyed = jsonMapper.readValue(line, new TypeReference<InlineEntry<Integer, SdeGraphic>>() {});
-            consumer.accept(keyed._key, keyed.value);
+            consumer.accept(jsonMapper.readValue(line, SdeGraphic.class));
         }
     }
 }

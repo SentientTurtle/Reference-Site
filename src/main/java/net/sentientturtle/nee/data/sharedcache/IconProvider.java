@@ -68,7 +68,7 @@ public class IconProvider {
         }
     }
 
-    private static Path techOverlayPath(int metaGroup, DataSources dataSources, boolean useOld) {
+    private static Path techOverlayPath(int metaGroup, DataSources dataSources, boolean useOld) throws IOException {
         if (metaGroup == 1) {
             return null;
         } else if (!useOld) {
@@ -117,7 +117,7 @@ public class IconProvider {
     public static @Nullable byte[] getTypeIcon64(int typeID, DataSources dataSources, boolean isBPC, boolean useOldOverlay) throws IOException {
         Type type = dataSources.sdeData().getTypes().get(typeID);
         Group group = dataSources.sdeData().getGroups().get(type.groupID);
-        int metaGroup = dataSources.sdeData().getMetaTypes().getOrDefault(type.typeID, 1);
+        int metaGroup = type.metaGroupID;
 
         String cacheKey = null;
         ProcessBuilder imageMagickCall = null;

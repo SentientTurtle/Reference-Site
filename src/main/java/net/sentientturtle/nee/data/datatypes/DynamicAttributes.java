@@ -5,5 +5,5 @@ import java.util.List;
 
 public record DynamicAttributes(List<IOMapping> inputOutputMapping, LinkedHashMap<Integer, DyAttribute> attributeIDs) {
     public record IOMapping(int resultingType, int[] applicableTypes) {}
-    public record DyAttribute(double min, double max, boolean highIsGood) {}
+    public record DyAttribute(double min, double max, Boolean highIsGood) {}
 }

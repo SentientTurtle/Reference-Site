@@ -32,12 +32,12 @@ public class Resource {
         return new Resource(new ResourceData.File(Main.RES_FOLDER.resolve(path)), path);
     }
 
-    /// Use a file resource, files provided in {@link Main#RES_FOLDER}, path relative to that folder
+    /// Use a file resource, provided at remote URL {@code url}
     public static Resource remoteURL(String url) {
         return new Resource(new ResourceData.Remote(url), null);
     }
 
-    /// Use a file resource, files provided in {@link Main#RES_FOLDER}, path relative to that folder
+    /// Use a file resource, provided at local-to-webpage path {@code path}
     public static Resource localPath(Path path) {
         return new Resource(new ResourceData.Remote(path.toString()), null);
     }
@@ -47,8 +47,7 @@ public class Resource {
         if (Main.GENERATE_ICONS) {
             Type invType = context.sde.getTypes().get(typeID);
             Group group = context.sde.getGroups().get(invType.groupID);
-            int metaGroup = context.sde.getMetaTypes().getOrDefault(typeID, 1);
-            boolean isBPC = group.categoryID == 9 && metaGroup != 1 && metaGroup != 54;
+            boolean isBPC = group.categoryID == 9 && invType.metaGroupID != 1 && invType.metaGroupID != 54;
 
             return new Resource(new ResourceData.IconProvider64(typeID, isBPC, true), "type_icons/" + typeID + ".png");
         } else {

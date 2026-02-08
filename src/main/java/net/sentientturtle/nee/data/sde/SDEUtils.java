@@ -16,7 +16,6 @@ import java.util.zip.ZipFile;
 public class SDEUtils {
     // If this breaks, check https://developers.eveonline.com/docs/services/static-data/
     private static final String SDE_VERSION_URL = "https://developers.eveonline.com/static-data/tranquility/latest.jsonl";
-    private static final String YAML_SDE_URL = "https://developers.eveonline.com/static-data/eve-online-static-data-latest-yaml.zip";
     private static final String JSONL_SDE_URL = "https://developers.eveonline.com/static-data/eve-online-static-data-latest-jsonl.zip";
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -28,40 +27,6 @@ public class SDEUtils {
             return sdeMetadata.buildNumber;
         } catch (URISyntaxException e) {
             throw new IOException(e);   // Should never happen, as the URI is hardcoded & correct.
-        }
-    }
-
-    public static void updateYAML(File file) throws IOException {
-        System.out.println("Updating YAML SDE...");
-        int mostRecent = getMostRecentVersion();
-
-        boolean download;
-        if (file.exists()) {
-            int currentVersion;
-            try (ZipFile sdeZip = new ZipFile(file)) {
-                String yaml = new String(sdeZip.getInputStream(sdeZip.getEntry("_sde.yaml")).readAllBytes());
-                currentVersion = yaml.lines()
-                    .filter(line -> line.startsWith("  buildNumber"))
-                    .mapToInt(line -> Integer.parseInt(line.substring("  buildNumber: ".length())))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalStateException("No buildnumber in `_sde.yaml`"));
-            }
-
-            System.out.println("\tCurrent YAML SDE: " + currentVersion + "\n\tMost recent: " + mostRecent);
-            download = currentVersion != mostRecent;
-            if (download) file.delete();
-        } else {
-            download = true;
-        }
-        if (download) {
-            System.out.println("\tSDE Outdated!");
-            try {
-                download(file, new URI(YAML_SDE_URL).toURL().openStream());
-            } catch (URISyntaxException e) {
-                throw new IOException(e);
-            }
-        } else {
-            System.out.println("\tSDE Up to date!");
         }
     }
 

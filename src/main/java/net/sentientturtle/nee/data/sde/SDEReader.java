@@ -5,43 +5,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import net.sentientturtle.nee.util.Position;
+import net.sentientturtle.nee.util.Position2D;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+// There used to be two Reader implementations (YAML & JSONL), but for performance & code robustness reasons the yaml version has been removed
 public interface SDEReader extends AutoCloseable {
-    void readCategories(BiConsumer<Integer, SdeCategory> consumer) throws IOException;
-    void readGroups(BiConsumer<Integer, SdeGroup> consumer) throws IOException;
-    void readTypeBonuses(BiConsumer<Integer, SdeTypeBonus> consumer) throws IOException;
-    void readTypes(BiConsumer<Integer, SdeType> consumer) throws IOException;
-    void readAttributes(BiConsumer<Integer, SdeAttribute> consumer) throws IOException;
-    void readEffects(BiConsumer<Integer, SdeEffect> consumer) throws IOException;
-    void readDogma(Consumer<SdeTypeDogma> consumer) throws IOException;
-    void readIcons(BiConsumer<Integer, SdeIcon> consumer) throws IOException;
-    void readBlueprints(Consumer<SdeBlueprint> consumer) throws IOException;
-    void readMaterials(BiConsumer<Integer, SdeTypeMaterials> consumer) throws IOException;
-    void readSchematics(BiConsumer<Integer, SdePlanetSchematic> consumer) throws IOException;
-    void readMetaGroups(BiConsumer<Integer, SdeMetaGroup> consumer) throws IOException;
-    void readFactions(BiConsumer<Integer, SdeFaction> consumer) throws IOException;
-    void readMarketGroups(BiConsumer<Integer, SdeMarketGroup> consumer) throws IOException;
-    void readStationOperations(BiConsumer<Integer, SdeStationOperation> consumer) throws IOException;
-    void readNpcCorporations(BiConsumer<Integer, SdeNpcCorporation> consumer) throws IOException;
-    void readRegions(BiConsumer<Integer, SdeRegion> consumer) throws IOException;
-    void readConstellations(BiConsumer<Integer, SdeConstellation> consumer) throws IOException;
-    void readSolarSystems(BiConsumer<Integer, SdeSolarSystem> consumer) throws IOException;
-    void readAsteroidBelts(BiConsumer<Integer, SdeAsteroidBelt> consumer) throws IOException;
-    void readPlanets(BiConsumer<Integer, SdePlanet> consumer) throws IOException;
-    void readMoons(BiConsumer<Integer, SdeMoon> consumer) throws IOException;
-    void readStars(BiConsumer<Integer, SdeStar> consumer) throws IOException;
-    void readStargates(BiConsumer<Integer, SdeStargate> consumer) throws IOException;
-    void readStations(BiConsumer<Integer, SdeStation> consumer) throws IOException;
-    void readDbuffs(BiConsumer<Integer, SdeDbuff> consumer) throws IOException;
-    void readDynamicAttributes(BiConsumer<Integer, SdeDynamicAttributes> consumer) throws IOException;
-    void readGraphics(BiConsumer<Integer, SdeGraphic> consumer) throws IOException;
-
     enum SdeNpcCorporationExtent {L, G, R, N, C}
 
     enum SdeNpcCorporationSize {T, H, M, L, S}
@@ -59,12 +31,14 @@ public interface SDEReader extends AutoCloseable {
     ) {}
 
     record SdeCategory(
+        @JsonProperty(value = "_key", required = true) int categoryID,
         @JsonProperty(required = true) LocalizedString name,
         @JsonProperty(required = true) Boolean published,
         @Nullable Integer iconID
     ) {}
 
     record SdeGroup(
+        @JsonProperty(value = "_key", required = true) int groupID,
         @JsonProperty(required = true) int categoryID,
         @JsonProperty(required = true) LocalizedString name,
         @JsonProperty(required = true) boolean published,
@@ -84,13 +58,15 @@ public interface SDEReader extends AutoCloseable {
     ) {}
 
     record SdeTypeBonus(
-        @Nullable SdeBonus[] miscBonuses,
-        @Nullable SdeBonus[] roleBonuses,
+        @JsonProperty(value = "_key", required = true) int typeID,
+        SdeBonus @Nullable [] miscBonuses,
+        SdeBonus @Nullable [] roleBonuses,
         @Nullable LinkedHashMap<Integer, SdeBonus[]> types,
         @Nullable Integer iconID
     ) {}
 
     record SdeType(
+        @JsonProperty(value = "_key", required = true) int typeID,
         @JsonProperty(required = true) int groupID,
         @JsonProperty(required = true) boolean published,
         @JsonProperty(required = true) LocalizedString name,
@@ -112,8 +88,8 @@ public interface SDEReader extends AutoCloseable {
     ) {}
 
     record SdeAttribute(
-        @JsonProperty(required = true) int attributeID,
-        @Nullable Integer categoryID,
+        @JsonProperty(value = "_key", required = true) int attributeID,
+        @Nullable Integer attributeCategoryID,
         @JsonProperty(required = true) int dataType,
         @JsonProperty(required = true) double defaultValue,
         @Nullable String description,
@@ -134,8 +110,9 @@ public interface SDEReader extends AutoCloseable {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     record SdeEffect(
-        @JsonProperty(required = true) int effectID,
-        @JsonProperty(required = true) String effectName
+        @JsonProperty(value = "_key", required = true) int effectID,
+        @JsonProperty(required = true) int effectCategoryID,
+        @JsonProperty(required = true) String name
     ) {}
 
     record SdeTypeAttribute(
@@ -149,12 +126,13 @@ public interface SDEReader extends AutoCloseable {
     ) {}
 
     record SdeTypeDogma(
-        int typeID,
-        LinkedHashMap<Integer, Double> attributes,
+        @JsonProperty(value = "_key", required = true) int typeID,
+        @JsonProperty(required = true) LinkedHashMap<Integer, Double> attributes,
         LinkedHashMap<Integer, Boolean> effects
     ) {}
 
     record SdeIcon(
+        @JsonProperty(value = "_key", required = true) int iconID,
         @Nullable String description,
         @Nullable boolean obsolete,
         @JsonProperty(required = true) String iconFile
@@ -173,9 +151,9 @@ public interface SDEReader extends AutoCloseable {
 
     record SdeBpActivity(
         @JsonProperty(required = true) int time,
-        @Nullable SdeBpItem[] materials,
-        @Nullable SdeBpItem[] products,
-        @Nullable SdeBpSkill[] skills
+        SdeBpItem @Nullable [] materials,
+        SdeBpItem @Nullable [] products,
+        SdeBpSkill @Nullable [] skills
     ) {}
 
     record SdeBpActivities(
@@ -198,11 +176,27 @@ public interface SDEReader extends AutoCloseable {
         @JsonProperty(required = true) int quantity
     ) {}
 
-    record SdeTypeMaterials(@JsonProperty(required = true) SdeTypeMaterial[] materials) {}
+    record SdeTypeRandomizedMaterial(
+        @JsonProperty(required = true) int materialTypeID,
+        @JsonProperty(required = true) int quantityMin,
+        @JsonProperty(required = true) int quantityMax
+    ) {}
+
+    record SdeTypeMaterials(
+        @JsonProperty(value = "_key", required = true) int inputTypeID,
+        SdeTypeMaterial @Nullable [] materials,
+        SdeTypeRandomizedMaterial @Nullable [] randomizedMaterials
+    ) {}
+
+    record SdeCompressibleType(
+        @JsonProperty(value = "_key", required = true) int inputTypeID,
+        @JsonProperty(required = true) int compressedTypeID
+    ) {}
 
     record SdePlanetSchematicItem(@JsonProperty(required = true) boolean isInput, @JsonProperty(required = true) int quantity) {}
 
     record SdePlanetSchematic(
+        @JsonProperty(value = "_key", required = true) int schematicID,
         @JsonProperty(required = true) int cycleTime,
         @JsonProperty(required = true) LocalizedString name,
         @JsonProperty(required = true) Integer[] pins,
@@ -212,6 +206,7 @@ public interface SDEReader extends AutoCloseable {
     record MetaGroupColor(@JsonProperty(required = true) double r, @JsonProperty(required = true) double g, @JsonProperty(required = true) double b) {}
 
     record SdeMetaGroup(
+        @JsonProperty(value = "_key", required = true) int metaGroupID,
         @Nullable MetaGroupColor color,
         @JsonProperty(required = true) LocalizedString name,
         @Nullable Integer iconID,
@@ -220,6 +215,7 @@ public interface SDEReader extends AutoCloseable {
     ) {}
 
     record SdeFaction(
+        @JsonProperty(value = "_key", required = true) int factionID,
         @Nullable Integer corporationID,
         @JsonProperty(required = true) LocalizedString description,
         @Nullable String flatLogo,
@@ -235,6 +231,7 @@ public interface SDEReader extends AutoCloseable {
     ) {}
 
     record SdeMarketGroup(
+        @JsonProperty(value = "_key", required = true) int marketGroupID,
         @Nullable LocalizedString description,
         @JsonProperty(required = true) LocalizedString name,
         @Nullable Integer iconID,
@@ -243,6 +240,7 @@ public interface SDEReader extends AutoCloseable {
     ) {}
 
     record SdeStationOperation(
+        @JsonProperty(value = "_key", required = true) int operationID,
         @JsonProperty(required = true) int activityID,
         @JsonProperty(required = true) double border,
         @JsonProperty(required = true) double corridor,
@@ -260,7 +258,8 @@ public interface SDEReader extends AutoCloseable {
     record SdeNpcCorporationDivision(int divisionNumber, int leaderID, int size) {}
 
     record SdeNpcCorporation(
-        @Nullable int[] allowedMemberRaces,
+        @JsonProperty(value = "_key", required = true) int corporationID,
+        int @Nullable [] allowedMemberRaces,
         @Nullable Integer ceoID,
         @Nullable LinkedHashMap<Integer, Double> corporationTrades,
         @JsonProperty(required = true) boolean deleted,
@@ -275,7 +274,7 @@ public interface SDEReader extends AutoCloseable {
         @Nullable Integer iconID,
         @JsonProperty(required = true) int initialPrice,
         @Nullable LinkedHashMap<Integer, Integer> investors,
-        @Nullable int[] lpOfferTables,
+        int @Nullable [] lpOfferTables,
         @Nullable Integer mainActivityID,
         @JsonProperty(required = true) int memberLimit,
         @JsonProperty(required = true) double minSecurity,
@@ -295,6 +294,7 @@ public interface SDEReader extends AutoCloseable {
     ) {}
 
     record SdeRegion(
+        @JsonProperty(value = "_key", required = true) int regionID,
         @JsonProperty(required = true) Position position,
         @Nullable LocalizedString description,
         @Nullable Integer factionID,
@@ -305,6 +305,7 @@ public interface SDEReader extends AutoCloseable {
     ) {}
 
     record SdeConstellation(
+        @JsonProperty(value = "_key", required = true) int constellationID,
         @JsonProperty(required = true) Position position,
         @JsonProperty(required = true) LocalizedString name,
         @JsonProperty(required = true) int regionID,
@@ -314,11 +315,12 @@ public interface SDEReader extends AutoCloseable {
     ) {}
 
     record SdeSolarSystem(
+        @JsonProperty(value = "_key", required = true) int solarSystemID,
         @JsonProperty(required = false) boolean border,
         @JsonProperty(required = true) int constellationID,
         @JsonProperty(required = false) boolean corridor,
-        @Nullable int[] disallowedAnchorCategories,
-        @Nullable int[] disallowedAnchorGroups,
+        int @Nullable [] disallowedAnchorCategories,
+        int @Nullable [] disallowedAnchorGroups,
         @Nullable Integer factionID,
         @JsonProperty(required = false) boolean fringe,
         @JsonProperty(required = false) boolean hub,
@@ -327,6 +329,7 @@ public interface SDEReader extends AutoCloseable {
         @JsonProperty(required = true) LocalizedString name,
         @JsonSetter(nulls = Nulls.AS_EMPTY) int[] planetIDs,
         @JsonProperty(required = true) Position position,
+        @Nullable Position2D position2D,
         @JsonProperty(required = true) double radius,
         @JsonProperty(required = true) int regionID,
         @JsonProperty(required = false) boolean regional,
@@ -358,8 +361,9 @@ public interface SDEReader extends AutoCloseable {
     ) {}
 
     record SdeAsteroidBelt(
+        @JsonProperty(value = "_key", required = true) int asteroidBeltID,
         @JsonProperty(required = true) int celestialIndex,
-        @Nullable LocalizedString name,
+        @Nullable LocalizedString uniqueName,
         @JsonProperty(required = true) int orbitID,
         @JsonProperty(required = true) int orbitIndex,
         @JsonProperty(required = true) Position position,
@@ -377,11 +381,12 @@ public interface SDEReader extends AutoCloseable {
     ) {}
 
     record SdePlanet(
+        @JsonProperty(value = "_key", required = true) int planetID,
         @JsonSetter(nulls = Nulls.AS_EMPTY) int[] asteroidBeltIDs,
         @JsonProperty(required = true) SdePlanetAttributes attributes,
         @JsonProperty(required = true) int celestialIndex,
         @JsonSetter(nulls = Nulls.AS_EMPTY) int[] moonIDs,
-        @Nullable LocalizedString name,
+        @Nullable LocalizedString uniqueName,
         @JsonSetter(nulls = Nulls.AS_EMPTY) int[] npcStationIDs,
         @JsonProperty(required = true) int orbitID,
         @JsonProperty(required = true) Position position,
@@ -398,10 +403,11 @@ public interface SDEReader extends AutoCloseable {
     ) {}
 
     record SdeMoon(
+        @JsonProperty(value = "_key", required = true) int moonID,
         @Nullable Integer moonNameID,
         @JsonProperty(required = true) SdeMoonAttributes attributes,
         @JsonProperty(required = true) int celestialIndex,
-        @Nullable LocalizedString name,
+        @Nullable LocalizedString uniqueName,
         @JsonSetter(nulls = Nulls.AS_EMPTY) int[] npcStationIDs,
         @JsonProperty(required = true) int orbitID,
         @JsonProperty(required = true) int orbitIndex,
@@ -421,6 +427,7 @@ public interface SDEReader extends AutoCloseable {
     ) {}
 
     record SdeStar(
+        @JsonProperty(value = "_key", required = true) int starID,
         @JsonProperty(required = true) double radius,
         @JsonProperty(required = true) int solarSystemID,
         @JsonProperty(required = true) SdeStarStatistics statistics,
@@ -430,6 +437,7 @@ public interface SDEReader extends AutoCloseable {
     record SdeStargateDestination(int solarSystemID, int stargateID) {}
 
     record SdeStargate(
+        @JsonProperty(value = "_key", required = true) int stargateID,
         @JsonProperty(required = true) SdeStargateDestination destination,
         @JsonProperty(required = true) Position position,
         @JsonProperty(required = true) int solarSystemID,
@@ -445,6 +453,7 @@ public interface SDEReader extends AutoCloseable {
     ) {}
 
     record SdeStation(
+        @JsonProperty(value = "_key", required = true) int stationID,
         @Nullable Integer celestialIndex,
         @JsonProperty(required = true) int operationID,
         @JsonProperty(required = true) int orbitID,
@@ -466,19 +475,20 @@ public interface SDEReader extends AutoCloseable {
     record SdeLocationSkillModifier(@JsonProperty(required = true) int dogmaAttributeID, @JsonProperty(required = true) int skillID) {}
 
     record SdeDbuff(
+        @JsonProperty(value = "_key", required = true) int buffID,
         @JsonProperty(required = true) String aggregateMode,
         @JsonProperty(required = true) String developerDescription,
         @Nullable LocalizedString displayName,
-        @Nullable SdePlainModifier[] itemModifiers,
-        @Nullable SdeLocationGroupModifier[] locationGroupModifiers,
-        @Nullable SdePlainModifier[] locationModifiers,
-        @Nullable SdeLocationSkillModifier[] locationRequiredSkillModifiers,
+        SdePlainModifier @Nullable [] itemModifiers,
+        SdeLocationGroupModifier @Nullable [] locationGroupModifiers,
+        SdePlainModifier @Nullable [] locationModifiers,
+        SdeLocationSkillModifier @Nullable [] locationRequiredSkillModifiers,
         @JsonProperty(required = true) String operationName,
         @JsonProperty(required = true) String showOutputValueInUI
     ) {}
 
     record SdeDynamicAttribute(
-        @Nullable Integer highIsGood,
+        @Nullable Boolean highIsGood,
         @JsonProperty(required = true) double max,
         @JsonProperty(required = true) double min
     ) {}
@@ -489,17 +499,49 @@ public interface SDEReader extends AutoCloseable {
     ) {}
 
     record SdeDynamicAttributes(
+        @JsonProperty(value = "_key", required = true) int typeID,
         @JsonProperty(required = true) LinkedHashMap<Integer, SdeDynamicAttribute> attributeIDs,
         @JsonProperty(required = true) SdeIOMapping[] inputOutputMapping
     ) {}
 
     record SdeGraphic(
+        @JsonProperty(value = "_key", required = true) int graphicID,
         @Nullable String graphicFile,
         @Nullable String iconFolder,
         @Nullable String sofFactionName,
         @Nullable String sofHullName,
-        @Nullable String[] sofLayout,
+        String @Nullable [] sofLayout,
         @Nullable Integer sofMaterialSetID,
         @Nullable String sofRaceName
     ) {}
+
+    void readCategories(Consumer<SdeCategory> consumer) throws IOException;
+    void readGroups(Consumer<SdeGroup> consumer) throws IOException;
+    void readTypeBonuses(Consumer<SdeTypeBonus> consumer) throws IOException;
+    void readTypes(Consumer<SdeType> consumer) throws IOException;
+    void readAttributes(Consumer<SdeAttribute> consumer) throws IOException;
+    void readEffects(Consumer<SdeEffect> consumer) throws IOException;
+    void readDogma(Consumer<SdeTypeDogma> consumer) throws IOException;
+    void readIcons(Consumer<SdeIcon> consumer) throws IOException;
+    void readBlueprints(Consumer<SdeBlueprint> consumer) throws IOException;
+    void readMaterials(Consumer<SdeTypeMaterials> consumer) throws IOException;
+    void readCompressibleTypes(Consumer<SdeCompressibleType> consumer) throws IOException;
+    void readSchematics(Consumer<SdePlanetSchematic> consumer) throws IOException;
+    void readMetaGroups(Consumer<SdeMetaGroup> consumer) throws IOException;
+    void readFactions(Consumer<SdeFaction> consumer) throws IOException;
+    void readMarketGroups(Consumer<SdeMarketGroup> consumer) throws IOException;
+    void readStationOperations(Consumer<SdeStationOperation> consumer) throws IOException;
+    void readNpcCorporations(Consumer<SdeNpcCorporation> consumer) throws IOException;
+    void readRegions(Consumer<SdeRegion> consumer) throws IOException;
+    void readConstellations(Consumer<SdeConstellation> consumer) throws IOException;
+    void readSolarSystems(Consumer<SdeSolarSystem> consumer) throws IOException;
+    void readAsteroidBelts(Consumer<SdeAsteroidBelt> consumer) throws IOException;
+    void readPlanets(Consumer<SdePlanet> consumer) throws IOException;
+    void readMoons(Consumer<SdeMoon> consumer) throws IOException;
+    void readStars(Consumer<SdeStar> consumer) throws IOException;
+    void readStargates(Consumer<SdeStargate> consumer) throws IOException;
+    void readStations(Consumer<SdeStation> consumer) throws IOException;
+    void readDbuffs(Consumer<SdeDbuff> consumer) throws IOException;
+    void readDynamicAttributes(Consumer<SdeDynamicAttributes> consumer) throws IOException;
+    void readGraphics(Consumer<SdeGraphic> consumer) throws IOException;
 }

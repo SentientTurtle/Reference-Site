@@ -21,7 +21,6 @@ public class SharedCacheReader {
     private final HashMap<String, Path> cacheIndex;
     private final HashMap<String, String> resourceHashes;
     private final ConcurrentHashMap<String, byte[]> dataCache;
-    private final Path cacheFolder;
     private final Path resFiles;
 
     /**
@@ -30,7 +29,6 @@ public class SharedCacheReader {
      * @throws IOException If an IO error occurs parsing the cache index file
      */
     public SharedCacheReader(Path cacheFolder) throws IOException {
-        this.cacheFolder = cacheFolder;
         this.resFiles = cacheFolder.resolve("ResFiles");
 
         Path indexFile = cacheFolder.resolve("tq/resfileindex.txt");
@@ -52,10 +50,6 @@ public class SharedCacheReader {
         }
 
         this.dataCache = new ConcurrentHashMap<>();
-    }
-
-    Path getCacheFolder() {
-        return cacheFolder;
     }
 
     public boolean containsResource(String resource) {
@@ -87,21 +81,5 @@ public class SharedCacheReader {
                 }
             }
         );
-    }
-
-    public InputStream getInputStream(String resource) throws IOException {
-        Path resourcePath = cacheIndex.get(resource.toLowerCase());
-        if (resourcePath == null) throw new IllegalArgumentException("File not in shared cache: " + resource);
-
-        return new ByteArrayInputStream(dataCache.computeIfAbsent(
-            resource.toLowerCase(),
-            _ -> {
-                try {
-                    return Files.readAllBytes(resFiles.resolve(resourcePath));
-                } catch (IOException e) {
-                    return sneakyThrow(e);
-                }
-            }
-        ));
     }
 }

@@ -6,6 +6,7 @@ import net.sentientturtle.html.Component;
 import net.sentientturtle.html.PageLink;
 import net.sentientturtle.nee.data.datatypes.IndustryActivity;
 import net.sentientturtle.nee.data.datatypes.PlanetSchematic;
+import net.sentientturtle.nee.data.datatypes.RandomRange;
 import net.sentientturtle.nee.page.TypePage;
 import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.data.datatypes.Type;
@@ -36,7 +37,8 @@ public class TypeIndustry extends Component {
 
         Set<IndustryActivity> outputActivities = context.sde.getProductActivityMap().getOrDefault(type.typeID, Set.of());
         Set<Integer> reprocessingSources = context.sde.getOreReprocessingMap().getOrDefault(type.typeID, Set.of());
-        if (outputActivities.size() > 0 || reprocessingSources.size() > 0) {
+        Integer compressionSourceTypeID = context.sde.getCompressionReversedMap().get(type.typeID);
+        if (outputActivities.size() > 0 || reprocessingSources.size() > 0 || compressionSourceTypeID != null) {
             table.content(TR().content(TH().attribute("colspan", "3").text("Produced from")));
             for (IndustryActivity activity : outputActivities) {
                 table.content(TR().content(
@@ -56,6 +58,14 @@ public class TypeIndustry extends Component {
                         TD().content(TEXT("Reprocessing"))
                     ));
                 });
+
+            if (compressionSourceTypeID != null) {
+                table.content(TR().content(
+                    TD().content(IMG(Resource.typeIcon(compressionSourceTypeID, context), null, 64).className("type_industry_icon")),
+                    TD().content(new PageLink(new TypePage(context.sde.getTypes().get(compressionSourceTypeID)))),
+                    TD().content(TEXT("Compression"))
+                ));
+            }
         }
         Comparator<IndustryActivity> activityComparator = (o1, o2) -> typeComparator.compare(
             context.sde.getTypes().get(o1.bpTypeID),
@@ -90,6 +100,9 @@ public class TypeIndustry extends Component {
         Map<Integer, Integer> reprocessingMaterials = context.sde.getReprocessingMaterials().getOrDefault(type.typeID, Map.of());
         if (reprocessingMaterials.size() > 0) {
             table.content(TR().content(TH("font_header").attribute("colspan", "3").text("Reprocessing")));
+            if (type.portionSize != 1) {
+                table.content(TR().content(TD("text_center").attribute("colspan", "3").text("Per batch of " + type.portionSize)));
+            }
 
             reprocessingMaterials.entrySet()
                 .stream()
@@ -101,6 +114,35 @@ public class TypeIndustry extends Component {
                         TD().content(context.sde.format_with_unit(entry.getValue(), -1))
                     ));
                 });
+        }
+
+        Map<Integer, RandomRange> reprocessingRandomMaterials = context.sde.getReprocessingRandomMaterials().getOrDefault(type.typeID, Map.of());
+        if (reprocessingRandomMaterials.size() > 0) {
+            table.content(TR().content(TH("font_header").attribute("colspan", "3").text("Reprocessing")));
+            table.content(TR().content(TD("text_center").attribute("colspan", "3").text("(One of the following)")));
+
+            reprocessingRandomMaterials.entrySet()
+                .stream()
+                .sorted(Comparator.<Map.Entry<Integer, RandomRange>>comparingInt(entry -> entry.getValue().max()).reversed())
+                .forEach(entry -> {
+                    table.content(TR().content(
+                        TD().content(IMG(Resource.typeIcon(entry.getKey(), context), null, 64).className("type_industry_icon")),
+                        TD().content(new PageLink(new TypePage(context.sde.getTypes().get(entry.getKey())))),
+                        TD().content(context.sde.format_with_unit(entry.getValue().min(), -1), HTML.TEXT(" - "), context.sde.format_with_unit(entry.getValue().max(), -1))
+                    ));
+                });
+        }
+
+        Integer compressedTypeID = context.sde.getCompressionTypes().get(type.typeID);
+        if (compressedTypeID != null) {
+            Type compressedType = context.sde.getTypes().get(compressedTypeID);
+
+            table.content(TR().content(TH("font_header").attribute("colspan", "3").text("Compression")));
+            table.content(TR().content(
+                TD().content(IMG(Resource.typeIcon(compressedTypeID, context), null, 64).className("type_industry_icon")),
+                TD().content(new PageLink(new TypePage(compressedType))),
+                TD().content(context.sde.format_with_unit(compressedType.volume, 9))
+            ));
         }
 
         return new HTML[]{

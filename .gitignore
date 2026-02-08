@@ -16,9 +16,8 @@
 /rsc/EVE/NOT_IN_REPO/
 # Icons themselves are not included in the repo, a readme file elaborating on the format is.
 /rsc/EVE/type_icons/*.png
-# Python stdlib compiled files
-/rsc/pythonlib/*.pyc
-/rsc/pythonlib/*/*.pyc
+# Cache data
+/rsc/cache/
 
 # Output
 /output/

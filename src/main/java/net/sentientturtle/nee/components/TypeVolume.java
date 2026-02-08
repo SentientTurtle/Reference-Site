@@ -40,14 +40,14 @@ public class TypeVolume extends Component {
             return new HTML[]{
                 TABLE("type_volume_table font_text").content(
                     TR().content(
-                        TD().content(SPAN("type_volume_span").title("Volume").content(
+                        TD().content(SPAN("type_volume_span").content(
                             IMG(Resource.ofIconID(67, context), null, 32).className("type_volume_icon"),
                             TEXT("Volume:")
                         )),
                         TD().content(context.sde.format_with_unit(volume, 9))
                     ),
                     TR().content(
-                        TD().content(SPAN("type_volume_span").title("Packaged").content(
+                        TD().content(SPAN("type_volume_span").content(
                             IMG(Resource.ofIconID(67, context), null, 32).className("type_volume_icon"),
                             TEXT("Packaged Volume:")
                         )),

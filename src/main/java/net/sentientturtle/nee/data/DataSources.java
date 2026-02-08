@@ -1,10 +1,10 @@
 package net.sentientturtle.nee.data;
 
 import net.sentientturtle.nee.data.sde.SDEData;
-import net.sentientturtle.nee.data.sharedcache.SharedCacheReader;
+import net.sentientturtle.nee.data.sharedcache.SharedCache;
 
 public record DataSources(
     SDEData sdeData,
-    SharedCacheReader sharedCache,
+    SharedCache sharedCache,
     String gameVersion
 ) {}

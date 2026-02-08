@@ -682,11 +682,47 @@ public class ItemStats extends Component {
             ));
         }
 
-        Element mutationsTable = TABLE("item_stats_table");
-        Element applicableTypeTable = TABLE("item_stats_table");
+        Element warfareBuffTable = TABLE("item_stats_table");
+        for (int i = 0; i < WARFARE_BUFF_ATTRIBUTES.length; i++) {
+            int warfareBuffID = (int) (double) typeAttributes.getOrDefault(WARFARE_BUFF_ATTRIBUTES[i], 0.0);
+            if (warfareBuffID > 0) {
+                double buffAmount;
+                Double buffMultiplier = typeAttributes.get(WARFARE_BUFF_MULTIPLIER_ATTRIBUTES[i]);
+                Double buffValue = typeAttributes.get(WARFARE_BUFF_VALUE_ATTRIBUTES[i]);
+
+                if (buffMultiplier != null) {
+                    buffAmount = buffMultiplier;
+                } else {
+                    buffAmount = buffValue;
+                }
+
+                WarfareBuff warfareBuff = context.sde.getWarfareBuffs().get(warfareBuffID);
+                Element valueTD = TD();
+                switch (warfareBuff.showOutputValue()) {
+                    case SHOW_NORMAL -> valueTD.content(context.sde.format_with_unit(buffAmount, 124));
+                    case SHOW_INVERTED -> valueTD.content(context.sde.format_with_unit(-buffAmount, 124));
+                    case HIDE -> { continue; /* Skip this buff */ }
+                    default -> throw new RuntimeException("Unknown warfare buff display : " + warfareBuff.showOutputValue() + " for buff: " + warfareBuffID);
+                }
+
+                warfareBuffTable.content(TR().content(
+                    TD().content(SPAN("item_stats_span").title(Objects.requireNonNull(warfareBuff.displayName())).content(
+                            DIV("item_stats_icon"),
+                            TEXT(Objects.requireNonNull(warfareBuff.displayName()) + ":")
+                        )
+                    ),
+                    valueTD
+                ));
+
+            }
+        }
+
+        Element mutationAttributesTable = TABLE("item_stats_table");
+        Element mutationApplicationTable = TABLE("item_stats_table");
+        Element mutationResultTable = TABLE("item_stats_table");
         DynamicAttributes dynamicAttributes = context.sde.getDynamicAttributes().get(type.typeID);
         if (dynamicAttributes != null) {
-            mutationsTable.content(TR().content(TH().attribute("colspan", "4").text("Mutations")));
+            mutationAttributesTable.content(TR().content(TH().attribute("colspan", "4").text("Mutations")));
             for (Map.Entry<Integer, DynamicAttributes.DyAttribute> entry : dynamicAttributes.attributeIDs().entrySet()) {
                 int attributeID = entry.getKey();
 
@@ -710,7 +746,7 @@ public class ItemStats extends Component {
                         order = " ≥ \uD83C\uDFB2 ≥ ";
                     }
 
-                    mutationsTable.content(TR().content(
+                    mutationAttributesTable.content(TR().content(
                         TD().content(SPAN("item_stats_span").title(name).content(
                                 iconID != null ? IMG(Resource.ofIconID(iconID, context), null, 32).className("item_stats_icon") : DIV("item_stats_icon"),
                                 TEXT(name + ":")
@@ -723,15 +759,68 @@ public class ItemStats extends Component {
                 }
             }
 
-            applicableTypeTable.content(TR().content(TH().attribute("colspan", "4").text("Applicable to")));
+            mutationApplicationTable.content(TR().content(TH().attribute("colspan", "4").text("Applicable to")));
             dynamicAttributes.inputOutputMapping()
                 .stream()
                 .flatMapToInt(ioMapping -> Arrays.stream(ioMapping.applicableTypes()))
                 .mapToObj(types::get)
                 .filter(Objects::nonNull)
                 .sorted(Type.comparator(context.sde))
+                .distinct()
                 .forEach(applicableType -> {
-                    applicableTypeTable.content(TR().content(
+                    mutationApplicationTable.content(TR().content(
+                        TD().attribute("colspan", "4").content(SPAN("item_stats_span").content(
+                                IMG(Resource.typeIcon(applicableType.typeID, context), null, 32).className("item_stats_icon"),
+                                new PageLink(new TypePage(applicableType))
+                            )
+                        )
+                    ));
+                });
+
+            mutationResultTable.content(TR().content(TH().attribute("colspan", "4").text("Result")));
+            dynamicAttributes.inputOutputMapping()
+                .stream()
+                .mapToInt(DynamicAttributes.IOMapping::resultingType)
+                .mapToObj(types::get)
+                .filter(Objects::nonNull)
+                .sorted(Type.comparator(context.sde))
+                .distinct()
+                .forEach(resultType -> {
+                    mutationResultTable.content(TR().content(
+                        TD().attribute("colspan", "4").content(SPAN("item_stats_span").content(
+                                IMG(Resource.typeIcon(resultType.typeID, context), null, 32).className("item_stats_icon"),
+                                new PageLink(new TypePage(resultType))
+                            )
+                        )
+                    ));
+                });
+        }
+
+        Element mutationSourceMutaplasmidTable = TABLE("item_stats_table");
+        Element mutationSourceTable = TABLE("item_stats_table");
+        Set<Integer> sourceMutaplasmids = context.sde.getModuleDynamicAttributeMap().get(type.typeID);
+        if (sourceMutaplasmids != null && sourceMutaplasmids.size() > 0) {
+            mutationSourceMutaplasmidTable.content(TR().content(TH().attribute("colspan", "4").text("Created with")));
+            for (Integer sourceMutaplasmid : sourceMutaplasmids) {
+                mutationSourceMutaplasmidTable.content(TR().content(
+                    TD().attribute("colspan", "4").content(SPAN("item_stats_span").content(
+                            IMG(Resource.typeIcon(sourceMutaplasmid, context), null, 32).className("item_stats_icon"),
+                            new PageLink(new TypePage(context.sde.getTypes().get(sourceMutaplasmid)))
+                        )
+                    )
+                ));
+            }
+
+            mutationSourceTable.content(TR().content(TH().attribute("colspan", "4").text("Source Modules")));
+            sourceMutaplasmids.stream().map(context.sde.getDynamicAttributes()::get)
+                .flatMap(dya -> dya.inputOutputMapping().stream())
+                .flatMapToInt(iomapping -> Arrays.stream(iomapping.applicableTypes()))
+                .mapToObj(types::get)
+                .filter(Objects::nonNull)
+                .sorted(Type.comparator(context.sde))
+                .distinct()
+                .forEach(applicableType -> {
+                    mutationSourceTable.content(TR().content(
                         TD().attribute("colspan", "4").content(SPAN("item_stats_span").content(
                                 IMG(Resource.typeIcon(applicableType.typeID, context), null, 32).className("item_stats_icon"),
                                 new PageLink(new TypePage(applicableType))
@@ -741,46 +830,35 @@ public class ItemStats extends Component {
                 });
         }
 
-        Element warfareBuffTable = TABLE("item_stats_table");
-        for (int i = 0; i < WARFARE_BUFF_ATTRIBUTES.length; i++) {
-            int warfareBuffID = (int) (double) typeAttributes.getOrDefault(WARFARE_BUFF_ATTRIBUTES[i], 0.0);
-            if (warfareBuffID > 0) {
-                double buffAmount;
-                Double buffMultiplier = typeAttributes.get(WARFARE_BUFF_MULTIPLIER_ATTRIBUTES[i]);
-                Double buffValue = typeAttributes.get(WARFARE_BUFF_VALUE_ATTRIBUTES[i]);
-
-                if (buffMultiplier != null) {
-                    buffAmount = buffMultiplier;
-                } else {
-                    buffAmount = buffValue;
-                }
-
-                WarfareBuff warfareBuff = context.sde.getWarfareBuffs().get(warfareBuffID);
-                Element valueTD = TD();
-                switch (warfareBuff.showOutputValue()) {
-                    case SHOW_NORMAL -> valueTD.content(context.sde.format_with_unit(buffAmount, 124));
-                    case SHOW_INVERTED -> valueTD.content(context.sde.format_with_unit(-buffAmount, 124));
-                    default -> throw new RuntimeException("Unknown warfare buff display : " + warfareBuff.showOutputValue() + " for buff: " + warfareBuffID);
-                }
-
-                warfareBuffTable.content(TR().content(
-                    TD().content(SPAN("item_stats_span").title(Objects.requireNonNull(warfareBuff.displayName())).content(
-                            DIV("item_stats_icon"),
-                            TEXT(Objects.requireNonNull(warfareBuff.displayName()) + ":")
+        Element mutationApplicableMutaplasmidTable = TABLE("item_stats_table");
+        Set<Integer> applicableMutaplasmids = context.sde.getmoduleMutaplasmidMap().get(type.typeID);
+        if (applicableMutaplasmids != null && applicableMutaplasmids.size() > 0) {
+            mutationApplicableMutaplasmidTable.content(TR().content(TH().attribute("colspan", "4").text("Applicable Mutaplasmids")));
+            applicableMutaplasmids.stream()
+                .map(types::get)
+                .filter(Objects::nonNull)
+                .sorted(Type.comparator(context.sde))
+                .distinct()
+                .forEach(applicableType -> {
+                    mutationApplicableMutaplasmidTable.content(TR().content(
+                        TD().attribute("colspan", "4").content(SPAN("item_stats_span").content(
+                                IMG(Resource.typeIcon(applicableType.typeID, context), null, 32).className("item_stats_icon"),
+                                new PageLink(new TypePage(applicableType))
+                            )
                         )
-                    ),
-                    valueTD
-                ));
-
-            }
-
+                    ));
+                });
         }
 
         return new HTML[]{
             HEADER("font_header").text("Stats"),
             table.isEmpty() ? HTML.empty() : table,
-            mutationsTable.isEmpty() ? HTML.empty() : mutationsTable,
-            applicableTypeTable.isEmpty() ? HTML.empty() : applicableTypeTable,
+            mutationAttributesTable.isEmpty() ? HTML.empty() : mutationAttributesTable,
+            mutationApplicationTable.isEmpty() ? HTML.empty() : mutationApplicationTable,
+            mutationResultTable.isEmpty() ? HTML.empty() : mutationResultTable,
+            mutationSourceMutaplasmidTable.isEmpty() ? HTML.empty() : mutationSourceMutaplasmidTable,
+            mutationSourceTable.isEmpty() ? HTML.empty() : mutationSourceTable,
+            mutationApplicableMutaplasmidTable.isEmpty() ? HTML.empty() : mutationApplicableMutaplasmidTable,
             warfareBuffTable.isEmpty() ? HTML.empty() : warfareBuffTable
         };
     }

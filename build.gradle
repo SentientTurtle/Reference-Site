@@ -5,10 +5,10 @@ plugins {
 group 'net.sentientturtle'
 version '1.0-SNAPSHOT'
 
-sourceCompatibility = 1.24
-targetCompatibility = 1.24
-
-applicationDefaultJvmArgs = ["--enable-native-access=ALL-UNNAMED"]
+java {
+    sourceCompatibility = 1.24
+    targetCompatibility = 1.24
+}
 
 repositories {
     mavenCentral()
@@ -20,6 +20,4 @@ dependencies {
     implementation 'com.almworks.sqlite4java:sqlite4java:1.0.392'
     // Used by JSONL SDE & search index
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.19.0'
-    // Used by YAML SDE
-    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.19.0'
 }

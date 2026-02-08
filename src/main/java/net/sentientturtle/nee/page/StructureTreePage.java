@@ -11,6 +11,8 @@ import net.sentientturtle.nee.data.Resource;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
 
 /// Page containing the ship tree
 public class StructureTreePage extends Page {

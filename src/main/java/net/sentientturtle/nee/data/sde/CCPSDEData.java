@@ -21,10 +21,11 @@ public class CCPSDEData extends SDEData {
     private final Map<Integer, String> eveIcons;
     private final Map<Integer, EnumMap<IndustryActivityType, IndustryActivity>> bpActivities;
     private final Map<Integer, Map<Integer, Integer>> reprocessingMaterials;
+    private final Map<Integer, Map<Integer, RandomRange>> reprocessingRandomMaterials;
+    private final Map<Integer, Integer> compressionTypes;
     private final Map<Integer, PlanetSchematic> planetSchematics;
     private final Map<Integer, MetaGroup> metaGroups;
     private final Map<Integer, Set<Integer>> variants;
-    private final Map<Integer, Integer> metaTypes;
     private final Map<Integer, SolarSystem> solarSystems;
     private final Map<Integer, Constellation> constellations;
     private final Map<Integer, Region> regions;
@@ -33,6 +34,7 @@ public class CCPSDEData extends SDEData {
     private final Map<Integer, Set<Celestial>> systemCelestials;
     private final Map<Integer, EnumSet<Station.Service>> operationServices;
     private final Map<Integer, Set<Station>> stations;
+    private final Set<Integer> npcSeededItems;
     private final Map<Integer, Faction> factions;
     private final Map<Integer, MarketGroup> marketGroups;
     private final Map<Integer, WarfareBuff> warfareBuffs;
@@ -52,11 +54,11 @@ public class CCPSDEData extends SDEData {
 
     public CCPSDEData(SDEReader reader, boolean patch) throws IOException {
         this.categories = this.produceMap();
-        reader.readCategories((categoryID, sdeCategory) -> {
+        reader.readCategories(sdeCategory -> {
             this.categories.put(
-                categoryID,
+                sdeCategory.categoryID(),
                 new Category(
-                    categoryID,
+                    sdeCategory.categoryID(),
                     Objects.requireNonNull(sdeCategory.name().en()),
                     sdeCategory.iconID(),
                     sdeCategory.published()
@@ -64,11 +66,11 @@ public class CCPSDEData extends SDEData {
         });
 
         this.groups = this.produceMap();
-        reader.readGroups((groupID, sdeGroup) -> {
+        reader.readGroups(sdeGroup -> {
             this.groups.put(
-                groupID,
+                sdeGroup.groupID(),
                 new Group(
-                    groupID,
+                    sdeGroup.groupID(),
                     sdeGroup.categoryID(),
                     Objects.requireNonNull(sdeGroup.name().en()),
                     sdeGroup.iconID(),
@@ -79,14 +81,13 @@ public class CCPSDEData extends SDEData {
 
         this.types = this.produceMap();
         this.typeTraits = this.produceMap();
-        this.metaTypes = this.produceMap();
         HashMap<Integer, Set<Integer>> typeVariants = new HashMap<>();
 
-        reader.readTypes((typeID, sdeType) -> {
+        reader.readTypes(sdeType -> {
             this.types.put(
-                typeID,
+                sdeType.typeID(),
                 new Type(
-                    typeID,
+                    sdeType.typeID(),
                     sdeType.groupID(),
                     Objects.requireNonNull(sdeType.name().en()),
                     sdeType.description() != null ? sdeType.description().en() : null,
@@ -96,20 +97,19 @@ public class CCPSDEData extends SDEData {
                     sdeType.published(),
                     sdeType.iconID(),
                     sdeType.graphicID(),
-                    sdeType.marketGroupID()
+                    sdeType.marketGroupID(),
+                    sdeType.metaGroupID() != null ? sdeType.metaGroupID() : 1,
+                    sdeType.portionSize(),
+                    sdeType.basePrice()
                 )
             );
 
             if (sdeType.variationParentTypeID() != null) {
-                typeVariants.computeIfAbsent(sdeType.variationParentTypeID(), this::produceSet).add(typeID);
-            }
-
-            if (sdeType.metaGroupID() != null) {
-                metaTypes.put(typeID, sdeType.metaGroupID());
+                typeVariants.computeIfAbsent(sdeType.variationParentTypeID(), this::produceSet).add(sdeType.typeID());
             }
         });
 
-        reader.readTypeBonuses((typeID, typeBonus) -> {
+        reader.readTypeBonuses(typeBonus -> {
             List<TypeTraits.Bonus> miscBonuses = this.produceList();
             if (typeBonus.miscBonuses() != null) {
                 Arrays.stream(typeBonus.miscBonuses())
@@ -133,7 +133,7 @@ public class CCPSDEData extends SDEData {
                 }
             }
 
-            this.typeTraits.put(typeID, new TypeTraits(miscBonuses, roleBonuses, skillBonuses));
+            this.typeTraits.put(typeBonus.typeID(), new TypeTraits(miscBonuses, roleBonuses, skillBonuses));
         });
 
 
@@ -146,12 +146,12 @@ public class CCPSDEData extends SDEData {
         }
 
         this.attributes = this.produceMap();
-        reader.readAttributes((attributeID, attribute) -> {
+        reader.readAttributes(attribute -> {
             this.attributes.put(
-                attributeID,
+                attribute.attributeID(),
                 new Attribute(
-                    attributeID,
-                    attribute.categoryID(),
+                    attribute.attributeID(),
+                    attribute.attributeCategoryID(),
                     attribute.name(),
                     attribute.displayName() != null ? attribute.displayName().en() : null,
                     attribute.unitID(),
@@ -163,10 +163,10 @@ public class CCPSDEData extends SDEData {
         });
 
         this.effects = this.produceMap();
-        reader.readEffects((effectID, effect) -> {
+        reader.readEffects(effect -> {
             this.effects.put(
-                effectID,
-                new Effect(effectID, effect.effectName())
+                effect.effectID(),
+                new Effect(effect.effectID(), effect.name())
             );
         });
 
@@ -180,7 +180,7 @@ public class CCPSDEData extends SDEData {
         });
 
         this.eveIcons = this.produceMap();
-        reader.readIcons((iconID, sdeIcon) -> this.eveIcons.put(iconID, sdeIcon.iconFile()));
+        reader.readIcons(sdeIcon -> this.eveIcons.put(sdeIcon.iconID(), sdeIcon.iconFile()));
 
         this.bpActivities = this.produceMap();
         reader.readBlueprints(blueprint -> {
@@ -228,18 +228,30 @@ public class CCPSDEData extends SDEData {
         });
 
         this.reprocessingMaterials = this.produceMap();
-        reader.readMaterials((typeID, materials) -> {
-            if (materials.materials().length > 0) {
+        this.reprocessingRandomMaterials = this.produceMap();
+        reader.readMaterials(materials -> {
+            if (materials.materials() != null && materials.materials().length > 0) {
                 var prev = this.reprocessingMaterials.put(
-                    typeID,
+                    materials.inputTypeID(),
                     Arrays.stream(materials.materials()).collect(Collectors.toMap(SDEReader.SdeTypeMaterial::materialTypeID, SDEReader.SdeTypeMaterial::quantity))
                 );
-                if (prev != null) throw new IllegalStateException("Duplicate typeMaterials for type " + typeID);
+                if (prev != null) throw new IllegalStateException("Duplicate typeMaterials for type " + materials.inputTypeID());
+            }
+
+            if (materials.randomizedMaterials() != null && materials.randomizedMaterials().length > 0) {
+                var prev = this.reprocessingRandomMaterials.put(
+                    materials.inputTypeID(),
+                    Arrays.stream(materials.randomizedMaterials()).collect(Collectors.toMap(SDEReader.SdeTypeRandomizedMaterial::materialTypeID, m -> new RandomRange(m.quantityMin(), m.quantityMax())))
+                );
+                if (prev != null) throw new IllegalStateException("Duplicate typeMaterials for type " + materials.inputTypeID());
             }
         });
 
+        this.compressionTypes = this.produceMap();
+        reader.readCompressibleTypes(type -> this.compressionTypes.put(type.inputTypeID(), type.compressedTypeID()));
+
         this.planetSchematics = this.produceMap();
-        reader.readSchematics((schematicID, schematic) -> {
+        reader.readSchematics(schematic -> {
             int outputQuantity = -1;
             int outputType = -1;
             LinkedHashMap<Integer, Integer> inputs = new LinkedHashMap<>();
@@ -247,15 +259,15 @@ public class CCPSDEData extends SDEData {
                 if (entry.getValue().isInput()) {
                     inputs.put(entry.getKey(), entry.getValue().quantity());
                 } else {
-                    if (outputType != -1) throw new IllegalStateException("Planet schematic with duplicate outputs: " + schematicID);
+                    if (outputType != -1) throw new IllegalStateException("Planet schematic with duplicate outputs: " + schematic.schematicID());
                     outputType = entry.getKey();
                     outputQuantity = entry.getValue().quantity();
                 }
             }
             this.planetSchematics.put(
-                schematicID,
+                schematic.schematicID(),
                 new PlanetSchematic(
-                    schematicID,
+                    schematic.schematicID(),
                     schematic.cycleTime(),
                     outputType,
                     outputQuantity,
@@ -265,14 +277,14 @@ public class CCPSDEData extends SDEData {
         });
 
         this.metaGroups = this.produceMap();
-        reader.readMetaGroups((metaGroupID, metagroup) -> this.metaGroups.put(metaGroupID, new MetaGroup(metaGroupID, metagroup.name().en())));
+        reader.readMetaGroups(metagroup -> this.metaGroups.put(metagroup.metaGroupID(), new MetaGroup(metagroup.metaGroupID(), metagroup.name().en())));
 
         this.factions = this.produceMap();
-        reader.readFactions((factionID, faction) -> {
+        reader.readFactions(faction -> {
             this.factions.put(
-                factionID,
+                faction.factionID(),
                 new Faction(
-                    factionID,
+                    faction.factionID(),
                     faction.name().en(),
                     faction.iconID()
                 )
@@ -280,11 +292,11 @@ public class CCPSDEData extends SDEData {
         });
 
         this.marketGroups = this.produceMap();
-        reader.readMarketGroups((marketGroupID, marketGroup) -> {
+        reader.readMarketGroups(marketGroup -> {
             this.marketGroups.put(
-                marketGroupID,
+                marketGroup.marketGroupID(),
                 new MarketGroup(
-                    marketGroupID,
+                    marketGroup.marketGroupID(),
                     marketGroup.parentGroupID(),
                     marketGroup.name().en(),
                     marketGroup.description() != null ? marketGroup.description().en() : null
@@ -294,10 +306,10 @@ public class CCPSDEData extends SDEData {
 
         Map<Integer, String> operationNames = this.produceMap();
         this.operationServices = this.produceMap();
-        reader.readStationOperations((operationID, operation) -> {
-            operationNames.put(operationID, operation.operationName().en());
+        reader.readStationOperations(operation -> {
+            operationNames.put(operation.operationID(), operation.operationName().en());
 
-            EnumSet<Station.Service> services = operationServices.computeIfAbsent(operationID, _ -> EnumSet.noneOf(Station.Service.class));
+            EnumSet<Station.Service> services = operationServices.computeIfAbsent(operation.operationID(), _ -> EnumSet.noneOf(Station.Service.class));
 
             for (int serviceID : operation.services()) {
                 Station.Service service = Station.Service.fromID(serviceID);
@@ -308,9 +320,9 @@ public class CCPSDEData extends SDEData {
         });
 
         this.regions = this.produceMap();
-        reader.readRegions((regionID, region) -> {
-            this.regions.put(regionID, new Region(
-                regionID,
+        reader.readRegions(region -> {
+            this.regions.put(region.regionID(), new Region(
+                region.regionID(),
                 region.name().en(),
                 region.position().x(),
                 region.position().y(),
@@ -321,10 +333,10 @@ public class CCPSDEData extends SDEData {
         });
 
         this.constellations = this.produceMap();
-        reader.readConstellations((constellationID, constellation) -> {
-            constellations.put(constellationID, new Constellation(
+        reader.readConstellations(constellation -> {
+            constellations.put(constellation.constellationID(), new Constellation(
                 constellation.regionID(),
-                constellationID,
+                constellation.constellationID(),
                 constellation.name().en(),
                 constellation.position().x(),
                 constellation.position().y(),
@@ -335,11 +347,11 @@ public class CCPSDEData extends SDEData {
         });
 
         this.solarSystems = this.produceMap();
-        reader.readSolarSystems((solarSystemID, solarSystem) -> {
-            solarSystems.put(solarSystemID, new SolarSystem(
+        reader.readSolarSystems(solarSystem -> {
+            solarSystems.put(solarSystem.solarSystemID(), new SolarSystem(
                 solarSystem.regionID(),
                 solarSystem.constellationID(),
-                solarSystemID,
+                solarSystem.solarSystemID(),
                 solarSystem.name().en(),
                 solarSystem.position().x(),
                 solarSystem.position().y(),
@@ -353,10 +365,10 @@ public class CCPSDEData extends SDEData {
 
         Map<Integer, Celestial> celestials = this.produceMap();
         this.systemCelestials = this.produceMap();
-        reader.readStars((starID, star) -> {
+        reader.readStars(star -> {
             solarSystems.get(star.solarSystemID()).sunTypeID = star.typeID();
             Celestial starCelestial = new Celestial(
-                starID,
+                star.starID(),
                 star.typeID(),
                 types.get(star.typeID()).groupID,
                 Objects.requireNonNull(solarSystems.get(star.solarSystemID()).solarSystemName),
@@ -364,43 +376,43 @@ public class CCPSDEData extends SDEData {
                 null,
                 null // Maybe replace with an explicit (0,0,0)
             );
-            celestials.put(starID, starCelestial);
+            celestials.put(star.starID(), starCelestial);
             systemCelestials.computeIfAbsent(star.solarSystemID(), this::produceSet).add(starCelestial);
         });
 
-        reader.readPlanets((planetID, planet) -> {
+        reader.readPlanets(planet -> {
             Celestial planetCelestial = new Celestial(
-                planetID,
+                planet.planetID(),
                 planet.typeID(),
                 types.get(planet.typeID()).groupID,
-                planet.name() != null ? Objects.requireNonNull(planet.name().en()) : celestials.get(planet.orbitID()).itemName + " " + romanNumeral(planet.celestialIndex()),
+                planet.uniqueName() != null ? Objects.requireNonNull(planet.uniqueName().en()) : celestials.get(planet.orbitID()).itemName + " " + romanNumeral(planet.celestialIndex()),
                 planet.celestialIndex(),
                 null,
                 planet.position()
             );
-            celestials.put(planetID, planetCelestial);
+            celestials.put(planet.planetID(), planetCelestial);
             this.systemCelestials.computeIfAbsent(planet.solarSystemID(), this::produceSet).add(planetCelestial);
         });
-        reader.readMoons((moonID, moon) -> {
+        reader.readMoons(moon -> {
             Celestial moonCelestial = new Celestial(
-                moonID,
+                moon.moonID(),
                 moon.typeID(),
                 types.get(moon.typeID()).groupID,
-                moon.name() != null ? Objects.requireNonNull(moon.name().en()) : celestials.get(moon.orbitID()).itemName + " - Moon " + moon.orbitIndex(),
+                moon.uniqueName() != null ? Objects.requireNonNull(moon.uniqueName().en()) : celestials.get(moon.orbitID()).itemName + " - Moon " + moon.orbitIndex(),
                 moon.celestialIndex(),
                 moon.orbitIndex(),
                 moon.position()
             );
-            celestials.put(moonID, moonCelestial);
+            celestials.put(moon.moonID(), moonCelestial);
             this.systemCelestials.computeIfAbsent(moon.solarSystemID(), this::produceSet).add(moonCelestial);
         });
-        reader.readAsteroidBelts((asteroidBeltID, asteroidBelt) -> {
+        reader.readAsteroidBelts(asteroidBelt -> {
             this.systemCelestials.computeIfAbsent(asteroidBelt.solarSystemID(), this::produceSet)
                 .add(new Celestial(
-                    asteroidBeltID,
+                    asteroidBelt.asteroidBeltID(),
                     asteroidBelt.typeID(),
                     types.get(asteroidBelt.typeID()).groupID,
-                    asteroidBelt.name() != null ? Objects.requireNonNull(asteroidBelt.name().en()) : celestials.get(asteroidBelt.orbitID()).itemName + " - Asteroid Belt " + asteroidBelt.orbitIndex(),
+                    asteroidBelt.uniqueName() != null ? Objects.requireNonNull(asteroidBelt.uniqueName().en()) : celestials.get(asteroidBelt.orbitID()).itemName + " - Asteroid Belt " + asteroidBelt.orbitIndex(),
                     asteroidBelt.celestialIndex(),
                     asteroidBelt.orbitIndex(),
                     asteroidBelt.position()
@@ -408,11 +420,16 @@ public class CCPSDEData extends SDEData {
         });
 
         Map<Integer, String> corporationNames = this.produceMap();
-        reader.readNpcCorporations((corporationID, corporation) -> corporationNames.put(corporationID, corporation.name().en()));
+        this.npcSeededItems = this.produceSet();
+        reader.readNpcCorporations(corporation -> {
+            corporationNames.put(corporation.corporationID(), corporation.name().en());
+            if (corporation.corporationTrades() != null) {
+                npcSeededItems.addAll(corporation.corporationTrades().keySet());
+            }
+        });
 
         this.stations = this.produceMap();
-        reader.readStations((stationID, station) -> {
-
+        reader.readStations(station -> {
             String name;
             String orbitName = Objects.requireNonNull(celestials.get(station.orbitID()).itemName);
             String corporationName = Objects.requireNonNull(corporationNames.get(station.ownerID()));
@@ -425,7 +442,7 @@ public class CCPSDEData extends SDEData {
 
             this.stations.computeIfAbsent(station.solarSystemID(), this::produceSet)
                 .add(new Station(
-                    stationID,
+                    station.stationID(),
                     station.typeID(),
                     name,
                     station.operationID(),
@@ -457,7 +474,7 @@ public class CCPSDEData extends SDEData {
 
         this.outJumps = this.produceMap();
         this.inJumps = this.produceMap();
-        reader.readStargates((_, stargate) -> {
+        reader.readStargates(stargate -> {
             // TODO: Celestial object for stargates
             outJumps.computeIfAbsent(stargate.solarSystemID(), this::produceSet)
                 .add(stargate.destination().solarSystemID());
@@ -466,8 +483,8 @@ public class CCPSDEData extends SDEData {
         });
 
         this.warfareBuffs = this.produceMap();
-        reader.readDbuffs((buffID, buff) -> {
-            this.warfareBuffs.put(buffID, new WarfareBuff(
+        reader.readDbuffs(buff -> {
+            this.warfareBuffs.put(buff.buffID(), new WarfareBuff(
                 buff.displayName() != null ? buff.displayName().en() : null,
                 switch (buff.showOutputValueInUI()) {
                     case "ShowNormal" -> WarfareBuff.ShowOutputValue.SHOW_NORMAL;
@@ -479,19 +496,19 @@ public class CCPSDEData extends SDEData {
         });
 
         this.dynamicAttributes = this.produceMap();
-        reader.readDynamicAttributes((typeID, dynamicAttributes) -> {
+        reader.readDynamicAttributes(dynamicAttributes -> {
             List<DynamicAttributes.IOMapping> ioMapping = Arrays.stream(dynamicAttributes.inputOutputMapping()).map(io -> new DynamicAttributes.IOMapping(io.resultingType(), io.applicableTypes())).toList();
             LinkedHashMap<Integer, DynamicAttributes.DyAttribute> attributeIDs = new LinkedHashMap<>();
             dynamicAttributes.attributeIDs().forEach((attributeID, dyInfo) -> {
-                attributeIDs.put(attributeID, new DynamicAttributes.DyAttribute(dyInfo.min(), dyInfo.max(), ((Integer) 1).equals(dyInfo.highIsGood())));
+                attributeIDs.put(attributeID, new DynamicAttributes.DyAttribute(dyInfo.min(), dyInfo.max(), dyInfo.highIsGood()));
             });
-            this.dynamicAttributes.put(typeID, new DynamicAttributes(ioMapping, attributeIDs));
+            this.dynamicAttributes.put(dynamicAttributes.typeID(), new DynamicAttributes(ioMapping, attributeIDs));
         });
 
         this.graphicFolders = this.produceMap();
-        reader.readGraphics((graphicID, graphic) -> {
+        reader.readGraphics(graphic -> {
             if (graphic.iconFolder() != null) {
-                this.graphicFolders.put(graphicID, graphic.iconFolder().replace('\\', '/'));
+                this.graphicFolders.put(graphic.graphicID(), graphic.iconFolder().replace('\\', '/'));
             }
         });
 
@@ -651,6 +668,16 @@ public class CCPSDEData extends SDEData {
     }
 
     @Override
+    public Map<Integer, Map<Integer, RandomRange>> getReprocessingRandomMaterials() {
+        return reprocessingRandomMaterials;
+    }
+
+    @Override
+    public Map<Integer, Integer> getCompressionTypes() {
+        return compressionTypes;
+    }
+
+    @Override
     public Map<Integer, PlanetSchematic> getPlanetSchematics() {
         return planetSchematics;
     }
@@ -663,11 +690,6 @@ public class CCPSDEData extends SDEData {
     @Override
     public Map<Integer, Set<Integer>> getVariants() {
         return variants;
-    }
-
-    @Override
-    public Map<Integer, Integer> getMetaTypes() {
-        return metaTypes;
     }
 
     @Override
@@ -708,6 +730,11 @@ public class CCPSDEData extends SDEData {
     @Override
     public Map<Integer, Set<Station>> getStations() {
         return stations;
+    }
+
+    @Override
+    public Set<Integer> getNpcSeededItems() {
+        return npcSeededItems;
     }
 
     @Override

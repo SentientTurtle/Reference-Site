@@ -127,11 +127,17 @@ public class TypePage extends Page implements HasPersistentUrl {
             left.content(new TypeVolume(type));
         }
 
-        if (type.description != null && type.description.length() > 0)
-            left.content(new ItemDescription(EVEText.escape(type.description, context.sde, false)));
+        if (type.marketGroupID != null) {
+            left.content(new TypeMarketPrice(type));
+        }
 
-        if (data.getTypeTraits().get(type.typeID) != null)
+        if (type.description != null && type.description.length() > 0) {
+            left.content(new ItemDescription(EVEText.escape(type.description, context.sde, false)));
+        }
+
+        if (data.getTypeTraits().get(type.typeID) != null) {
             left.content(new TypeTraitInfo(type));
+        }
 
         Map<Integer, Attribute> attributes = data.getAttributes();
         Map<Integer, Double> typeAttributes = data.getTypeAttributes().getOrDefault(type.typeID, Map.of());
@@ -195,7 +201,7 @@ public class TypePage extends Page implements HasPersistentUrl {
         if (group.categoryID == 7 || group.categoryID == 66)
             mid.content(new ModuleFitting(type));
 
-        if (type.groupID == 1964) { // If item type is a Mutaplasmid
+        if (type.groupID == 1964 || context.sde.getModuleDynamicAttributeMap().containsKey(type.typeID)) { // If item type is a Mutaplasmid or mutated module
             mid.content(new ItemStats(type));
         } else if (categoryID == 7 || categoryID == 8 || categoryID == 18 || categoryID == 20 || categoryID == 22 || categoryID == 32 || categoryID == 66) {    // If module, subsystem, structure module, charge, implant, drone, or deployable
             for (int listedAttribute : ItemStats.INCLUDED_ATTRIBUTES) {
@@ -288,6 +294,7 @@ public class TypePage extends Page implements HasPersistentUrl {
         // If produced by a blueprint, used in PI, used in a blueprint, or has reprocessing output
         if (data.getProductActivityMap().containsKey(type.typeID)
             || data.getReprocessingMaterials().containsKey(type.typeID)
+            || data.getReprocessingRandomMaterials().containsKey(type.typeID)
             || data.getMaterialActivityMap().containsKey(type.typeID)
             || data.getInputSchematicMap().containsKey(type.typeID)
             || data.getOreReprocessingMap().containsKey(type.typeID)) {

@@ -72,7 +72,7 @@ public class TypeBlueprint extends Component {
             .forEach(key -> {
                 IndustryActivity activity = bpActivities.get(key);
 
-                int metaGroup = context.sde.getMetaTypes().getOrDefault(activity.bpTypeID, 1);
+                int metaGroup = context.sde.getTypes().get(activity.bpTypeID).metaGroupID;
                 if (metaGroup != 1 && metaGroup != 54 && (
                     activity.activityType == IndustryActivityType.RESEARCH_TIME
                     || activity.activityType == IndustryActivityType.RESEARCH_MATERIAL

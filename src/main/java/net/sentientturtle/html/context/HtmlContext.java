@@ -3,7 +3,7 @@ package net.sentientturtle.html.context;
 import net.sentientturtle.html.Document;
 import net.sentientturtle.nee.data.DataSources;
 import net.sentientturtle.nee.data.sde.SDEData;
-import net.sentientturtle.nee.data.sharedcache.SharedCacheReader;
+import net.sentientturtle.nee.data.sharedcache.SharedCache;
 import net.sentientturtle.nee.data.Resource;
 import org.jspecify.annotations.NonNull;
 
@@ -32,7 +32,7 @@ public abstract class HtmlContext {
     // EVE-specific fields; These live here because Java generic inference breaks with generic HTML and Element, otherwise HtmlContext could have a generic type for data extension
     public final DataSources dataSources;
     public final SDEData sde;
-    public final SharedCacheReader sharedCache;
+    public final SharedCache sharedCache;
 
 
     /**

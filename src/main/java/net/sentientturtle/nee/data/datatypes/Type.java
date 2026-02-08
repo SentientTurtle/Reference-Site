@@ -26,8 +26,26 @@ public class Type implements HasPage {
     public @Nullable Integer iconID;
     public @Nullable Integer graphicID;
     public @Nullable Integer marketGroupID;
+    public int metaGroupID;
+    public int portionSize;
+    public @Nullable Double basePrice;
 
-    public Type(int typeID, int groupID, String name, String description, double mass, double volume, double capacity, boolean published, @Nullable Integer iconID, @Nullable Integer graphicID, @Nullable Integer marketGroupID) {
+    public Type(
+        int typeID,
+        int groupID,
+        String name,
+        String description,
+        double mass,
+        double volume,
+        double capacity,
+        boolean published,
+        @Nullable Integer iconID,
+        @Nullable Integer graphicID,
+        @Nullable Integer marketGroupID,
+        int metaGroupID,
+        int portionSize,
+        @Nullable Double basePrice
+    ) {
         this.typeID = typeID;
         this.groupID = groupID;
         this.name = name;
@@ -39,15 +57,18 @@ public class Type implements HasPage {
         this.iconID = iconID;
         this.graphicID = graphicID;
         this.marketGroupID = marketGroupID;
+        this.metaGroupID = metaGroupID;
+        this.portionSize = portionSize;
+        this.basePrice = basePrice;
     }
 
     public static Comparator<Integer> idComparator(SDEData data) {
-        Map<Integer, Integer> metaTypes = data.getMetaTypes();
+        Map<Integer, Type> types = data.getTypes();
         Map<Integer, Map<Integer, Double>> typeAttributes = data.getTypeAttributes();
 
         return (t1, t2) -> {
             // Structure meta groups have their ordering reversed
-            int m1 = metaTypes.getOrDefault(t1, 1);
+            int m1 = types.get(t1).metaGroupID;
             m1 = switch (m1) {
                 case 52 -> 54;
                 case 53 -> 53;
@@ -55,7 +76,7 @@ public class Type implements HasPage {
                 default -> m1;
             };
 
-            int m2 = metaTypes.getOrDefault(t2, 1);
+            int m2 = types.get(t2).metaGroupID;
             m2 = switch (m2) {
                 case 52 -> 54;
                 case 53 -> 53;

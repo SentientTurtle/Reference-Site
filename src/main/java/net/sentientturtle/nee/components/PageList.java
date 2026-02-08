@@ -50,6 +50,12 @@ public class PageList extends Component {
                 margin-left: 1rem;
             }
             
+            .page_list_list {
+                display: flex;
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+            
             .page_list_entry {
                 display: flex;
                 gap: 0.5rem;

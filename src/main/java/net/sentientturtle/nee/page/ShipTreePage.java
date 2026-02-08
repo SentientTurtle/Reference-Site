@@ -12,6 +12,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static net.sentientturtle.html.HTML.*;
 
@@ -129,7 +130,7 @@ public class ShipTreePage extends Page {
         {25, 831, 324, 830, 834, 893, 1527, 1283},    // Frigates
         {420, 541, 1534, 1305},                       // Destroyers
         {26, 906, 833, 358, 894, 832, 963, 1972},     // Cruisers
-        {419, 1201, 540},                             // Battlecruisers
+        {419, 1201, 540, 4902},                       // Battlecruisers
         {27, 898, 900},                               // Battleships
         {485, 4594},                                  // Dreadnought
         {1538, 547, 659},                             // Carriers
@@ -662,7 +663,7 @@ public class ShipTreePage extends Page {
         42243
     };
 
-    private static final int[] SOE_SHIPS = new int[]{33468, 33470, 33472};
+    private static final int[] SOE_SHIPS = new int[]{33468, 33470, 33472, 89607};
 
     private static final int[] SOCT_SHIPS = new int[]{
         3756,
@@ -686,7 +687,12 @@ public class ShipTreePage extends Page {
         33697,
         34328,
         37135,
-        42244
+        42244,
+        89240,
+        89647,
+        89648,
+        89649,
+        91174
     };
 
     private static final int[] TRIGLAVIAN_SHIPS = new int[]{
@@ -750,7 +756,9 @@ public class ShipTreePage extends Page {
         78414,
         85062,
         85229,
-        85236
+        85236,
+        89807,
+        89808
     };
 
     public static final int[] SPECIAL_SHIPS = new int[]{
@@ -800,4 +808,27 @@ public class ShipTreePage extends Page {
                                           + DEATHLESS_SHIPS.length
                                           + TOURNAMENT_SHIPS.length
                                           + SPECIAL_SHIPS.length;
+
+    public static int[] getCommonShips() {
+        return Stream.of(
+            AMARR_SHIPS,
+            CALDARI_SHIPS,
+            GALLENTE_SHIPS,
+            MINMATAR_SHIPS,
+            ORE_SHIPS,
+            GURISTAS_SHIPS,
+            SANSHA_SHIPS,
+            BLOODRAIDER_SHIPS,
+            ANGELCARTEL_SHIPS,
+            SERPENTIS_SHIPS,
+            SOE_SHIPS,
+            TRIGLAVIAN_SHIPS,
+            EDENCOM_SHIPS,
+            CONCORD_SHIPS,
+            SOCT_SHIPS,
+            DEATHLESS_SHIPS
+        )
+            .flatMapToInt(Arrays::stream)
+            .toArray();
+    }
 }

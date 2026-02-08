@@ -596,6 +596,10 @@ public abstract non-sealed class Frame implements Document, HTML {
             display: block;
         }
         
+        .text_center {
+            text-align: center;
+        }
+        
         fieldset {
             border-color: var(--colour-theme-border);
         }

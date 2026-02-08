@@ -30,7 +30,7 @@ public class TypeVariants extends Component {
         Map<Integer, MetaGroup> metaGroups = context.sde.getMetaGroups();
         HashMap<Integer, Set<Integer>> metaVariants = new HashMap<>();
         for (int variantID : context.sde.getVariants().get(type.typeID)) {
-            Integer metaGroupID = context.sde.getMetaTypes().getOrDefault(variantID, 1);
+            Integer metaGroupID = context.sde.getTypes().get(variantID).metaGroupID;
             metaVariants.computeIfAbsent(metaGroupID, _ -> new HashSet<>()).add(variantID);
         }
 
