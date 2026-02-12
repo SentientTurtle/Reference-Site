@@ -127,7 +127,7 @@ public class TypePage extends Page implements HasPersistentUrl {
             left.content(new TypeVolume(type));
         }
 
-        if (type.marketGroupID != null) {
+        if (type.marketGroupID != null || TypeMarketPrice.remoteInjectionSkills.contains(type.typeID)) {
             left.content(new TypeMarketPrice(type));
         }
 

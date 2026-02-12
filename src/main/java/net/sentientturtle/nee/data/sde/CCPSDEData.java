@@ -34,7 +34,6 @@ public class CCPSDEData extends SDEData {
     private final Map<Integer, Set<Celestial>> systemCelestials;
     private final Map<Integer, EnumSet<Station.Service>> operationServices;
     private final Map<Integer, Set<Station>> stations;
-    private final Set<Integer> npcSeededItems;
     private final Map<Integer, Faction> factions;
     private final Map<Integer, MarketGroup> marketGroups;
     private final Map<Integer, WarfareBuff> warfareBuffs;
@@ -420,12 +419,8 @@ public class CCPSDEData extends SDEData {
         });
 
         Map<Integer, String> corporationNames = this.produceMap();
-        this.npcSeededItems = this.produceSet();
         reader.readNpcCorporations(corporation -> {
             corporationNames.put(corporation.corporationID(), corporation.name().en());
-            if (corporation.corporationTrades() != null) {
-                npcSeededItems.addAll(corporation.corporationTrades().keySet());
-            }
         });
 
         this.stations = this.produceMap();
@@ -730,11 +725,6 @@ public class CCPSDEData extends SDEData {
     @Override
     public Map<Integer, Set<Station>> getStations() {
         return stations;
-    }
-
-    @Override
-    public Set<Integer> getNpcSeededItems() {
-        return npcSeededItems;
     }
 
     @Override

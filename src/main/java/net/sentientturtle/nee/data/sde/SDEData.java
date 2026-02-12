@@ -112,9 +112,6 @@ public abstract class SDEData {
     // Map<SolarSystemID, Set<Station in solarsystem>>
     public abstract Map<Integer, Set<Station>> getStations();
 
-    //  Set<TypeID seeded in market by NPC corporations>
-    public abstract Set<Integer> getNpcSeededItems();
-
     // Map<FactionID, Faction>
     public abstract Map<Integer, Faction> getFactions();
 
@@ -793,8 +790,6 @@ public abstract class SDEData {
             variants.removeIf(typeID -> !types.containsKey(typeID));
         }
         typeVariants.values().removeIf(variants -> variants.size() < 2);
-
-        this.getNpcSeededItems().removeIf(typeID -> !types.containsKey(typeID));
 
         // Create parent marketGroup for all without one
         Map<Integer, MarketGroup> marketGroups = this.getMarketGroups();

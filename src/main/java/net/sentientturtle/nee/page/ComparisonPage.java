@@ -111,6 +111,12 @@ public class ComparisonPage extends Page {
                             column.add(new TypeVolume(type).style(String.format("grid-column: %d; grid-row: volume;", currentCol)));
                             usedRows.add("volume");
                         }
+
+                        if (type.marketGroupID != null || TypeMarketPrice.remoteInjectionSkills.contains(type.typeID)) {
+                            column.add(new TypeMarketPrice(type).style(String.format("grid-column: %d; grid-row: marketprice;", currentCol)));
+                            usedRows.add("marketprice");
+                        }
+
                         if (data.getTypeTraits().get(type.typeID) != null) {
                             column.add(new TypeTraitInfo(type).style(String.format("grid-column: %d; grid-row: traits;", currentCol)));
                             usedRows.add("traits");
