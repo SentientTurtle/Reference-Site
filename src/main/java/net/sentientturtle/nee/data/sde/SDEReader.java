@@ -81,6 +81,7 @@ public interface SDEReader extends AutoCloseable {
         @Nullable Integer iconID,
         @Nullable Integer raceID,
         @Nullable Integer metaGroupID,
+        @Nullable Integer metaLevel,
         @Nullable Double basePrice,
         @Nullable Integer marketGroupID,
         @Nullable Integer variationParentTypeID,

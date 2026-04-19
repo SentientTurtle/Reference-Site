@@ -39,7 +39,7 @@ public class TypeTraitInfo extends Component {
                 TR("font_header").content(
                     TH().attribute("colspan", "2").content(HEADER().content(
                         new PageLink(new TypePage(context.sde.getTypes().get(skillID))),
-                        TEXT(" bonuses (per skill level)")
+                        TEXT(" bonuses (per\u00A0skill\u00A0level)")
                     ))
                 )
             );

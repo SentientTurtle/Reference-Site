@@ -842,16 +842,12 @@ public abstract class SDEData {
         // Patch meta level
         for (Map.Entry<Integer, Type> entry : getTypes().entrySet()) {
             int typeID = entry.getKey();
-            Map<Integer, Double> typeAttributes = getTypeAttributes().get(typeID);
-            if (typeAttributes != null) {
-                int metaGroup = entry.getValue().metaGroupID;
-                int minLevel = getMetaGroups().get(metaGroup).getMetaLevel();
 
-                Double metaLevel = typeAttributes.get(633);
-                if (metaLevel != null && metaLevel < minLevel) {
-                    typeAttributes.put(633, (double) minLevel);
-                }
-            }
+            int metaGroup = entry.getValue().metaGroupID;
+            int minLevel = getMetaGroups().get(metaGroup).getMetaLevel();
+
+            // Leave null metaLevel as-is
+            entry.getValue().metaLevel = entry.getValue().metaLevel == null ? null : Integer.max(entry.getValue().metaLevel, minLevel);
         }
 
         // Patch missing variants

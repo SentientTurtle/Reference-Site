@@ -126,20 +126,20 @@ public class ShipTreePage extends Page {
 
     // Array with each entry (line) being a list of groupIDs representing a ship class
     private static final int[][] GROUP_ORDER = new int[][]{
-        {29, 237, 31, 1022},                          // Capsule, Corvette, Shuttle, Prototype Exploration Ship
-        {25, 831, 324, 830, 834, 893, 1527, 1283},    // Frigates
-        {420, 541, 1534, 1305},                       // Destroyers
-        {26, 906, 833, 358, 894, 832, 963, 1972},     // Cruisers
-        {419, 1201, 540, 4902},                       // Battlecruisers
-        {27, 898, 900},                               // Battleships
-        {485, 4594},                                  // Dreadnought
-        {1538, 547, 659},                             // Carriers
-        {30},                                         // Titan
-        {28, 1202, 380},                              // Industrial
-        {463, 543},                                   // Mining Barges
-        {941},                                        // Industrial Command Ships
-        {513, 902},                                   // Freighter
-        {883}                                         // Capital Industrial Ships
+        {29, 237, 31, 1022},                            // Capsule, Corvette, Shuttle, Prototype Exploration Ship
+        {25, 831, 324, 830, 834, 893, 1527, 1283},      // Frigates
+        {420, 541, 1534, 1305},                         // Destroyers
+        {26, 906, 833, 358, 894, 832, 963, 1972, 5087}, // Cruisers & "Special Edition Yachts"
+        {419, 1201, 540, 4902},                         // Battlecruisers
+        {27, 898, 900},                                 // Battleships
+        {485, 4594},                                    // Dreadnought
+        {1538, 547, 659},                               // Carriers
+        {30},                                           // Titan
+        {28, 1202, 380},                                // Industrial
+        {463, 543},                                     // Mining Barges
+        {941},                                          // Industrial Command Ships
+        {513, 902},                                     // Freighter
+        {883}                                           // Capital Industrial Ships
     };
 
     private static final String[] GROUP_NAMES = new String[]{

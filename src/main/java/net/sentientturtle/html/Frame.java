@@ -161,6 +161,9 @@ public abstract non-sealed class Frame implements Document, HTML {
             #header {
                 flex-wrap: wrap;
                 justify-content: space-around;
+                max-width: 100vw;
+                position: sticky;
+                left: 0;
             }
         
             #header_text {
@@ -196,6 +199,10 @@ public abstract non-sealed class Frame implements Document, HTML {
             justify-content: center;
             padding: 0.5rem;
             gap: 0.5rem;
+        }
+        
+        @media (max-width: 47.5rem) {
+            padding-inline: 0;
         }
         
         #footer {

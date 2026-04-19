@@ -44,6 +44,9 @@ public class Sidebar extends Component {
                     flex-direction: row;
                     flex-wrap: wrap;
                     justify-content: center;
+                    max-width: 100vw;
+                    position: sticky;
+                    left: 0;
                 }
             }
             

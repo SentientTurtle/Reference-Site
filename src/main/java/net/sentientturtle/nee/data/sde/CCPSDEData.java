@@ -98,6 +98,7 @@ public class CCPSDEData extends SDEData {
                     sdeType.graphicID(),
                     sdeType.marketGroupID(),
                     sdeType.metaGroupID() != null ? sdeType.metaGroupID() : 1,
+                    sdeType.metaLevel(),
                     sdeType.portionSize(),
                     sdeType.basePrice()
                 )

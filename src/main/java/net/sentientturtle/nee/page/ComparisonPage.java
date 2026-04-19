@@ -59,7 +59,13 @@ public class ComparisonPage extends Page {
             }
             
             #content:has(.comparison_grid) {
-                justify-content: space-around;
+                padding-inline: 0;
+            }
+        
+            @media (max-width: 47.5rem) {
+                body:has(.comparison_grid) {
+                    width: fit-content;
+                }
             }
             
             .comparison_grid > * {
