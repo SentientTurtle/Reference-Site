@@ -1,6 +1,7 @@
 package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
+import net.sentientturtle.html.HeadEntries;
 import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.components.TextBox;
@@ -87,6 +88,12 @@ public class DevResourcePage extends Page {
                 HTML.multi(TEXT_BOLD("Types: "), TEXT_ITALICS("/type/{type_id}"), TEXT(" e.g. `/type/648` -> "), new PageLink(new TypePage(context.sde.getTypes().get(648)))),
                 HTML.multi(TEXT_BOLD("Map: "), TEXT_ITALICS("/map.html?item={item_id}"), TEXT(" e.g. `/map.html?item=30000142` -> "), new PageLink("map.html?item=30000142", "Jita"), BR(), TEXT(" (Available: RegionID, ConstellationID, SolarSystemID, -1 for the entire New Eden Cluster, -2 for the Anoikis cluster (\"WH space\"))"))
             )
+        );
+    }
+    @Override
+    protected HeadEntries headEntries(HtmlContext context) {
+        return super.headEntries(context).append(
+            HTML.META().attribute("name", "description").attribute("content", "Resources for EVE Online third party development")
         );
     }
 }

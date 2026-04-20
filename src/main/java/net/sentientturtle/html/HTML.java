@@ -154,6 +154,19 @@ public sealed interface HTML permits Element, HTML.EmptyHTML, HTML.MultiHTML, HT
             .className(className);
     }
 
+    /// {@code <h1></h1>}
+    static Element HN(int n) {
+        if (n <= 0 || n > 6) throw new IllegalArgumentException("HTML section header (h1-h6) number out of range! (" + n + ")");
+        return new Element("h" + n);
+    }
+
+    /// {@code <h1 class='[className]'></h1>}
+    static Element HN(int n, String className) {
+        if (n <= 0 || n > 6) throw new IllegalArgumentException("HTML section header (h1-h6) number out of range! (" + n + ")");
+        return new Element("h" + n)
+            .className(className);
+    }
+
     /// {@code <img>}
     ///
     /// 'Placeholder' img tag

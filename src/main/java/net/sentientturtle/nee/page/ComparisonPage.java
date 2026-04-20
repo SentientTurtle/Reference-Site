@@ -1,6 +1,7 @@
 package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
+import net.sentientturtle.html.HeadEntries;
 import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.components.*;
@@ -298,5 +299,20 @@ public class ComparisonPage extends Page {
                     })
             )
             .style(String.format("grid-template-columns: repeat(%d, auto); grid-template-rows: %s", NUM_COLUMNS, usedRows.stream().map(row -> "[" + row + "] auto").collect(Collectors.joining(" "))));
+    }
+
+    @Override
+    protected HeadEntries headEntries(HtmlContext context) {
+        var variants = context.sde.getVariants().get(parentType.typeID);
+        String[] names = new String[variants.size()];
+
+        int idx = 0;
+        for (Integer i : variants) {
+            names[idx++] = context.sde.getTypes().get(i).name;
+        }
+
+        return super.headEntries(context).append(
+            HTML.META().attribute("name", "description").attribute("content", "Item comparison: " + String.join(" - ", names))
+        );
     }
 }

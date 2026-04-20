@@ -6,6 +6,7 @@ import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.page.PageKind;
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static net.sentientturtle.html.HTML.*;
@@ -27,8 +28,8 @@ public abstract non-sealed class Frame implements Document, HTML {
         return null;
     }
 
-    protected List<HTML> headEntries(HtmlContext context) {
-        return List.of();
+    protected HeadEntries headEntries(HtmlContext context) {
+        return new HeadEntries();
     }
 
     protected abstract HTML getContent(HtmlContext context);
@@ -539,6 +540,10 @@ public abstract non-sealed class Frame implements Document, HTML {
         .colour_deathless_highlight_border_bg { background-color: #BC4900; }
         
         /* Global CSS */
+        
+        h1, h2, h3, h4, h6, h6 {
+            margin: 0.5rem;
+        }
         
         .font_header {
             font-family: 'Electrolize', sans-serif;

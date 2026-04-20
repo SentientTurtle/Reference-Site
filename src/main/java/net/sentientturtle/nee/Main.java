@@ -48,9 +48,8 @@ public class Main {
     public static String DEPLOYMENT_URL;
     public static Set<String> PRE_COMPRESSED_FILES;
 
-    // Website title as configurable variable in case a rename is needed
+    // Website title as configurable variable
     public static final String WEBSITE_NAME = "New Eden Encyclopedia";
-    public static final String WEBSITE_ABBREVIATION = "NEE";
 
     // Browser cache busting variable
     public static final String BUILD_NUMBER = String.valueOf(TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis()) % (3600 * 24 * 7));
@@ -210,11 +209,6 @@ public class Main {
                             zipOutputStream.closeEntry();
                         }
                     }
-                    int count = pageCount.incrementAndGet();
-                    if (count % 500 == 0) {
-                        System.out.println("\t" + count);
-                    }
-
                     dependencies.putAll(context.getFileDependencies());
                 } catch (RenderingException e) {
                     ExceptionUtil.sneakyThrow(e);
@@ -224,10 +218,11 @@ public class Main {
 
                 css.addAll(context.getCSS());
                 js.addAll(context.getJavascript());
+
+                pageCount.incrementAndGet();
             });
 
         System.out.println("Writing resources");
-        final AtomicInteger resourceCount = new AtomicInteger(0);
         if (!SKIP_RESOURCES) {
             dependencies.entrySet()
                 .parallelStream()
@@ -249,11 +244,6 @@ public class Main {
                                 gzipOutputStream.finish();
                                 zipOutputStream.closeEntry();
                             }
-                        }
-
-                        int count = resourceCount.incrementAndGet();
-                        if (count % 500 == 0) {
-                            System.out.println("\t" + count);
                         }
                     } catch (Exception e) {
                         ExceptionUtil.sneakyThrow(e);

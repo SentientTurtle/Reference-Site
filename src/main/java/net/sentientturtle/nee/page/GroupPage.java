@@ -1,6 +1,7 @@
 package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
+import net.sentientturtle.html.HeadEntries;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.components.GroupList;
@@ -54,4 +55,10 @@ public class GroupPage extends Page {
         return group.getIconWithFallback(context);
     }
 
+    @Override
+    protected HeadEntries headEntries(HtmlContext context) {
+        return super.headEntries(context).append(
+            HTML.META().attribute("name", "description").attribute("content", "Item group: " + group.name)
+        );
+    }
 }

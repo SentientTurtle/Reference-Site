@@ -33,9 +33,10 @@ public class HTMLUtil {
      */
     public static String escapeText(@NonNull String text) {
         return text
-                .replace("&", "&amp;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;");
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("\u00A0", "&nbsp;");   // Not strictly required, but makes identifying these in output easier
     }
 
     /// Hack-y percent-encoding, correct but to be replaced with proper encoding

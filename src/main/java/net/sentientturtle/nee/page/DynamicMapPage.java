@@ -2,6 +2,7 @@ package net.sentientturtle.nee.page;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sentientturtle.html.HTML;
+import net.sentientturtle.html.HeadEntries;
 import net.sentientturtle.html.RenderingException;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.Resource;
@@ -45,10 +46,11 @@ public class DynamicMapPage extends Page {
     }
 
     @Override
-    protected List<HTML> headEntries(HtmlContext context) {
+    protected HeadEntries headEntries(HtmlContext context) {
         // Add a file-dependency on three.core
         Resource.file("three/three.core.min.js").getURI(context);
-        return List.of(
+        return super.headEntries(context).append(
+            HTML.META().attribute("name", "description").attribute("content", "A map of the EVE Online game world"),
             SCRIPT_IMPORTMAP(new ImportMap(Map.of(
                 "three", "./" + Resource.file("three/three.module.min.js").getURI(context),
                 "CSS2D", "./" + Resource.file("three/CSS2DRenderer.js").getURI(context),

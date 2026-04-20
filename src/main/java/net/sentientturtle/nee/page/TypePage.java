@@ -2,6 +2,7 @@ package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.HasPersistentUrl;
+import net.sentientturtle.html.HeadEntries;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.Main;
 import net.sentientturtle.nee.data.datatypes.Attribute;
@@ -306,5 +307,11 @@ public class TypePage extends Page implements HasPersistentUrl {
         if (!mid.isEmpty()) columns.add(mid);
         if (!right.isEmpty()) columns.add(right);
         return HTML.multi(columns.toArray(HTML[]::new));
+    }
+    @Override
+    protected HeadEntries headEntries(HtmlContext context) {
+        return super.headEntries(context).append(
+            HTML.META().attribute("name", "description").attribute("content", "Item: " + type.name + "\n" + type.description)
+        );
     }
 }

@@ -1,6 +1,7 @@
 package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
+import net.sentientturtle.html.HeadEntries;
 import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.Component;
 import net.sentientturtle.html.context.HtmlContext;
@@ -184,5 +185,11 @@ public class MarketGroupPage extends Page {
             )
             .toArray(ItemTree.Group[]::new);
         return new ItemTree.Entry(group.name, new PageLink(new MarketGroupPage(group)), treeGroups);
+    }
+    @Override
+    protected HeadEntries headEntries(HtmlContext context) {
+        return super.headEntries(context).append(
+            HTML.META().attribute("name", "description").attribute("content", "Market group: " + marketGroup.name)
+        );
     }
 }

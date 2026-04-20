@@ -2,6 +2,7 @@ package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.Frame;
 import net.sentientturtle.html.HTML;
+import net.sentientturtle.html.HeadEntries;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.components.*;
@@ -11,7 +12,6 @@ import net.sentientturtle.nee.data.datatypes.Station;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import static net.sentientturtle.html.HTML.DIV;
@@ -42,8 +42,8 @@ public class MapFrame extends Frame {
     }
 
     @Override
-    protected List<HTML> headEntries(HtmlContext context) {
-        return List.of(
+    protected HeadEntries headEntries(HtmlContext context) {
+        return super.headEntries(context).append(
             // Disable search engine indexing as these documents are intended to be shown in an iframe on the dynamic map page
             HTML.META().attribute("name", "robots").attribute("content", "noindex,nofollow"),
             // Let the parent window know iframe has reached document-loaded (Which happens immediately before script execution for module scripts)

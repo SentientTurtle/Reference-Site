@@ -27,8 +27,6 @@ public class TypeTraitInfo extends Component {
 
     @Override
     protected HTML[] getContent(HtmlContext context) {
-        boolean first = true;
-
         Element table = TABLE("type_traits_table font_text");
 
         TypeTraits traits = context.sde.getTypeTraits().get(type.typeID);
@@ -37,7 +35,7 @@ public class TypeTraitInfo extends Component {
 
             table.content(
                 TR("font_header").content(
-                    TH().attribute("colspan", "2").content(HEADER().content(
+                    TH().attribute("colspan", "2").content(HN(3).content(
                         new PageLink(new TypePage(context.sde.getTypes().get(skillID))),
                         TEXT(" bonuses (per\u00A0skill\u00A0level)")
                     ))
@@ -52,7 +50,7 @@ public class TypeTraitInfo extends Component {
         if (traits.roleBonuses().size() > 0) {
             table.content(
                 TR("font_header").content(
-                    TH().attribute("colspan", "2").content(HEADER().text("Role Bonus"))
+                    TH().attribute("colspan", "2").content(HN(3).text("Role Bonus"))
                 )
             );
 
@@ -64,7 +62,7 @@ public class TypeTraitInfo extends Component {
         if (traits.miscBonuses().size() > 0) {
             table.content(
                 TR("font_header").content(
-                    TH().attribute("colspan", "2").content(HEADER().text("Misc Bonus"))
+                    TH().attribute("colspan", "2").content(HN(3).text("Misc Bonus"))
                 )
             );
 

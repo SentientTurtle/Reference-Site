@@ -1,6 +1,7 @@
 package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
+import net.sentientturtle.html.HeadEntries;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.Main;
 import net.sentientturtle.nee.components.PageList;
@@ -39,8 +40,9 @@ public class IndexPage extends Page {
     }
 
     @Override
-    protected List<HTML> headEntries(HtmlContext context) {
-        return List.of(
+    protected HeadEntries headEntries(HtmlContext context) {
+        return super.headEntries(context).append(
+            HTML.META().attribute("name", "description").attribute("content", this.description()),
             SCRIPT_MODULE("""
                 fetch("./rsc/status.json")
                         .then(r => r.json())

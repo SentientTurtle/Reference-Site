@@ -15,7 +15,7 @@ import static net.sentientturtle.html.HTML.*;
 @SuppressWarnings("WeakerAccess")
 public abstract class Page extends Frame {
     private HTML getHeader(HtmlContext context) {
-        return DIV().id(context.tryID("header")).content(
+        return HEADER().id(context.tryID("header")).content(
             SPAN("header_span").content(
                 IMG(Resource.file("bookicon.png"), null, 64).className("header_icon"),
                 TEXT_BOLD().className("font_header").id(context.tryID("header_text")).content(new PageLink(new IndexPage()))
@@ -56,6 +56,9 @@ public abstract class Page extends Frame {
             LINK().attribute("rel", "stylesheet").attribute("href", c -> c.pathTo("theme.css")).id(context.tryID("theme_stylesheet")),
             LINK().attribute("rel", "icon").attribute("href", c -> Resource.file("bookicon.png").getURI(c))
         );
+
+        // Pending ability to control AI snippets specifically, just block all of them.
+        head.content(META().attribute("name", "robots").attribute("content", "nosnippet"));
 
         head.content(META().attribute("property", "og:site_name").attribute("content", Main.WEBSITE_NAME));
         head.content(META().attribute("property", "og:title").attribute("content", this.name()));

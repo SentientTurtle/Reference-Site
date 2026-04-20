@@ -1,12 +1,11 @@
 package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
+import net.sentientturtle.html.HeadEntries;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.components.ItemTitle;
 import net.sentientturtle.nee.data.Resource;
 import org.jspecify.annotations.Nullable;
-
-import java.util.List;
 
 import static net.sentientturtle.html.HTML.*;
 
@@ -55,8 +54,8 @@ public class SearchResults extends Page {
     }
 
     @Override
-    protected List<HTML> headEntries(HtmlContext context) {
-        return List.of(
+    protected HeadEntries headEntries(HtmlContext context) {
+        return super.headEntries(context).append(
             HTML.SCRIPT_MODULE(
                 "import searchindex from \"/" + Resource.searchIndex().getURI(context) + "\";\n"
                 +

@@ -2,6 +2,7 @@ package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.Element;
 import net.sentientturtle.html.HTML;
+import net.sentientturtle.html.HeadEntries;
 import net.sentientturtle.html.PageLink;
 import net.sentientturtle.nee.components.TabBox;
 import net.sentientturtle.html.context.HtmlContext;
@@ -347,6 +348,13 @@ public class ShipTreePage extends Page {
         }
 
         return DIV("ship_tree font_header").content(content);
+    }
+
+    @Override
+    protected HeadEntries headEntries(HtmlContext context) {
+        return super.headEntries(context).append(
+            HTML.META().attribute("name", "description").attribute("content", "Ship Tree for EVE Online")
+        );
     }
 
     private static final int[] CALDARI_SHIPS = new int[]{

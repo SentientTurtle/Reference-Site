@@ -1,6 +1,7 @@
 package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
+import net.sentientturtle.html.HeadEntries;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.Main;
 import net.sentientturtle.nee.data.Resource;
@@ -11,7 +12,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
-import java.util.List;
 import java.util.stream.Stream;
 
 import static net.sentientturtle.html.HTML.*;
@@ -86,8 +86,8 @@ public class SettingsPage extends Page {
     }
 
     @Override
-    protected List<HTML> headEntries(HtmlContext context) {
-        return List.of(
+    protected HeadEntries headEntries(HtmlContext context) {
+        return super.headEntries(context).append(
             HTML.SCRIPT_MODULE("""
                 let [_, current_theme] = document.cookie.match(/(?:^|;)\\s*theme\\s*=([^;]+)/) ?? [];
                 current_theme = (current_theme ?? "").trim();

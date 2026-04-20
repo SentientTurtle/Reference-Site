@@ -1,6 +1,7 @@
 package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
+import net.sentientturtle.html.HeadEntries;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.components.ItemTree;
 import net.sentientturtle.nee.data.sde.SDEData;
@@ -102,6 +103,12 @@ public class StructureTreePage extends Page {
                 // POS Shield hardening
                 groupFor(groups.get(444), context.sde)
             )
+        );
+    }
+    @Override
+    protected HeadEntries headEntries(HtmlContext context) {
+        return super.headEntries(context).append(
+            HTML.META().attribute("name", "description").attribute("content", "Structure and Deployable tree for EVE Online")
         );
     }
 }
