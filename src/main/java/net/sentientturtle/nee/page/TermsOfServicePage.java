@@ -1,6 +1,7 @@
 package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
+import net.sentientturtle.html.IndexSetting;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.components.TextBox;
 import net.sentientturtle.nee.data.Resource;
@@ -47,10 +48,10 @@ public class TermsOfServicePage extends Page {
                 TEXT("EVE Online materials subject to "), A("https://developers.eveonline.com/license-agreement", TEXT("EVE Online Third Party Development License")),
                 BR(),
                 TEXT(
-                    "EVE Online and the EVE logo are the registered trademarks of CCP hf. " +
+                    "EVE Online and the EVE logo are the registered trademarks of Fenris Creations. " +
                     "All rights are reserved worldwide. All other trademarks are the property of their respective owners. " +
-                    "EVE Online, the EVE logo, EVE and all associated logos and designs are the intellectual property of CCP hf. " +
-                    "All artwork, screenshots, characters, vehicles, storylines, world facts or other recognizable features of the intellectual property relating to these trademarks are likewise the intellectual property of CCP hf."
+                    "EVE Online, the EVE logo, EVE and all associated logos and designs are the intellectual property of Fenris Creations. " +
+                    "All artwork, screenshots, characters, vehicles, storylines, world facts or other recognizable features of the intellectual property relating to these trademarks are likewise the intellectual property of Fenris Creations."
                 )
             ))
         );
@@ -59,6 +60,12 @@ public class TermsOfServicePage extends Page {
     @Override
     public PageKind getPageKind() {
         return PageKind.STATIC;
+    }
+
+    @Override
+    public IndexSetting getIndexSetting() {
+        // TOS page
+        return IndexSetting.NO_INDEX;
     }
 
     @Nullable

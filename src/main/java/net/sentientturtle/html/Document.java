@@ -15,7 +15,7 @@ public interface Document {
 
     /// Document title, as used in {@code <title>}
     default String title() {
-        return Main.WEBSITE_NAME + " - " + this.name();
+        return this.name() + " - " + Main.WEBSITE_NAME;
     }
 
     /// Absolute path to this document

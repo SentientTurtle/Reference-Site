@@ -144,6 +144,8 @@ public class Type implements HasPage {
         return new TypePage(this);
     }
 
+    // Custom equals & hashcode, compare only by typeID
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -24,12 +24,12 @@ Map of typeIDs to which icon types are available for that type. Different icon t
   },
 ```
 
-Unlike the official CCP Image Service:
+Unlike the official Fenris Creations Image Service:
 * Icons are of varying sizes, where possible, higher resolution icons are provided
 * Renders are in jpg format
 * Types with "bp", "relic", or "reaction" routes have an "icon" entry as well, enabling the use of the `/{type_id}/icon` route for all types
 
-For full compatibility with the CCP Image Service the following routes need to be directed to the official service:
+For full compatibility with the Fenris Creations Image Service the following routes need to be directed to the official service:
 * /alliances/
 * /characters/
 * /corporations/

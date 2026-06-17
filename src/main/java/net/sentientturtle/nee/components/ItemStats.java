@@ -831,7 +831,7 @@ public class ItemStats extends Component {
         }
 
         Element mutationApplicableMutaplasmidTable = TABLE("item_stats_table");
-        Set<Integer> applicableMutaplasmids = context.sde.getmoduleMutaplasmidMap().get(type.typeID);
+        Set<Integer> applicableMutaplasmids = context.sde.getModuleMutaplasmidMap().get(type.typeID);
         if (applicableMutaplasmids != null && applicableMutaplasmids.size() > 0) {
             mutationApplicableMutaplasmidTable.content(TR().content(TH().attribute("colspan", "4").text("Applicable Mutaplasmids")));
             applicableMutaplasmids.stream()

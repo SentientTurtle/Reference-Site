@@ -16,14 +16,23 @@ public class PageLink extends Element {
     }
 
     public PageLink(Document document, @Nullable String text) {
-        super("a");
-        this.attribute("href", context -> context.pathTo(document));
-        this.text(text == null ? document.name() : text);
+        this(document, HTML.TEXT(text == null ? document.name() : text));
     }
 
     public PageLink(Document document, @NonNull HTML content) {
         super("a");
-        this.attribute("href", context -> context.pathTo(document));
+        this.attribute("href", context -> {
+            String path = context.pathTo(document);
+            if (path.endsWith("index.html")) {
+                if (path.length() > 10) {
+                    return path.substring(0, path.length() - 10);
+                } else {
+                    return "./";
+                }
+            } else {
+                return path;
+            }
+        });
         this.content(content);
     }
 

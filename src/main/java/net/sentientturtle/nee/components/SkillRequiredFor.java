@@ -25,7 +25,7 @@ public class SkillRequiredFor extends Component {
 
     @Override
     protected HTML[] getContent(HtmlContext context) {
-        Map<Integer, Set<Integer>> requiredFor = context.sde.getRequiresSkillMap().get(type.typeID);
+        Map<Integer, Set<Integer>> requiredFor = context.sde.getSkillUnlockMap().get(type.typeID);
 
         var table = TABLE("skill_required_table font_header");
 

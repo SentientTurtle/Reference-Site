@@ -2,9 +2,10 @@ package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.HeadEntries;
+import net.sentientturtle.html.IndexSetting;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.Resource;
-import net.sentientturtle.nee.components.GroupList;
+import net.sentientturtle.nee.components.SimpleList;
 import net.sentientturtle.nee.components.ItemTitle;
 import net.sentientturtle.nee.data.datatypes.Category;
 import org.jspecify.annotations.Nullable;
@@ -40,13 +41,19 @@ public class CategoryPage extends Page {
     protected HTML getContent(HtmlContext context) {
         return DIV("category_page_grid").content(
             new ItemTitle(category.name, getIcon(context)),
-            new GroupList(category)
+            new SimpleList(category)
         );
     }
 
     @Override
     public PageKind getPageKind() {
         return PageKind.CATEGORY;
+    }
+
+    @Override
+    public IndexSetting getIndexSetting() {
+        // Disabled indexing on "list" pages; No notable information, probably won't be searched for directly.
+        return IndexSetting.NO_INDEX;
     }
 
     @Nullable

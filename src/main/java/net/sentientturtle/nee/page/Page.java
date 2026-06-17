@@ -15,11 +15,14 @@ import static net.sentientturtle.html.HTML.*;
 @SuppressWarnings("WeakerAccess")
 public abstract class Page extends Frame {
     private HTML getHeader(HtmlContext context) {
+        HTML headerText;
+        if (this instanceof IndexPage) {
+            headerText = HN(1, "font_header").id(context.tryID("header_text")).content(new PageLink(new IndexPage()));
+        } else {
+            headerText = TEXT_BOLD().className("font_header").id(context.tryID("header_text")).content(new PageLink(new IndexPage()));
+        }
         return HEADER().id(context.tryID("header")).content(
-            SPAN("header_span").content(
-                IMG(Resource.file("bookicon.png"), null, 64).className("header_icon"),
-                TEXT_BOLD().className("font_header").id(context.tryID("header_text")).content(new PageLink(new IndexPage()))
-            ),
+            SPAN("header_span").content(IMG(Resource.file("bookicon.png"), null, 64).className("header_icon"), headerText),
             SPAN("header_span header_search").content(
                 HTML.RAW("<form class='font_header' action='" + context.pathTo(new SearchResults()) + "'>" +
                          "<input class='font_header' id='search_input' type='text' placeholder='Search...' name='search' aria-label='Search'>" +
@@ -30,17 +33,17 @@ public abstract class Page extends Frame {
 
     private static HTML getFooter(HtmlContext context) {
         return DIV().id(context.tryID("footer")).content(
-            DIV().content(new PageLink(new TermsOfServicePage(), "Terms of Service & Privacy")),
+            DIV().content(new PageLink(new TermsOfServicePage(), "Terms of Service & Privacy"), TEXT(" - "), HTML.A("/sitemap.xml", TEXT("Sitemap"))),
             DIV("font_text").text(
-                "EVE Online and the EVE logo are the registered trademarks of CCP hf.\n" +
+                "EVE Online and the EVE logo are the registered trademarks of Fenris Creations.\n" +
                 "All rights are reserved worldwide.\n" +
                 "All other trademarks are the property of their respective owners.\n" +
-                "EVE Online, the EVE logo, EVE and all associated logos and designs are the intellectual property of CCP hf.\n" +
+                "EVE Online, the EVE logo, EVE and all associated logos and designs are the intellectual property of Fenris Creations.\n" +
                 "All artwork, screenshots, characters, vehicles, storylines, world facts or other recognizable features of the intellectual property relating\n" +
-                "to these trademarks are likewise the intellectual property of CCP hf.\n" +
-                "CCP hf. has granted permission to the " + Main.WEBSITE_NAME + " project to use EVE Online and all associated logos and designs for promotional and\n" +
+                "to these trademarks are likewise the intellectual property of Fenris Creations.\n" +
+                "Fenris Creations. has granted permission to the " + Main.WEBSITE_NAME + " project to use EVE Online and all associated logos and designs for promotional and\n" +
                 "information purposes on its website but does not endorse, and is not in any way affiliated with, the " + Main.WEBSITE_NAME + " project.\n" +
-                "CCP is in no way responsible for the content on or functioning of the " + Main.WEBSITE_NAME + ", nor can it be liable for any damage arising from the use of\n" +
+                "Fenris Creations is in no way responsible for the content on or functioning of the " + Main.WEBSITE_NAME + ", nor can it be liable for any damage arising from the use of\n" +
                 "the " + Main.WEBSITE_NAME + ".\n"
             )
         );

@@ -1,15 +1,12 @@
 package net.sentientturtle.nee.data.sde;
 
-import net.sentientturtle.nee.Main;
 import net.sentientturtle.nee.data.datatypes.*;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class CCPSDEData extends SDEData {
+public class OfficialSDEData extends SDEData {
     private final Map<Integer, Category> categories;
     private final Map<Integer, Group> groups;
     private final Map<Integer, Attribute> attributes;
@@ -18,6 +15,7 @@ public class CCPSDEData extends SDEData {
     private final Map<Integer, Map<Integer, Double>> typeAttributes;
     private final Map<Integer, Set<Integer>> typeEffects;
     private final Map<Integer, TypeTraits> typeTraits;
+    private final Map<Integer, TypeList> typeLists;
     private final Map<Integer, String> eveIcons;
     private final Map<Integer, EnumMap<IndustryActivityType, IndustryActivity>> bpActivities;
     private final Map<Integer, Map<Integer, Integer>> reprocessingMaterials;
@@ -39,19 +37,9 @@ public class CCPSDEData extends SDEData {
     private final Map<Integer, WarfareBuff> warfareBuffs;
     private final Map<Integer, DynamicAttributes> dynamicAttributes;
     private final Map<Integer, String> graphicFolders;
+    private final Map<Integer, Integer> alphaSkills;
 
-    public static void main(String[] args) throws IOException {
-        Main.RES_FOLDER = Path.of("./rsc");
-
-        System.out.println("Loading SDE...");
-        long sde_start = System.nanoTime();
-//        SDEData sdeData = new CCPSDEData(new YAMLSDEReader(Path.of("./rsc/sde.zip")), false);
-        SDEData sdeData = new CCPSDEData(new JSONLSDEReader(Path.of("./rsc/sde_jsonl.zip")), false);
-        long sdeDuration = System.nanoTime() - sde_start;
-        System.out.println("\tSDE loaded! (" + (TimeUnit.NANOSECONDS.toMillis(sdeDuration) / 1000.0) +")");
-    }
-
-    public CCPSDEData(SDEReader reader, boolean patch) throws IOException {
+    public OfficialSDEData(SDEReader reader, boolean patch) throws IOException {
         this.categories = this.produceMap();
         reader.readCategories(sdeCategory -> {
             this.categories.put(
@@ -136,7 +124,6 @@ public class CCPSDEData extends SDEData {
             this.typeTraits.put(typeBonus.typeID(), new TypeTraits(miscBonuses, roleBonuses, skillBonuses));
         });
 
-
         this.variants = this.produceMap();
         for (Map.Entry<Integer, Set<Integer>> entry : typeVariants.entrySet()) {
             entry.getValue().add(entry.getKey());
@@ -155,6 +142,7 @@ public class CCPSDEData extends SDEData {
                     attribute.name(),
                     attribute.displayName() != null ? attribute.displayName().en() : null,
                     attribute.unitID(),
+                    attribute.dataType(),
                     attribute.iconID(),
                     attribute.published(),
                     attribute.highIsGood()
@@ -508,8 +496,63 @@ public class CCPSDEData extends SDEData {
             }
         });
 
+        this.alphaSkills = this.produceMap();
+        reader.readCloneGrades(cloneGrade -> {
+            for (SDEReader.SdeCloneGradeSkill skill : cloneGrade.skills()) {
+                Integer level = alphaSkills.put(skill.typeID(), skill.level());
+                if (level != null && level != skill.level()) throw new IllegalStateException("Clone grade skill mismatch: " + skill.typeID());
+            }
+        });
+
         if (patch) this.patch();
         this.loadViews();
+
+        // Custom handling of typeLists, which rely on the views for efficient loading, and are exposed as a kind-of-view
+        this.typeLists = this.produceMap();
+        reader.readTypeLists(typeList -> {
+            Set<Type> typeSet = this.produceSet();
+            this.typeLists.put(
+                typeList.typeListID(),
+                new TypeList(
+                    typeList.typeListID(),
+                    typeSet,
+                    typeList.displayName() != null ? typeList.displayName().en() : null,
+                    typeList.displayDescription() != null ? typeList.displayDescription().en() : null
+                )
+            );
+
+            for (int categoryID : typeList.includedCategoryIDs()) {
+                if (typeList.excludesCategory(categoryID)) continue;
+
+                for (Group group : this.getCategoryGroupMap().getOrDefault(categoryID, Set.of())) {   // Excluded unpublished categories, which are not included in the CategoryGroups map
+                    if (typeList.excludesGroup(group.groupID)) continue;
+
+                    for (Type type : this.getGroupTypeMap().get(group.groupID)) { // All groups acquired through CategoryGroups should be published and known about
+                        if (typeList.excludesType(type.typeID)) continue;
+
+                        typeSet.add(type);
+                    }
+                }
+            }
+
+            for (int groupID : typeList.includedGroupIDs()) {
+                if (typeList.excludesGroup(groupID)) continue;
+
+                for (Type type : this.getGroupTypeMap().getOrDefault(groupID, Set.of())) {   // Excluded unpublished groups, which are not included in the GroupTypes map
+                    if (typeList.excludesType(type.typeID)) continue;
+
+                    typeSet.add(type);
+                }
+            }
+
+            for (int typeID : typeList.includedTypeIDs()) {
+                if (typeList.excludesType(typeID)) continue;
+                Type type = types.get(typeID);
+                if (type == null) continue; // Excluded unpublished types
+
+                typeSet.add(type);
+            }
+        });
     }
 
     private String romanNumeral(int num) {
@@ -626,6 +669,11 @@ public class CCPSDEData extends SDEData {
     @Override
     public Map<Integer, TypeTraits> getTypeTraits() {
         return typeTraits;
+    }
+
+    @Override
+    public Map<Integer, TypeList> getTypeLists() {
+        return typeLists;
     }
 
     @Override
@@ -751,5 +799,10 @@ public class CCPSDEData extends SDEData {
     @Override
     public Map<Integer, String> getGraphicFolders() {
         return graphicFolders;
+    }
+
+    @Override
+    public Map<Integer, Integer> getAlphaSkills() {
+        return alphaSkills;
     }
 }

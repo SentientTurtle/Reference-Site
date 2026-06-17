@@ -2,6 +2,7 @@ package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.HeadEntries;
+import net.sentientturtle.html.IndexSetting;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.components.ItemTree;
 import net.sentientturtle.nee.data.sde.SDEData;
@@ -12,14 +13,12 @@ import net.sentientturtle.nee.data.Resource;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Stream;
 
 /// Page containing the ship tree
 public class StructureTreePage extends Page {
     @Override
     public String name() {
-        return "Structures";
+        return "Structure Tree";
     }
 
     @Override
@@ -38,15 +37,20 @@ public class StructureTreePage extends Page {
     }
 
     @Override
+    public IndexSetting getIndexSetting() {
+        return IndexSetting.INDEX;
+    }
+
+    @Override
     public @Nullable Resource getIcon(HtmlContext context) {
         return null;
     }
 
     private static ItemTree.Entry entryFor(int categoryID, SDEData data) {
         Category category = data.getCategories().get(categoryID);
-        ItemTree.Group[] groups = data.getCategoryGroups().get(categoryID)
+        ItemTree.Group[] groups = data.getCategoryGroupMap().get(categoryID)
             .stream()
-            .filter(group -> data.getGroupTypes().containsKey(group.groupID))
+            .filter(group -> data.getGroupTypeMap().containsKey(group.groupID))
             .map(group -> groupFor(group, data))
             .toArray(ItemTree.Group[]::new);
 
@@ -57,7 +61,7 @@ public class StructureTreePage extends Page {
     }
 
     private static ItemTree.Group groupFor(Group group, SDEData data) {
-        Type[] types = data.getGroupTypes().get(group.groupID)
+        Type[] types = data.getGroupTypeMap().get(group.groupID)
             .stream().sorted(Type.comparator(data))
             .toArray(Type[]::new);
         return new ItemTree.Group(group.name, types);

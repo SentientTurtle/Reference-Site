@@ -57,6 +57,13 @@ public enum PageKind {
             .flatMap((Function<Stream<? extends MapItem>, Stream<? extends MapItem>>) stream -> stream)
             .map(MapFrame::new)
     ),
+    TYPELIST(data ->
+        data.getTypeLists()
+            .values()
+            .stream()
+            .filter(typeList -> typeList.displayName() != null)
+            .map(TypeListPage::new)
+    ),
     STATIC(_ -> Stream.of(new IndexPage(), new SearchResults(), new DynamicMapPage(), new TermsOfServicePage(), new DevResourcePage(), new SettingsPage())) {
         @Override
         public String getPageFilePath(String pageName) {

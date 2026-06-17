@@ -516,9 +516,59 @@ public interface SDEReader extends AutoCloseable {
         @Nullable String sofRaceName
     ) {}
 
+    record SdeTypeList(
+        @JsonProperty(value = "_key", required = true) int typeListID,
+        @Nullable LocalizedString displayDescription,
+        @Nullable LocalizedString displayName,
+        @JsonProperty(required = true) String name,
+        @JsonSetter(nulls = Nulls.AS_EMPTY) int[] excludedCategoryIDs,
+        @JsonSetter(nulls = Nulls.AS_EMPTY) int[] includedCategoryIDs,
+        @JsonSetter(nulls = Nulls.AS_EMPTY) int[] excludedGroupIDs,
+        @JsonSetter(nulls = Nulls.AS_EMPTY) int[] includedGroupIDs,
+        @JsonSetter(nulls = Nulls.AS_EMPTY) int[] excludedTypeIDs,
+        @JsonSetter(nulls = Nulls.AS_EMPTY) int[] includedTypeIDs
+    ) {
+        public boolean excludesCategory(int categoryID) {
+            for (int excludedCategoryID : excludedCategoryIDs) {
+                if (excludedCategoryID == categoryID) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public boolean excludesGroup(int groupID) {
+            for (int excludedGroupID : excludedGroupIDs) {
+                if (excludedGroupID == groupID) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public boolean excludesType(int typeID) {
+            for (int excludedTypeID : excludedTypeIDs) {
+                if (excludedTypeID == typeID) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+    record SdeCloneGrade(
+        @JsonProperty(value = "_key", required = true) int cloneGradeID,
+        @JsonProperty(required = true) String name,
+        @JsonProperty(required = true) SdeCloneGradeSkill[] skills
+    ) {}
+    record SdeCloneGradeSkill(
+        @JsonProperty(required = true) int typeID,
+        @JsonProperty(required = true) int level
+    ) {}
+
     void readCategories(Consumer<SdeCategory> consumer) throws IOException;
     void readGroups(Consumer<SdeGroup> consumer) throws IOException;
     void readTypeBonuses(Consumer<SdeTypeBonus> consumer) throws IOException;
+    void readTypeLists(Consumer<SdeTypeList> consumer) throws IOException;
     void readTypes(Consumer<SdeType> consumer) throws IOException;
     void readAttributes(Consumer<SdeAttribute> consumer) throws IOException;
     void readEffects(Consumer<SdeEffect> consumer) throws IOException;
@@ -545,4 +595,5 @@ public interface SDEReader extends AutoCloseable {
     void readDbuffs(Consumer<SdeDbuff> consumer) throws IOException;
     void readDynamicAttributes(Consumer<SdeDynamicAttributes> consumer) throws IOException;
     void readGraphics(Consumer<SdeGraphic> consumer) throws IOException;
+    void readCloneGrades(Consumer<SdeCloneGrade> consumer) throws IOException;
 }

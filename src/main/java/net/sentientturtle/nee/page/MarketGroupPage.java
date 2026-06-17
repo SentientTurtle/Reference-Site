@@ -1,9 +1,6 @@
 package net.sentientturtle.nee.page;
 
-import net.sentientturtle.html.HTML;
-import net.sentientturtle.html.HeadEntries;
-import net.sentientturtle.html.PageLink;
-import net.sentientturtle.html.Component;
+import net.sentientturtle.html.*;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.components.ItemDescription;
 import net.sentientturtle.nee.components.ItemTree;
@@ -49,6 +46,12 @@ public class MarketGroupPage extends Page {
     @Override
     public PageKind getPageKind() {
         return PageKind.MARKET_GROUP;
+    }
+
+    @Override
+    public IndexSetting getIndexSetting() {
+        // Disabled indexing on "list" pages; No notable information, probably won't be searched for directly.
+        return IndexSetting.NO_INDEX;
     }
 
     @Override

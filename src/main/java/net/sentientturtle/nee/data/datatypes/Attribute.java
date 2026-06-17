@@ -11,6 +11,7 @@ public final class Attribute {
     public @Nullable String attributeName;
     public @Nullable String displayName;
     public @Nullable Integer unitID;
+    public int dataType;
     public @Nullable Integer iconID;
     public boolean published;
     public boolean highIsGood;
@@ -21,6 +22,7 @@ public final class Attribute {
         @Nullable String attributeName,
         @Nullable String displayName,
         @Nullable Integer unitID,
+        int dataType,
         @Nullable Integer iconID,
         boolean published,
         boolean highIsGood
@@ -30,6 +32,7 @@ public final class Attribute {
         this.attributeName = attributeName;
         this.displayName = displayName;
         this.unitID = unitID;
+        this.dataType = dataType;
         this.iconID = iconID;
         this.published = published;
         this.highIsGood = highIsGood;

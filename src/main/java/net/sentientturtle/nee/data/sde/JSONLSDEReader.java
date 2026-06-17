@@ -144,6 +144,16 @@ public class JSONLSDEReader implements SDEReader {
     }
 
     @Override
+    public void readTypeLists(Consumer<SdeTypeList> consumer) throws IOException {
+        ZipEntry entry = zipFile.getEntry("typeLists.jsonl");
+        BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
+        String line;
+        while ((line = br.readLine()) != null) {
+            consumer.accept(jsonMapper.readValue(line, SdeTypeList.class));
+        }
+    }
+
+    @Override
     public void readTypes(Consumer<SdeType> consumer) throws IOException {
         ZipEntry entry = zipFile.getEntry("types.jsonl");
         BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
@@ -416,6 +426,16 @@ public class JSONLSDEReader implements SDEReader {
         String line;
         while ((line = br.readLine()) != null) {
             consumer.accept(jsonMapper.readValue(line, SdeGraphic.class));
+        }
+    }
+
+    @Override
+    public void readCloneGrades(Consumer<SdeCloneGrade> consumer) throws IOException {
+        ZipEntry entry = zipFile.getEntry("cloneGrades.jsonl");
+        BufferedReader br = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
+        String line;
+        while ((line = br.readLine()) != null) {
+            consumer.accept(jsonMapper.readValue(line, SdeCloneGrade.class));
         }
     }
 }

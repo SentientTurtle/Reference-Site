@@ -3,6 +3,7 @@ package net.sentientturtle.nee.page;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.HeadEntries;
+import net.sentientturtle.html.IndexSetting;
 import net.sentientturtle.html.RenderingException;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.Resource;
@@ -38,6 +39,11 @@ public class DynamicMapPage extends Page {
     @Override
     public PageKind getPageKind() {
         return PageKind.STATIC;
+    }
+
+    @Override
+    public IndexSetting getIndexSetting() {
+        return IndexSetting.INDEX;
     }
 
     @Override

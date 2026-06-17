@@ -1,9 +1,6 @@
 package net.sentientturtle.nee.page;
 
-import net.sentientturtle.html.Element;
-import net.sentientturtle.html.HTML;
-import net.sentientturtle.html.HeadEntries;
-import net.sentientturtle.html.PageLink;
+import net.sentientturtle.html.*;
 import net.sentientturtle.nee.components.TabBox;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.datatypes.Group;
@@ -21,7 +18,7 @@ import static net.sentientturtle.html.HTML.*;
 public class ShipTreePage extends Page {
     @Override
     public String name() {
-        return "Ships";
+        return "Ship Tree";
     }
 
     @Override
@@ -37,6 +34,11 @@ public class ShipTreePage extends Page {
     @Override
     public PageKind getPageKind() {
         return PageKind.ITEM_TREE;
+    }
+
+    @Override
+    public IndexSetting getIndexSetting() {
+        return IndexSetting.INDEX;
     }
 
     @Override
@@ -134,7 +136,7 @@ public class ShipTreePage extends Page {
         {419, 1201, 540, 4902},                         // Battlecruisers
         {27, 898, 900},                                 // Battleships
         {485, 4594},                                    // Dreadnought
-        {1538, 547, 659},                               // Carriers
+        {1538, 547, 659, 5120},                         // Carriers
         {30},                                           // Titan
         {28, 1202, 380},                                // Industrial
         {463, 543},                                     // Mining Barges
@@ -252,12 +254,12 @@ public class ShipTreePage extends Page {
 
     @Override
     protected HTML getContent(HtmlContext context) {
-        Set<Group> shipGroups = context.sde.getCategoryGroups().get(6);
+        Set<Group> shipGroups = context.sde.getCategoryGroupMap().get(6);
         Objects.requireNonNull(shipGroups);
         Set<Integer> shipTypeIDs = shipGroups
             .stream()
             .filter(group -> group.published)
-            .flatMap(group -> context.sde.getGroupTypes().getOrDefault(group.groupID, Set.of()).stream())
+            .flatMap(group -> context.sde.getGroupTypeMap().getOrDefault(group.groupID, Set.of()).stream())
             .filter(type -> type.published)
             .map(type -> type.typeID)
             .collect(Collectors.toCollection(HashSet::new));
@@ -273,7 +275,7 @@ public class ShipTreePage extends Page {
             ),
             new TabBox.Tab(
                 IMG(Resource.fromSharedCache("res:/ui/texture/classes/shiptree/factions/gallente.png", context), "Gallente Federation", 64).title("Gallente Federation").className("ship_tree_icon"),
-                getTree(context, shipTypeIDs, "Gallente Federatopn", "gallente", GALLENTE_SHIPS)
+                getTree(context, shipTypeIDs, "Gallente Federation", "gallente", GALLENTE_SHIPS)
             ),
             new TabBox.Tab(
                 IMG(Resource.fromSharedCache("res:/ui/texture/classes/shiptree/factions/minmatar.png", context), "Minmatar Republic", 64).title("Minmatar Republic").className("ship_tree_icon"),
@@ -422,7 +424,9 @@ public class ShipTreePage extends Page {
         72904,
         73793,
         73795,
-        77284
+        77284,
+        91857,
+        92823
     };
 
     private static final int[] MINMATAR_SHIPS = new int[]{
@@ -491,7 +495,9 @@ public class ShipTreePage extends Page {
         72903,
         73787,
         73794,
-        77288
+        77288,
+        91858,
+        92825
     };
 
     private static final int[] AMARR_SHIPS = new int[]{
@@ -559,7 +565,9 @@ public class ShipTreePage extends Page {
         72907,
         73789,
         73790,
-        77283
+        77283,
+        91775,
+        92822
     };
 
     private static final int[] GALLENTE_SHIPS = new int[]{
@@ -630,7 +638,9 @@ public class ShipTreePage extends Page {
         72913,
         73792,
         73796,
-        77281
+        77281,
+        91849,
+        92824
     };
 
 

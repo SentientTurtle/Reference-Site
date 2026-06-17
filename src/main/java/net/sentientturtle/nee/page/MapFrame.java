@@ -3,6 +3,7 @@ package net.sentientturtle.nee.page;
 import net.sentientturtle.html.Frame;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.HeadEntries;
+import net.sentientturtle.html.IndexSetting;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.components.*;
@@ -42,10 +43,14 @@ public class MapFrame extends Frame {
     }
 
     @Override
+    public IndexSetting getIndexSetting() {
+        // Disable search engine indexing as these documents are intended to be shown in an iframe on the dynamic map page
+        return IndexSetting.NO_INDEX_NO_FOLLOW;
+    }
+
+    @Override
     protected HeadEntries headEntries(HtmlContext context) {
         return super.headEntries(context).append(
-            // Disable search engine indexing as these documents are intended to be shown in an iframe on the dynamic map page
-            HTML.META().attribute("name", "robots").attribute("content", "noindex,nofollow"),
             // Let the parent window know iframe has reached document-loaded (Which happens immediately before script execution for module scripts)
             // Iframe's onload event is the full window load event, which happens after images/etc load, so we manually create our own
             HTML.SCRIPT_MODULE("window.parent.postMessage('MAPFRAME-DOMLOADED');")

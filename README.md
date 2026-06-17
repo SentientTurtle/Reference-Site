@@ -18,10 +18,10 @@ EVE Online content (`./rsc/EVE/` + other files) subject to copyright and tradema
 
 ## Copyright & trademark notices
 
-EVE Online and the EVE logo are the registered trademarks of CCP hf.
-EVE Online, the EVE logo, EVE and all associated logos and designs are the intellectual property of CCP hf.
-All artwork, screenshots, characters, vehicles, storylines, world facts or other recognizable features of the intellectual property relating to these trademarks are likewise the intellectual property of CCP hf.
-CCP hf. has granted permission to New Eden Encyclopedia to use EVE Online and all associated logos and designs for promotional and information purposes on its website but does not endorse, and is not in any way affiliated with, New Eden Encyclopedia.
-CCP is in no way responsible for the content on or functioning of this website, nor can it be liable for any damage arising from the use of this software.
+EVE Online and the EVE logo are the registered trademarks of Fenris Creations.
+EVE Online, the EVE logo, EVE and all associated logos and designs are the intellectual property of Fenris Creations.
+All artwork, screenshots, characters, vehicles, storylines, world facts or other recognizable features of the intellectual property relating to these trademarks are likewise the intellectual property of Fenris Creations.
+Fenris Creations. has granted permission to New Eden Encyclopedia to use EVE Online and all associated logos and designs for promotional and information purposes on its website but does not endorse, and is not in any way affiliated with, New Eden Encyclopedia.
+Fenris Creations is in no way responsible for the content on or functioning of this website, nor can it be liable for any damage arising from the use of this software.
 
-Use of EVE Online materials in accordance with [CCP Games' third-party-developer license](https://developers.eveonline.com/license-agreement)
+Use of EVE Online materials in accordance with [Fenris Creations' third-party-developer license](https://developers.eveonline.com/license-agreement)

@@ -4,10 +4,13 @@ import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.HeadEntries;
 import net.sentientturtle.html.IndexSetting;
 import net.sentientturtle.html.context.HtmlContext;
-import net.sentientturtle.nee.data.Resource;
+import net.sentientturtle.nee.components.ItemDescription;
 import net.sentientturtle.nee.components.SimpleList;
 import net.sentientturtle.nee.components.ItemTitle;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.data.datatypes.Group;
+import net.sentientturtle.nee.data.datatypes.TypeList;
+import net.sentientturtle.nee.util.EVEText;
 import org.jspecify.annotations.Nullable;
 
 import static net.sentientturtle.html.HTML.DIV;
@@ -15,39 +18,41 @@ import static net.sentientturtle.html.HTML.DIV;
 /**
  * Page for a {@link Group}
  */
-public class GroupPage extends Page {
-    public final Group group;
+public class TypeListPage extends Page {
+    public final TypeList typeList;
 
-    public GroupPage(Group group) {
-        this.group = group;
+    public TypeListPage(TypeList typeList) {
+        this.typeList = typeList;
+        if (typeList.displayName() == null) throw new IllegalArgumentException("Attempt to create page for TypeList without display name: #" + typeList.typeListID());
     }
 
     @Override
     public @Nullable String description() {
-        return null;
+        return typeList.displayDescription();
     }
 
     @Override
     public String filename() {
-        return group.groupID + "-" + name();
+        return typeList.typeListID() + "-" + name();
     }
 
     @Override
     public String name() {
-        return group.name;
+        return typeList.displayName();
     }
 
     @Override
     protected HTML getContent(HtmlContext context) {
-        return DIV("group_page_grid").content(
-            new ItemTitle(group.name, getIcon(context)),
-            new SimpleList(group)
+        return DIV("typelist_page_grid").content(
+            new ItemTitle(typeList.displayName(), getIcon(context)),
+            typeList.displayDescription() != null ? new ItemDescription(EVEText.escape(typeList.displayDescription(), context.sde, false)) : HTML.empty(),
+            new SimpleList(typeList)
         );
     }
 
     @Override
     public PageKind getPageKind() {
-        return PageKind.GROUP;
+        return PageKind.TYPELIST;
     }
 
     @Override
@@ -59,13 +64,13 @@ public class GroupPage extends Page {
     @Nullable
     @Override
     public Resource getIcon(HtmlContext context) {
-        return group.getIconWithFallback(context);
+        return new TypePage(typeList.types().iterator().next()).getIcon(context);
     }
 
     @Override
     protected HeadEntries headEntries(HtmlContext context) {
         return super.headEntries(context).append(
-            HTML.META().attribute("name", "description").attribute("content", "Item group: " + group.name)
+            HTML.META().attribute("name", "description").attribute("content", "TypeList: " + typeList.displayName())
         );
     }
 }

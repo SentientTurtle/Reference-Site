@@ -56,7 +56,7 @@ public class TypeVolume extends Component {
                     mass > 0.0 ?
                         TR().content(
                             TD().content(SPAN("type_volume_span").content(
-                                IMG(Resource.ofIconID(76, context), null, 32).title("Mass").className("type_volume_icon"),
+                                IMG(Resource.ofIconID(76, context), null, 32).className("type_volume_icon"),
                                 TEXT("Mass:")
                             )),
                             TD().content(context.sde.format_with_unit(mass, 2))

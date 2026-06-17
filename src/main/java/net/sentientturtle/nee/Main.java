@@ -1,9 +1,9 @@
 package net.sentientturtle.nee;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sentientturtle.html.HasPersistentUrl;
+import net.sentientturtle.html.IndexSetting;
 import net.sentientturtle.html.RenderingException;
 import net.sentientturtle.html.context.NoopHtmlContext;
 import net.sentientturtle.html.context.StringBuilderHtmlContext;
@@ -13,9 +13,9 @@ import net.sentientturtle.nee.data.sharedcache.IconProvider;
 import net.sentientturtle.nee.data.sharedcache.SharedCache;
 import net.sentientturtle.nee.page.*;
 import net.sentientturtle.nee.util.ExceptionUtil;
+import net.sentientturtle.html.Sitemap;
 
 import java.io.*;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,7 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.Deflater;
 import java.util.zip.GZIPOutputStream;
@@ -125,7 +124,7 @@ public class Main {
             properties.setProperty("GENERATE_ICONS", "FALSE");
             properties.setProperty("SKIP_RESOURCES", "FALSE");
             properties.setProperty("IS_DEV_BUILD", "TRUE");
-            properties.setProperty("PRE_COMPRESSED_FILES", "html,css,js,json,txt");
+            properties.setProperty("PRE_COMPRESSED_FILES", "html,css,js,json,txt,xml");
             properties.setProperty("DELETE_THIS_KEY", "");
 
             properties.store(new FileWriter(propertyPath), "NEE Generator config");
@@ -144,7 +143,7 @@ public class Main {
 
         System.out.println("Loading SDE...");
         long sde_start = System.nanoTime();
-        SDEData sdeData = new CCPSDEData(new JSONLSDEReader(JSONL_SDE_FILE), patch);
+        SDEData sdeData = new OfficialSDEData(new JSONLSDEReader(JSONL_SDE_FILE), patch);
         long sdeDuration = System.nanoTime() - sde_start;
         System.out.println("\tSDE loaded! (" + (TimeUnit.NANOSECONDS.toMillis(sdeDuration) / 1000.0) +")");
 
@@ -158,6 +157,7 @@ public class Main {
     }
 
     public static Path OUTPUT_DIR = Path.of("./output");
+
 
     public static void main(String[] args) throws IOException, InterruptedException {
         long startTime = System.nanoTime();
@@ -174,6 +174,15 @@ public class Main {
 
         ConcurrentLinkedQueue<String> redirects = new ConcurrentLinkedQueue<>();
         ConcurrentHashMap<Path, Resource.ResourceData> dependencies = new ConcurrentHashMap<>();
+
+        Sitemap sitemap = new Sitemap();
+
+        // TODO: Search functionality should be upgraded with something like typesense
+        NoopHtmlContext searchContext = new NoopHtmlContext(0, data);
+        record IndexEntry(String name, String path, String icon) { }
+
+        String dynamicMapPagePath = new DynamicMapPage().getPath() + "?item=";
+        List<IndexEntry> indexEntries = Collections.synchronizedList(new ArrayList<>(10_000));
 
         System.out.println("Writing pages...");
         final AtomicInteger pageCount = new AtomicInteger(0);
@@ -220,6 +229,26 @@ public class Main {
                 js.addAll(context.getJavascript());
 
                 pageCount.incrementAndGet();
+
+                if (page.getIndexSetting() == IndexSetting.INDEX) {
+                    sitemap.addSite(DEPLOYMENT_URL + page.getURLPath());
+                }
+
+                if (page instanceof TypePage || page instanceof MapFrame) {
+                    String path;
+                    if (page instanceof MapFrame mapPage) {
+                        path = dynamicMapPagePath + mapPage.mapItem.getID();
+                    } else {
+                        path = page.getPath();
+                    }
+
+                    Resource pageIcon = page.getIcon(searchContext);
+                    indexEntries.add(new IndexEntry(
+                        page.name(),
+                        path,
+                        pageIcon != null ? pageIcon.getURI(searchContext, true) : null
+                    ));
+                }
             });
 
         System.out.println("Writing resources");
@@ -306,31 +335,7 @@ public class Main {
         zipOutputStream.write(Files.readAllBytes(RES_FOLDER.resolve("favicon.ico")));
         zipOutputStream.closeEntry();
 
-        // TODO: Search functionality should be upgraded with something like typesense
-        NoopHtmlContext searchContext = new NoopHtmlContext(0, data);
         ObjectMapper objectMapper = new ObjectMapper();
-        record IndexEntry(String name, String path, String icon) { }
-
-        String dynamicMapPagePath = new DynamicMapPage().getPath() + "?item=";
-        List<IndexEntry> indexEntries = PageKind.pageStream(data.sdeData())
-            .filter(page -> (page instanceof MapFrame || page instanceof TypePage))
-            .map(page -> {
-                String path;
-                if (page instanceof MapFrame mapPage) {
-                    path = dynamicMapPagePath + mapPage.mapItem.getID();
-                } else {
-                    path = page.getPath();
-                }
-
-                Resource pageIcon = page.getIcon(searchContext);
-                return new IndexEntry(
-                    page.name(),
-                    path,
-                    pageIcon != null ? pageIcon.getURI(searchContext, true) : null
-                );
-            })
-            .collect(Collectors.toList());
-
         try {
             String searchJson = "const searchindex = " + objectMapper.writeValueAsString(indexEntries) + ";\nexport default searchindex;";
             byte[] bytes = searchJson.getBytes(StandardCharsets.UTF_8);
@@ -350,6 +355,19 @@ public class Main {
             }
         } catch (JsonProcessingException e) {
             ExceptionUtil.sneakyThrow(e);
+        }
+
+        byte[] sitemapBytes = sitemap.getDocumentString().getBytes(StandardCharsets.UTF_8);
+
+        zipOutputStream.putNextEntry(new ZipEntry("sitemap.xml"));
+        zipOutputStream.write(sitemapBytes);
+        zipOutputStream.closeEntry();
+        if (PRE_COMPRESSED_FILES.contains("xml")) {
+            zipOutputStream.putNextEntry(new ZipEntry("sitemap.xml.gz"));
+            GZIPOutputStream gzipOutputStream = new GZIPOutputStream(zipOutputStream);
+            gzipOutputStream.write(sitemapBytes);
+            gzipOutputStream.finish();
+            zipOutputStream.closeEntry();
         }
 
         System.out.println("Finalizing zip file...");

@@ -3,6 +3,7 @@ package net.sentientturtle.nee.page;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.HasPersistentUrl;
 import net.sentientturtle.html.HeadEntries;
+import net.sentientturtle.html.IndexSetting;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.Main;
 import net.sentientturtle.nee.data.datatypes.Attribute;
@@ -39,6 +40,11 @@ public class TypePage extends Page implements HasPersistentUrl {
     @Override
     public PageKind getPageKind() {
         return PageKind.TYPE;
+    }
+
+    @Override
+    public IndexSetting getIndexSetting() {
+        return IndexSetting.INDEX;
     }
 
     @Override
@@ -128,7 +134,7 @@ public class TypePage extends Page implements HasPersistentUrl {
             left.content(new TypeVolume(type));
         }
 
-        if (type.marketGroupID != null || TypeMarketPrice.remoteInjectionSkills.contains(type.typeID)) {
+        if (TypeMarketPrice.appliesTo(type, context)) {
             left.content(new TypeMarketPrice(type));
         }
 
@@ -199,7 +205,7 @@ public class TypePage extends Page implements HasPersistentUrl {
             }
         }
 
-        if (group.categoryID == 7 || group.categoryID == 66)
+        if (group.categoryID == 7 || group.categoryID == 32 || group.categoryID == 66)
             mid.content(new ModuleFitting(type));
 
         if (type.groupID == 1964 || context.sde.getModuleDynamicAttributeMap().containsKey(type.typeID)) { // If item type is a Mutaplasmid or mutated module
@@ -211,6 +217,11 @@ public class TypePage extends Page implements HasPersistentUrl {
                     break;
                 }
             }
+        }
+
+        // If item is a skill
+        if (group.categoryID == 16) {
+            mid.content(new SkillInfo(type));
         }
 
         HashSet<Integer> canBeFittedToGroups = new HashSet<>();
@@ -243,7 +254,7 @@ public class TypePage extends Page implements HasPersistentUrl {
 
         double targetChargeSize = typeAttributes.getOrDefault(128, 0.0);
         Map<Integer, Double> usedWithTypes = usedWithGroups.stream()
-            .flatMap(g -> data.getGroupTypes().getOrDefault(g, Set.of()).stream())
+            .flatMap(g -> data.getGroupTypeMap().getOrDefault(g, Set.of()).stream())
             .filter(t -> {
                 HashSet<Integer> targetUsedWithGroups = new HashSet<>();
                 for (int attributeID : USED_WITH_GROUP_ATTRIBUTES) {
@@ -283,10 +294,9 @@ public class TypePage extends Page implements HasPersistentUrl {
             mid.content(new TypeBlueprint(type));
         }
 
-        // Has a skill-required-1 attribute
-        if (typeAttributes.containsKey(182)) right.content(new TypeSkills(type));
+        if (context.sde.getRequiredSkillMap().containsKey(type.typeID)) right.content(new TypeSkills(type));
 
-        if (data.getRequiresSkillMap().containsKey(type.typeID))
+        if (data.getSkillUnlockMap().containsKey(type.typeID))
             right.content(new SkillRequiredFor(type));
 
         if (data.getVariants().containsKey(type.typeID))  // If type has variants
@@ -311,7 +321,7 @@ public class TypePage extends Page implements HasPersistentUrl {
     @Override
     protected HeadEntries headEntries(HtmlContext context) {
         return super.headEntries(context).append(
-            HTML.META().attribute("name", "description").attribute("content", "Item: " + type.name + "\n" + type.description)
+            HTML.META().attribute("name", "description").attribute("content", type.name + " - " + context.sde.getGroups().get(type.groupID).name)
         );
     }
 }

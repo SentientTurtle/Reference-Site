@@ -4,6 +4,7 @@ import net.sentientturtle.html.Element;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.Component;
+import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.data.sde.SDEData;
 import net.sentientturtle.nee.data.datatypes.Type;
 
@@ -18,8 +19,6 @@ import static net.sentientturtle.html.HTML.*;
  */
 public class TypeSkills extends Component {
     private final Type type;
-    public static final int[] SKILL_ATTRIBUTES = {182, 183, 184, 1285, 1289, 1290};
-    public static final int[] LEVEL_ATTRIBUTES = {277, 278, 279, 1286, 1287, 1288};
 
     public TypeSkills(Type type) {
         super("type_skills colour_theme_minor");
@@ -28,11 +27,24 @@ public class TypeSkills extends Component {
 
     @Override
     protected HTML[] getContent(HtmlContext context) {
+        Boolean omegaRequired = context.sde.getItemOmegaMap().get(type.typeID);
+
         Element list = DIV("type_skills_list font_text");
         fetchSkills(type.typeID, context.sde, list, 1);
         return new HTML[]{
             HEADER("type_skills_title font_header").text("Required skills"),
-            list
+            list,
+            omegaRequired != null
+                ? omegaRequired
+                    ? DIV("type_skills_clonegrade").content(
+                        IMG(Resource.fromSharedCache("res:/ui/texture/classes/clonegrade/omega_128.png", context), null, 32).className("type_skills_clonegrade_icon"),
+                        TEXT_ITALICS("Omega Clone")
+                    )
+                    : DIV("type_skills_clonegrade").content(
+                        IMG(Resource.fromSharedCache("res:/ui/texture/classes/clonegrade/alpha_128.png", context), null, 32).className("type_skills_clonegrade_icon"),
+                        TEXT_ITALICS("Alpha Clone")
+                    )
+                : HTML.empty()
         };
     }
 
@@ -71,37 +83,45 @@ public class TypeSkills extends Component {
             .type_skills_indicator {
                 user-select: none;
             }
+            
+            .type_skills_clonegrade {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .type_skills_clonegrade_icon {
+                width: 2rem;
+                height: 2rem;
+            }
             """;
     }
 
     private void fetchSkills(int typeID, SDEData sdeData, Element parent, int indent) {
-        Map<Integer, Map<Integer, Double>> attributeValues = sdeData.getTypeAttributes();
+        Map<Integer, Integer> requiredSkills = sdeData.getRequiredSkillMap().get(typeID);
+        if (requiredSkills == null) return;
+        for (Map.Entry<Integer, Integer> entry : requiredSkills.entrySet()) {
+            int skill = entry.getKey();
+            int level = entry.getValue();
 
-        for (int i = 0; i < SKILL_ATTRIBUTES.length; i++) {
-            Double skill = attributeValues.get(typeID).get(SKILL_ATTRIBUTES[i]);
-            if (skill != null) {
-                Element row = DIV("type_skills_row");
-                parent.content(row);
+            Element row = DIV("type_skills_row");
+            parent.content(row);
+            if (level < 0 || level > 5) throw new RuntimeException("Invalid skill level: " + level);
 
-                int level = attributeValues.get(typeID).get(LEVEL_ATTRIBUTES[i]).intValue();
-                if (level < 0 || level > 5) throw new RuntimeException("Invalid skill level: " + level);
+            String levelBoxes = "■".repeat(level) + "□".repeat(5 - level);
 
-                String levelBoxes = "■".repeat(level) + "□".repeat(5 - level);
-
-                row.content(
-                    HTML.repeat(indent, DIV("type_skills_spacer")),
-                    SPAN("type_skills_text").content(
-                        SPAN("type_skills_text").content(sdeData.format_with_unit(skill, 116)), // 116 = typeID unit
-                        SPAN("type_skills_level font_roman_numeral").text(" " + level + " ").content(
-                            SPAN("type_skills_indicator").text(levelBoxes)
-                        )
+            row.content(
+                HTML.repeat(indent, DIV("type_skills_spacer")),
+                SPAN("type_skills_text").content(
+                    SPAN("type_skills_text").content(sdeData.format_with_unit(skill, 116)), // 116 = typeID unit
+                    SPAN("type_skills_level font_roman_numeral").text(" " + level + " ").content(
+                        SPAN("type_skills_indicator").text(levelBoxes)
                     )
-                );
+                )
+            );
 
-                if (attributeValues.get(skill.intValue()).containsKey(182)) {
-                    fetchSkills(skill.intValue(), sdeData, parent, indent + 1);
-                }
-            }
+            fetchSkills(skill, sdeData, parent, indent + 1);
         }
     }
 }

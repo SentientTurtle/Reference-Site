@@ -2,6 +2,7 @@ package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.HeadEntries;
+import net.sentientturtle.html.IndexSetting;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.Main;
 import net.sentientturtle.nee.components.PageList;
@@ -69,7 +70,7 @@ public class IndexPage extends Page {
                 "<pre>The " + Main.WEBSITE_NAME +
                 " is an automatically updated reference site for <a href='https://en.wikipedia.org/wiki/Eve_Online'>EVE Online.<a>" +   // No link to official site as it's got login options
                 "<br>Issues can be reported on the project's <a href='https://github.com/SentientTurtle/Reference-Site'>Github repository.</a>" +
-                "<br><br><i>The " + Main.WEBSITE_NAME + " project is not affiliated with CCP hf.</i></pre>"
+                "<br><br><i>The " + Main.WEBSITE_NAME + " project is not affiliated with Fenris Creations.</i></pre>"
             )),
             !Main.IS_DEV_BUILD ? HTML.empty() : new TextBox("Development notes", HTML.RAW("This is a development build of the website. Some content and features may not be available or functional on all devices.\n")),
             new PageList("Featured pages", getFeaturedPages(context)),
@@ -97,13 +98,13 @@ public class IndexPage extends Page {
     // This logic could be replaced by querying the Static Data Export's changelog
     private TypePage[] getFeaturedPages(HtmlContext context) {
         var structures = Stream.concat(
-                    context.sde.getCategoryGroups().get(22).stream().map(group -> group.groupID),
+                    context.sde.getCategoryGroupMap().get(22).stream().map(group -> group.groupID),
                     Stream.of(
                         1657, 1404, 1406,
                         1408, 2017, 2016, 4744
                     )
                 )
-                .map(context.sde.getGroupTypes()::get)
+                .map(context.sde.getGroupTypeMap()::get)
                 .flatMap(Set::stream)
                 .filter(type -> type.metaGroupID <= 14 || type.metaGroupID >= 52)    // Exclude abyssal, temp, and cash-shop items
                 .sorted(Comparator.<Type>comparingInt(t -> t.typeID).reversed())
@@ -114,9 +115,9 @@ public class IndexPage extends Page {
             .sorted(Comparator.<Type>comparingInt(t -> t.typeID).reversed())
             .limit(4);
 
-        var drones = context.sde.getCategoryGroups().get(18)
+        var drones = context.sde.getCategoryGroupMap().get(18)
             .stream()
-            .flatMap(group -> context.sde.getGroupTypes().get(group.groupID).stream())
+            .flatMap(group -> context.sde.getGroupTypeMap().get(group.groupID).stream())
             .filter(type -> context.sde.getParentTypeMap().getOrDefault(type.typeID, type.typeID) == type.typeID)
             .filter(type -> type.metaGroupID <= 14 || type.metaGroupID >= 52)    // Exclude abyssal, temp, and cash-shop items
             .sorted(Comparator.<Type>comparingInt(t -> t.typeID).reversed())
@@ -127,9 +128,9 @@ public class IndexPage extends Page {
         addGroupsAndChildren(allowedGroups, marketGroups, 9);
         addGroupsAndChildren(allowedGroups, marketGroups, 2202);
 
-        var modules = context.sde.getCategoryGroups().get(7)
+        var modules = context.sde.getCategoryGroupMap().get(7)
             .stream()
-            .flatMap(group -> context.sde.getGroupTypes().get(group.groupID).stream())
+            .flatMap(group -> context.sde.getGroupTypeMap().get(group.groupID).stream())
             .filter(type -> context.sde.getParentTypeMap().getOrDefault(type.typeID, type.typeID) == type.typeID)
             .filter(type -> type.metaGroupID <= 14 || type.metaGroupID >= 52)    // Exclude abyssal, temp, and cash-shop items
             .filter(type -> allowedGroups.contains(type.marketGroupID))
@@ -148,6 +149,11 @@ public class IndexPage extends Page {
     @Override
     public PageKind getPageKind() {
         return PageKind.STATIC;
+    }
+
+    @Override
+    public IndexSetting getIndexSetting() {
+        return IndexSetting.INDEX;
     }
 
     @Nullable

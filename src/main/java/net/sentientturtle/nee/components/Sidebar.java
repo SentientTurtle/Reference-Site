@@ -1,5 +1,6 @@
 package net.sentientturtle.nee.components;
 
+import net.sentientturtle.html.Document;
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.html.PageLink;
@@ -14,18 +15,28 @@ public class Sidebar extends Component {
         super("nav", "sidebar font_header");
     }
 
+    private HTML buttonFor(Document document, String buttonText) {
+        // <a> wraps the entire visible button, with the clip-path applied to the <div>s but not <a>, ensuring the focus/tab-select outline does not get clipped
+        return new PageLink(
+            document,
+            DIV("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset").content(
+                DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text(buttonText)
+            )
+        );
+    }
+
     @Override
     protected HTML[] getContent(HtmlContext context) {
         return new HTML[]{
-            new PageLink(new IndexPage(), DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text("Home")).className("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset"),
-            new PageLink(new ShipTreePage(), DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text("Ships")).className("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset"),
-            new PageLink(new MarketGroupPage(context.sde.getMarketGroups().get(9)), DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text("Ship Modules")).className("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset"),
-            new PageLink(new StructureTreePage(), DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text("Structures")).className("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset"),
-            new PageLink(new MarketGroupPage(context.sde.getMarketGroups().get(2202)), DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text("Structure Modules")).className("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset"),
-            new PageLink(new MarketGroupPage(context.sde.getMarketGroups().get(-1)), DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text("Items")).className("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset"),
-            new PageLink(new DynamicMapPage(), DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text("Map")).className("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset"),
-            new PageLink(new DevResourcePage(), DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text("3rd Party Dev")).className("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset"),
-            new PageLink(new SettingsPage(), DIV("sidebar_button eve_clip_bottom_right eve_clip_mobile_unset").text("Settings")).className("sidebar_button_border eve_clip_bottom_right eve_clip_mobile_unset")
+            buttonFor(new IndexPage(), "Home"),
+            buttonFor(new ShipTreePage(), "Ships"),
+            buttonFor(new MarketGroupPage(context.sde.getMarketGroups().get(9)), "Ship Modules"),
+            buttonFor(new StructureTreePage(), "Structures"),
+            buttonFor(new MarketGroupPage(context.sde.getMarketGroups().get(2202)), "Structure Modules"),
+            buttonFor(new MarketGroupPage(context.sde.getMarketGroups().get(-1)), "Items"),
+            buttonFor(new DynamicMapPage(), "Map"),
+            buttonFor(new DevResourcePage(), "3rd Party Dev"),
+            buttonFor(new SettingsPage(), "Settings")
         };
     }
 
@@ -78,7 +89,6 @@ public class Sidebar extends Component {
                 background: var(--colour-theme-bg);
                 pointer-events: none;
             }
-            
             """;
     }
 }

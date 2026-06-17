@@ -33,16 +33,10 @@ public class ItemTitle extends Component {
 
     @Override
     protected HTML[] getContent(HtmlContext context) {
-        if (icon != null) {
-            return new HTML[]{
-                IMG(this.icon, null, 64).className("item_title_icon"),
-                HTML.TEXT_BOLD().content(this.text).className("font_header item_title_text")
-            };
-        } else {
-            return new HTML[]{
-                HTML.TEXT_BOLD().content(this.text).className("font_header item_title_text")
-            };
-        }
+        return new HTML[]{
+            this.icon != null ? IMG(this.icon, null, 64).className("item_title_icon") : HTML.empty(),
+            HTML.HN(1, "font_header item_title_text").content(this.text)
+        };
     }
 
     @Override
@@ -66,6 +60,7 @@ public class ItemTitle extends Component {
             .item_title_text {
                 font-size: 1.5rem;
                 margin-inline: 0.5rem;
+                margin-block: 0;
             }""";
     }
 }

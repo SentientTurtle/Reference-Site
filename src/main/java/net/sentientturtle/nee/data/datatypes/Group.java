@@ -40,7 +40,7 @@ public class Group implements HasPage {
             if (iconID != null && iconID != 0) {
                 fallbackIcon = Resource.ofIconID(iconID, context);
             } else {
-                Set<Type> types = context.sde.getGroupTypes().getOrDefault(groupID, Set.of());
+                Set<Type> types = context.sde.getGroupTypeMap().getOrDefault(groupID, Set.of());
                 if (types.size() > 0) {
                     Type type = types.stream()
                         .min(Type.comparator(context.sde))

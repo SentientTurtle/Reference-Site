@@ -2,6 +2,7 @@ package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.HeadEntries;
+import net.sentientturtle.html.IndexSetting;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.components.ItemTitle;
 import net.sentientturtle.nee.data.Resource;
@@ -110,6 +111,12 @@ public class SearchResults extends Page {
     @Override
     public PageKind getPageKind() {
         return PageKind.STATIC;
+    }
+
+    @Override
+    public IndexSetting getIndexSetting() {
+        // Search results are subject to change and should not be indexed
+        return IndexSetting.NO_INDEX_NO_FOLLOW;
     }
 
     @Nullable

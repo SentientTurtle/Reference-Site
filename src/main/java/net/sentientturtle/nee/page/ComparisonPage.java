@@ -2,6 +2,7 @@ package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.HeadEntries;
+import net.sentientturtle.html.IndexSetting;
 import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.components.*;
@@ -38,6 +39,12 @@ public class ComparisonPage extends Page {
     @Override
     public PageKind getPageKind() {
         return PageKind.Comparison;
+    }
+
+    @Override
+    public IndexSetting getIndexSetting() {
+        // Disable search engine indexing as these documents are information-dense and unlikely to be directly sought out by search query
+        return IndexSetting.NO_INDEX;
     }
 
     @Override
@@ -119,7 +126,7 @@ public class ComparisonPage extends Page {
                             usedRows.add("volume");
                         }
 
-                        if (type.marketGroupID != null || TypeMarketPrice.remoteInjectionSkills.contains(type.typeID)) {
+                        if (TypeMarketPrice.appliesTo(type, context)) {
                             column.add(new TypeMarketPrice(type).style(String.format("grid-column: %d; grid-row: marketprice;", currentCol)));
                             usedRows.add("marketprice");
                         }
@@ -252,7 +259,7 @@ public class ComparisonPage extends Page {
 
                         double targetChargeSize = typeAttributes.getOrDefault(128, 0.0);
                         Map<Integer, Double> usedWithTypes = usedWithGroups.stream()
-                            .flatMap(g -> data.getGroupTypes().getOrDefault(g, Set.of()).stream())
+                            .flatMap(g -> data.getGroupTypeMap().getOrDefault(g, Set.of()).stream())
                             .filter(t -> {
                                 HashSet<Integer> targetUsedWithGroups = new HashSet<>();
                                 for (int attributeID : TypePage.USED_WITH_GROUP_ATTRIBUTES) {
@@ -289,8 +296,7 @@ public class ComparisonPage extends Page {
                             usedRows.add("usedwith");
                         }
 
-                        // Has a skill-required-1 attribute
-                        if (typeAttributes.containsKey(182)) {
+                        if (context.sde.getRequiredSkillMap().containsKey(typeID)) {
                             column.add(new TypeSkills(type).style(String.format("grid-column: %d; grid-row: skills;", currentCol)));
                             usedRows.add("skills");
                         }

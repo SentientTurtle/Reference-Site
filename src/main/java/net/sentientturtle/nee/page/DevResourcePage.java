@@ -2,6 +2,7 @@ package net.sentientturtle.nee.page;
 
 import net.sentientturtle.html.HTML;
 import net.sentientturtle.html.HeadEntries;
+import net.sentientturtle.html.IndexSetting;
 import net.sentientturtle.html.PageLink;
 import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.components.TextBox;
@@ -30,6 +31,11 @@ public class DevResourcePage extends Page {
     @Override
     public PageKind getPageKind() {
         return PageKind.STATIC;
+    }
+
+    @Override
+    public IndexSetting getIndexSetting() {
+        return IndexSetting.INDEX;
     }
 
     @Override

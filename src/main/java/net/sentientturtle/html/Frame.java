@@ -6,9 +6,6 @@ import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.page.PageKind;
 import org.jspecify.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static net.sentientturtle.html.HTML.*;
 
 /// HTML Website "page" without header/footer/sidebar; For use in iframes
@@ -17,6 +14,9 @@ public abstract non-sealed class Frame implements Document, HTML {
      * @return The {@link PageKind} of this page
      */
     public abstract PageKind getPageKind();
+
+    /// @return Indexation setting for this page
+    public abstract IndexSetting getIndexSetting();
 
     ///  @return Page description (shown in opengraph metadata)
     public abstract @Nullable String description();
@@ -52,6 +52,12 @@ public abstract non-sealed class Frame implements Document, HTML {
             LINK().attribute("rel", "stylesheet").attribute("href", c -> c.pathTo("theme.css")).id(context.tryID("theme_stylesheet")),
             LINK().attribute("rel", "icon").attribute("href", c -> Resource.file("bookicon.png").getURI(c))
         );
+
+        head.content(META().attribute("name", "robots").attribute("content", switch (this.getIndexSetting()) {
+            case INDEX -> "index, follow";
+            case NO_INDEX -> "noindex";
+            case NO_INDEX_NO_FOLLOW -> "noindex, nofollow";
+        }));
 
         head.content(META().attribute("property", "og:site_name").attribute("content", Main.WEBSITE_NAME));
         head.content(META().attribute("property", "og:title").attribute("content", this.name()));
@@ -148,6 +154,7 @@ public abstract non-sealed class Frame implements Document, HTML {
         
         #header_text {
             font-size: 2.25rem;
+            margin: 0;
         }
         
         #header_text > a {

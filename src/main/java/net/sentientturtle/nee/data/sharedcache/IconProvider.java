@@ -16,10 +16,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -108,11 +105,50 @@ public class IconProvider {
         }
     }
 
+    private static Path cloneOverlayPath(int typeID, DataSources dataSources, boolean useOld) throws IOException {
+        Boolean omegaRequired = dataSources.sdeData().getItemOmegaMap().get(typeID);
+        if (omegaRequired == null) return null;
+        if (omegaRequired) {
+            return Main.RES_FOLDER.resolve("EVE/type_overlays_old/Omega-Flip.png");
+        } else {
+            return Main.RES_FOLDER.resolve("EVE/type_overlays_old/Alpha-Flip.png");
+        }
+    }
+
+    private static Path fittingOverlayPath(int typeID, DataSources dataSources, boolean useOld) throws IOException {
+        Set<Integer> typeEffects = dataSources.sdeData().getTypeEffects().getOrDefault(typeID, Set.of());
+
+        // Low power
+        if (typeEffects.contains(11)) {
+            return Main.RES_FOLDER.resolve("EVE/type_overlays_old/Slot-Low.png");
+        }
+        // Med power
+        if (typeEffects.contains(13)) {
+            return Main.RES_FOLDER.resolve("EVE/type_overlays_old/Slot-Med.png");
+        }
+        // High power
+        if (typeEffects.contains(12)) {
+            return Main.RES_FOLDER.resolve("EVE/type_overlays_old/Slot-High.png");
+        }
+        // Rig
+        if (typeEffects.contains(2663)) {
+            return Main.RES_FOLDER.resolve("EVE/type_overlays_old/Slot-Rig.png");
+        }
+        // Subsystem
+        if (typeEffects.contains(3772)) {
+            return Main.RES_FOLDER.resolve("EVE/type_overlays_old/Slot-Subsystem.png");
+        }
+
+        return null;
+    }
+
     private static boolean useIconInsteadOfGraphic(int groupID) {
         return groupID == 4168 || groupID == 711 || groupID == 12 || groupID == 340 || groupID == 448 || groupID == 479 || groupID == 548 || groupID == 649;
     }
 
     private static final Semaphore imageServiceSemaphore = new Semaphore(1);
+
+    private static final int[] COATING_MARKET_GROUPS = {3632, 3653, 3654, 3655};
 
     public static @Nullable byte[] getTypeIcon64(int typeID, DataSources dataSources, boolean isBPC, boolean useOldOverlay) throws IOException {
         Type type = dataSources.sdeData().getTypes().get(typeID);
@@ -178,21 +214,21 @@ public class IconProvider {
                     String bpType = isBPC ? "bpc" : "bp";
                     // use image-service specific caching so these will be invalid should the missing graphics return
                     cacheKey = "IMAGESERV;" + bpType + ";" + type.typeID;
-                        return CACHED_ICONS.computeIfAbsent(cacheKey, _ -> {
-                            System.out.println("\t\tconnecting to Image Service...");
-                            try {
-                                imageServiceSemaphore.acquire();
-                            } catch (InterruptedException e) {
-                                ExceptionUtil.sneakyThrow(new IOException("Interrupted while waiting on image service semaphore!", e));
-                            }
-                            try (InputStream inputStream = new URI("https://images.evetech.net/types/" + type.typeID + "/" + bpType).toURL().openStream()) {
-                                return inputStream.readAllBytes();
-                            } catch (IOException | URISyntaxException e) {
-                                return ExceptionUtil.sneakyThrow(e);
-                            } finally {
-                                imageServiceSemaphore.release();
-                            }
-                        });
+                    return CACHED_ICONS.computeIfAbsent(cacheKey, _ -> {
+                        System.out.println("\t\tconnecting to Image Service...");
+                        try {
+                            imageServiceSemaphore.acquire();
+                        } catch (InterruptedException e) {
+                            ExceptionUtil.sneakyThrow(new IOException("Interrupted while waiting on image service semaphore!", e));
+                        }
+                        try (InputStream inputStream = new URI("https://images.evetech.net/types/" + type.typeID + "/" + bpType).toURL().openStream()) {
+                            return inputStream.readAllBytes();
+                        } catch (IOException | URISyntaxException e) {
+                            return ExceptionUtil.sneakyThrow(e);
+                        } finally {
+                            imageServiceSemaphore.release();
+                        }
+                    });
                 }
             }
 
@@ -202,7 +238,7 @@ public class IconProvider {
                 Path techOverlay = techOverlayPath(metaGroup, dataSources, useOldOverlay);
                 if (techOverlay != null) {
                     cacheKey = metaGroup
-                               + ";" + useOldOverlay
+                               + ";" + techOverlay.getFileName()
                                + ";" + dataSources.sharedCache().getResourceHash(backgroundResource)
                                + ";" + dataSources.sharedCache().getResourceHash(iconResource)
                                + ";" + dataSources.sharedCache().getResourceHash(overlayResource);
@@ -222,7 +258,7 @@ public class IconProvider {
                     );
                 } else {
                     cacheKey = metaGroup
-                               + ";" + useOldOverlay
+                               + ";NO_OVERLAY"
                                + ";" + dataSources.sharedCache().getResourceHash(backgroundResource)
                                + ";" + dataSources.sharedCache().getResourceHash(iconResource)
                                + ";" + dataSources.sharedCache().getResourceHash(overlayResource);
@@ -243,6 +279,25 @@ public class IconProvider {
             if (imageMagickCall == null) {
                 return null;
             }
+        } else if (type.groupID == 4726 && isCoating(type)) {   // Handle SKINR coatings separately, mask out their background
+            String iconResource = null;
+            if (type.iconID != null) {
+                iconResource = dataSources.sdeData().getEveIcons().get(type.iconID);
+            }
+
+            if (iconResource == null || !dataSources.sharedCache().containsResource(iconResource)) {
+                return null;
+            }
+            cacheKey = dataSources.sharedCache().getResourceHash(iconResource);
+            imageMagickCall = new ProcessBuilder(
+                "magick",
+                "composite",
+                "-compose",
+                "Dst_In", "(", Main.RES_FOLDER.resolve("EVE/COATING_MASK.gif").toString(), "-alpha", "copy", ")",
+                dataSources.sharedCache().getPath(iconResource).toString(),
+                "-resize", "64x64",
+                "png:-"
+            );
         } else {    // Regular item
             String iconResource = null;
             String graphicFolder = dataSources.sdeData().getGraphicFolders().get(type.graphicID != null ? type.graphicID : 0);
@@ -262,18 +317,12 @@ public class IconProvider {
             if (iconResource == null || !dataSources.sharedCache().containsResource(iconResource)) {
                 return null;
             }
+
             Path techOverlay = techOverlayPath(metaGroup, dataSources, useOldOverlay);
-            if (techOverlay != null) {
-                cacheKey = metaGroup + ";" + useOldOverlay + ";" + dataSources.sharedCache().getResourceHash(iconResource);
-                imageMagickCall = new ProcessBuilder(
-                    "magick",
-                    dataSources.sharedCache().getPath(iconResource).toString(),
-                    "-resize", "64x64",
-                    "(", techOverlay.toString(), "-resize", "16x16!", ")",
-                    "-composite",
-                    "png:-"
-                );
-            } else {
+            Path cloneOverlay = cloneOverlayPath(typeID, dataSources, useOldOverlay);
+            Path fittingOverlay = fittingOverlayPath(typeID, dataSources, useOldOverlay);
+
+            if (techOverlay == null && cloneOverlay == null && fittingOverlay == null) {
                 if (iconResource.endsWith(".png")) {
                     // No need to cache
                     return dataSources.sharedCache().getBytes(iconResource);
@@ -281,11 +330,38 @@ public class IconProvider {
                     cacheKey = dataSources.sharedCache().getResourceHash(iconResource);
                     imageMagickCall = new ProcessBuilder("magick", dataSources.sharedCache().getPath(iconResource).toString(), "png:-");
                 }
+            } else {
+                cacheKey = "";
+                ArrayList<String> command = new ArrayList<>();
+                command.add("magick");
+                command.add(dataSources.sharedCache().getPath(iconResource).toString());
+                command.add("-resize"); command.add("64x64");
+
+                if (techOverlay != null) {
+                    Collections.addAll(command, "(", techOverlay.toString(), "-resize", "16x16!", ")", "-composite");
+                    cacheKey += techOverlay.getFileName() + ";";
+                }
+
+                if (cloneOverlay != null) {
+                    Collections.addAll(command, "(", cloneOverlay.toString(), "-gravity", "NorthEast", ")", "-composite");
+                    cacheKey += cloneOverlay.getFileName() + ";";
+                }
+
+                if (fittingOverlay != null) {
+                    Collections.addAll(command, "(", fittingOverlay.toString(), "-gravity", "SouthEast", ")", "-composite");
+                    cacheKey += fittingOverlay.getFileName() + ";";
+                }
+
+                command.add("png:-");
+
+                cacheKey += dataSources.sharedCache().getResourceHash(iconResource);
+                imageMagickCall = new ProcessBuilder(command);
             }
         }
 
         assert cacheKey != null;
         ProcessBuilder finalImageMagickCall = imageMagickCall;
+
         return CACHED_ICONS.computeIfAbsent(
             cacheKey,
             _ -> {
@@ -307,6 +383,16 @@ public class IconProvider {
                 }
             }
         );
+    }
+
+    private static boolean isCoating(Type type) {
+        if (type.marketGroupID == null) return false;
+        for (int marketGroup : COATING_MARKET_GROUPS) {
+            if (type.marketGroupID == marketGroup) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static boolean hasRender(Type type, DataSources dataSources) {

@@ -5,6 +5,7 @@ import net.sentientturtle.html.PageLink;
 import net.sentientturtle.nee.components.TypeSkills;
 import net.sentientturtle.nee.data.datatypes.*;
 import net.sentientturtle.nee.page.GroupPage;
+import net.sentientturtle.nee.page.TypeListPage;
 import net.sentientturtle.nee.page.TypePage;
 import org.jspecify.annotations.Nullable;
 
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
  * <br>
  * Implementors must call {@link SDEData#patch()} and then {@link SDEData#loadViews()} after initializing the abstract collections in this type
  *
- * @see CCPSDEData
+ * @see OfficialSDEData
  */
 public abstract class SDEData {
     private static final DecimalFormat decimalFormat;
@@ -51,6 +52,9 @@ public abstract class SDEData {
 
     // Map<TypeID, TypeTrait>, with special values for SkillID {-1, -2}
     public abstract Map<Integer, TypeTraits> getTypeTraits();
+
+    // Map<TypeID, Set<TypeID>>,
+    public abstract Map<Integer, TypeList> getTypeLists();
 
     // Map<AttributeID, Attribute>
     public abstract Map<Integer, Attribute> getAttributes();
@@ -127,11 +131,14 @@ public abstract class SDEData {
     // Map<GraphicID, String folderPath>
     public abstract Map<Integer, String> getGraphicFolders();
 
+    // Map<skill TypeID, skill level>
+    public abstract Map<Integer, Integer> getAlphaSkills();
+
     // Views
     // Map<CategoryID, Set<Group>>
-    private Map<Integer, Set<Group>> categoryGroups;
+    private Map<Integer, Set<Group>> categoryGroupMap;
     // Map<GroupID, Set<Type>>
-    private Map<Integer, Set<Type>> groupTypes;
+    private Map<Integer, Set<Type>> groupTypeMap;
 
     // Map<Material TypeID, Set<IndustryActivity using material>>
     private Map<Integer, Set<IndustryActivity>> materialActivityMap;
@@ -152,32 +159,36 @@ public abstract class SDEData {
     // Map<MarketGroupID, Set<child MarketGroup>>
     private Map<Integer, Set<MarketGroup>> marketGroupChildMap;
     // Map<ConstellationID, List<SolarSystem>>
-    private Map<Integer, List<SolarSystem>> constellationSolarSystems;
+    private Map<Integer, List<SolarSystem>> constellationSolarSystemMap;
     // Map<RegionID, List<SolarSystem>>
-    private Map<Integer, List<SolarSystem>> regionSolarSystems;
+    private Map<Integer, List<SolarSystem>> regionSolarSystemMap;
     // Map<RegionID, List<Constellation>>
-    private Map<Integer, List<Constellation>> regionConstellations;
+    private Map<Integer, List<Constellation>> regionConstellationMap;
+    // Map<item TypeID, Map<required skill TypeID, required skill Level>>
+    private Map<Integer, Map<Integer, Integer>> requiredSkillMap;
     // Map<skill TypeID, Map<Level, Set<TypeID requiring skill>>>
-    private Map<Integer, Map<Integer, Set<Integer>>> requiresSkillMap;
+    private Map<Integer, Map<Integer, Set<Integer>>> skillUnlockMap;
     // Map<TypeID, parent TypeID>
     private Map<Integer, Integer> parentTypeMap;
     // Map<module TypeID, Set<source mutaplasmid TypeID>>
     private Map<Integer, Set<Integer>> moduleDynamicAttributeMap;
     // Map<module TypeID, Set<mutaplasmid applicable-to-module TypeID>
     private Map<Integer, Set<Integer>> moduleMutaplasmidMap;
+    // Map<item TypeID, true if Item requires Omega, false if item is alpha useable>
+    private Map<Integer, Boolean> itemOmegaMap;
 
     // View getters
 
     // Map<CategoryID, Set<Group>>
-    public Map<Integer, Set<Group>> getCategoryGroups() {
-        if (categoryGroups == null) throw new IllegalStateException("View collections not initialized!");
-        return categoryGroups;
+    public Map<Integer, Set<Group>> getCategoryGroupMap() {
+        if (categoryGroupMap == null) throw new IllegalStateException("View collections not initialized!");
+        return categoryGroupMap;
     }
 
     // Map<GroupID, Set<Type>>
-    public Map<Integer, Set<Type>> getGroupTypes() {
-        if (groupTypes == null) throw new IllegalStateException("View collections not initialized!");
-        return groupTypes;
+    public Map<Integer, Set<Type>> getGroupTypeMap() {
+        if (groupTypeMap == null) throw new IllegalStateException("View collections not initialized!");
+        return groupTypeMap;
     }
 
     // Map<Material TypeID, Set<IndustryActivity using material>>
@@ -236,26 +247,32 @@ public abstract class SDEData {
 
     // Map<RegionID, List<Constellation>>
     public Map<Integer, List<SolarSystem>> getConstellationSolarSystemMap() {
-        if (constellationSolarSystems == null) throw new IllegalStateException("View collections not initialized!");
-        return constellationSolarSystems;
+        if (constellationSolarSystemMap == null) throw new IllegalStateException("View collections not initialized!");
+        return constellationSolarSystemMap;
     }
 
     // Map<RegionID, List<SolarSystem>>
     public Map<Integer, List<SolarSystem>> getRegionSolarSystemMap() {
-        if (regionSolarSystems == null) throw new IllegalStateException("View collections not initialized!");
-        return regionSolarSystems;
+        if (regionSolarSystemMap == null) throw new IllegalStateException("View collections not initialized!");
+        return regionSolarSystemMap;
     }
 
     // Map<RegionID, List<Constellation>>
     public Map<Integer, List<Constellation>> getRegionConstellationMap() {
-        if (regionConstellations == null) throw new IllegalStateException("View collections not initialized!");
-        return regionConstellations;
+        if (regionConstellationMap == null) throw new IllegalStateException("View collections not initialized!");
+        return regionConstellationMap;
+    }
+
+    // Map<item TypeID, Map<required skill TypeID, required skill Level>>
+    public Map<Integer, Map<Integer, Integer>> getRequiredSkillMap() {
+        if (requiredSkillMap == null) throw new IllegalStateException("View collections not initialized!");
+        return requiredSkillMap;
     }
 
     // Map<skill TypeID, Map<Level, Set<TypeID requiring skill>>>
-    public Map<Integer, Map<Integer, Set<Integer>>> getRequiresSkillMap() {
-        if (requiresSkillMap == null) throw new IllegalStateException("View collections not initialized!");
-        return requiresSkillMap;
+    public Map<Integer, Map<Integer, Set<Integer>>> getSkillUnlockMap() {
+        if (skillUnlockMap == null) throw new IllegalStateException("View collections not initialized!");
+        return skillUnlockMap;
     }
 
     // Map<TypeID, parent TypeID>
@@ -271,9 +288,15 @@ public abstract class SDEData {
     }
 
     // Map<module TypeID, Set<mutaplasmid applicable-to-module TypeID>
-    public Map<Integer, Set<Integer>> getmoduleMutaplasmidMap() {
+    public Map<Integer, Set<Integer>> getModuleMutaplasmidMap() {
         if (moduleMutaplasmidMap == null) throw new IllegalStateException("View collections not initialized!");
         return moduleMutaplasmidMap;
+    }
+
+    // Map<item TypeID, true if Item requires Omega, false if item is alpha useable>
+    public Map<Integer, Boolean> getItemOmegaMap() {
+        if (itemOmegaMap == null) throw new IllegalStateException("View collections not initialized!");
+        return itemOmegaMap;
     }
 
     /*
@@ -305,15 +328,15 @@ public abstract class SDEData {
 
     // Initialize data views
     protected void loadViews() {
-        categoryGroups = produceMap();
+        categoryGroupMap = produceMap();
         for (Group group : getGroups().values()) {
-            categoryGroups.computeIfAbsent(group.categoryID, this::produceSet).add(group);
+            categoryGroupMap.computeIfAbsent(group.categoryID, this::produceSet).add(group);
         }
 
-        groupTypes = produceMap();
+        groupTypeMap = produceMap();
         marketGroupTypeMap = produceMap();
         for (Type type : getTypes().values()) {
-            groupTypes.computeIfAbsent(type.groupID, this::produceSet).add(type);
+            groupTypeMap.computeIfAbsent(type.groupID, this::produceSet).add(type);
             if (type.marketGroupID != null) {
                 marketGroupTypeMap.computeIfAbsent(type.marketGroupID, this::produceSet).add(type);
             }
@@ -375,30 +398,56 @@ public abstract class SDEData {
             }
         }
 
-        constellationSolarSystems = produceMap();
-        regionSolarSystems = produceMap();
+        constellationSolarSystemMap = produceMap();
+        regionSolarSystemMap = produceMap();
         for (SolarSystem solarSystem : getSolarSystems().values()) {
-            constellationSolarSystems.computeIfAbsent(solarSystem.constellationID, this::produceList).add(solarSystem);
-            regionSolarSystems.computeIfAbsent(solarSystem.regionID, this::produceList).add(solarSystem);
+            constellationSolarSystemMap.computeIfAbsent(solarSystem.constellationID, this::produceList).add(solarSystem);
+            regionSolarSystemMap.computeIfAbsent(solarSystem.regionID, this::produceList).add(solarSystem);
         }
 
-        regionConstellations = produceMap();
+        regionConstellationMap = produceMap();
         for (Constellation constellation : getConstellations().values()) {
-            regionConstellations.computeIfAbsent(constellation.regionID, this::produceList).add(constellation);
+            regionConstellationMap.computeIfAbsent(constellation.regionID, this::produceList).add(constellation);
         }
 
-        requiresSkillMap = produceMap();
+        final int[] SKILL_ATTRIBUTES = {182, 183, 184, 1285, 1289, 1290};
+        final int[] LEVEL_ATTRIBUTES = {277, 278, 279, 1286, 1287, 1288};
+
+        requiredSkillMap = produceMap();
+        skillUnlockMap = produceMap();
         for (Map.Entry<Integer, Map<Integer, Double>> entry : getTypeAttributes().entrySet()) {
             int typeID = entry.getKey();
             Map<Integer, Double> typeAttributes = entry.getValue();
-            int[] skillAttributes = TypeSkills.SKILL_ATTRIBUTES;
-            for (int i = 0; i < skillAttributes.length; i++) {
-                Double skillTypeID = typeAttributes.get(skillAttributes[i]);
+            for (int i = 0; i < SKILL_ATTRIBUTES.length; i++) {
+                Double skillTypeID = typeAttributes.get(SKILL_ATTRIBUTES[i]);
                 if (skillTypeID != null) {
-                    int level = (int) (double) typeAttributes.getOrDefault(TypeSkills.LEVEL_ATTRIBUTES[i], 1.0);
-                    requiresSkillMap.computeIfAbsent((int) (double) skillTypeID, this::produceMap).computeIfAbsent(level, this::produceSet).add(typeID);
+                    int level = (int) (double) typeAttributes.getOrDefault(LEVEL_ATTRIBUTES[i], 1.0);
+
+                    requiredSkillMap.computeIfAbsent(typeID, this::produceMap).put((int) (double) skillTypeID, level);
+                    skillUnlockMap.computeIfAbsent((int) (double) skillTypeID, this::produceMap).computeIfAbsent(level, this::produceSet).add(typeID);
                 }
             }
+        }
+
+        itemOmegaMap = produceMap();
+        // Add alpha skills
+        for (Integer skillTypeID : getAlphaSkills().keySet()) {
+            itemOmegaMap.putIfAbsent(skillTypeID, false);
+        }
+        // Add anything that only requires the alpha skills
+        for (Map.Entry<Integer, Map<Integer, Integer>> entry : requiredSkillMap.entrySet()) {
+            int typeID = entry.getKey();
+            boolean isOmega = false;
+
+            for (Map.Entry<Integer, Integer> skillEntry : entry.getValue().entrySet()) {
+                int skill = skillEntry.getKey();
+                int level = skillEntry.getValue();
+
+                Integer alphaLevel = getAlphaSkills().get(skill);
+                isOmega |= alphaLevel == null || alphaLevel < level;
+            }
+
+            itemOmegaMap.put(typeID, isOmega);
         }
 
         parentTypeMap = produceMap();
@@ -435,15 +484,15 @@ public abstract class SDEData {
             if (durationLong < 60) {
                 return HTML.TEXT(String.format("%2ds", durationLong));
             } else if (durationLong < 60 * 60) {
-                return HTML.TEXT(String.format("%2dm %2ds", durationLong / 60, durationLong % 60));
+                return HTML.TEXT(String.format("%2dm %02ds", durationLong / 60, durationLong % 60));
             } else if (durationLong < 60 * 60 * 24) {
-                return HTML.TEXT(String.format("%2dh %2dm %2ds", durationLong / (60 * 60), durationLong % (60 * 60) / 60, durationLong % 60));
+                return HTML.TEXT(String.format("%2dh %02dm %02ds", durationLong / (60 * 60), durationLong % (60 * 60) / 60, durationLong % 60));
             } else if (durationLong < 60.0 * 60.0 * 24.0 * 30.0) {
-                return HTML.TEXT(String.format("%2dd", durationLong / (60 * 60 * 24)) + " " + String.format("%2dh %2dm %2ds", durationLong % (60 * 60 * 24) / (60 * 60), durationLong % (60 * 60) / 60, durationLong % 60));
+                return HTML.TEXT(String.format("%2dd %02dh %02dm %02ds", durationLong / (60 * 60 * 24), durationLong % (60 * 60 * 24) / (60 * 60), durationLong % (60 * 60) / 60, durationLong % 60));
             } else if (durationLong < 60.0 * 60.0 * 24.0 * 365.0) {
-                return HTML.TEXT(String.format("%2dm", durationLong / (60 * 60 * 24 * 30)) + " " + String.format("%2dd", durationLong % (60 * 60 * 24 * 30) / (60 * 60 * 24)) + " " + String.format("%2dh %2dm %2ds", durationLong % (60 * 60 * 24) / (60 * 60), durationLong % (60 * 60) / 60, durationLong % 60));
+                return HTML.TEXT(String.format("%2dm %02dd %02dh %02dm %02ds", durationLong / (60 * 60 * 24 * 30), durationLong % (60 * 60 * 24 * 30) / (60 * 60 * 24), durationLong % (60 * 60 * 24) / (60 * 60), durationLong % (60 * 60) / 60, durationLong % 60));
             } else {
-                return HTML.TEXT(String.format("%2dy", durationLong / (60 * 60 * 24 * 365)) + " " + String.format("%2dm", durationLong % (60 * 60 * 24 * 365) / (60 * 60 * 24 * 30)) + " " + String.format("%2dd", durationLong % (60 * 60 * 24 * 30) / (60 * 60 * 24)) + " " + String.format("%2dh %2dm %2ds", durationLong % (60 * 60 * 24) / (60 * 60), durationLong % (60 * 60) / 60, durationLong % 60));
+                return HTML.TEXT(String.format("%2dy %02dm %02dd %02dh %02dm %02ds", durationLong / (60 * 60 * 24 * 365), durationLong % (60 * 60 * 24 * 365) / (60 * 60 * 24 * 30), durationLong % (60 * 60 * 24 * 30) / (60 * 60 * 24), durationLong % (60 * 60 * 24) / (60 * 60), durationLong % (60 * 60) / 60, durationLong % 60));
             }
         }
     }
@@ -460,6 +509,13 @@ public abstract class SDEData {
 
         return HTML.SPAN("no_break")
             .content(switch (unitID) {
+                case -7:    // Skill points, "SP"
+                    yield HTML.TEXT(decimalFormat.format(value) + " SP");
+                case -6:    // TypeList
+                    TypeList list = getTypeLists().get((int) value);
+                    if (list == null) throw new RuntimeException("Reference to unknown typelist: " + value);
+                    if (list.displayName() == null) throw new RuntimeException("Attempt to format typelist without displayname!");
+                    yield new PageLink(new TypeListPage(list));
                 case -5:    // Mining yield (m³/s)
                     yield HTML.TEXT(decimalFormat.format(value) + " m³/s");
                 case -4:    // Health sustain (HP/s)
@@ -669,9 +725,7 @@ public abstract class SDEData {
         Set<Integer> unpublishCategories = Set.of();
         HashSet<Integer> unpublishCategoriesAndChildren = new HashSet<>(List.of(
             11, // Entity (NPCs)
-            54, // Lights
-            91, // SKINs
-            2118 // Personalisation (User-created skins)
+            54 // Lights
         ));
         Set<Integer> unpublishGroups = Set.of();
         HashSet<Integer> unpublishGroupsAndChildren = new HashSet<>(List.of(
@@ -838,6 +892,11 @@ public abstract class SDEData {
         // Fix units
         attributes.get(2104).unitID = -1;
         attributes.get(90).unitID = 114;
+        for (Attribute attribute : attributes.values()) {
+            if (attribute.dataType == 13) {
+                attribute.unitID = -6;
+            }
+        }
 
         // Patch meta level
         for (Map.Entry<Integer, Type> entry : getTypes().entrySet()) {
