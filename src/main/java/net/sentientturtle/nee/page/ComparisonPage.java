@@ -171,6 +171,11 @@ public class ComparisonPage extends Page {
                                 column.add(new ShipFitting(type).style(String.format("grid-column: %d; grid-row: fitting;", currentCol)));
                                 usedRows.add("fitting");
                             }
+                            // Has a jump drive
+                            if (typeAttributes.getOrDefault(861, 0.0) > 0.0) {
+                                column.add(new ShipJumpDrive(type).style(String.format("grid-column: %d; grid-row: jumpdrive;", currentCol)));
+                                usedRows.add("jumpdrive");
+                            }
 
                             if (typeAttributes.getOrDefault(37, 0.0) > 0 && categoryID != 18 && categoryID != 22) { // Max velocity > 0
                                 column.add(new ShipPropulsion(type).style(String.format("grid-column: %d; grid-row: propulsion;", currentCol)));

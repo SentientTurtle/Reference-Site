@@ -10,7 +10,6 @@ import net.sentientturtle.nee.data.Resource;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 import static net.sentientturtle.html.HTML.*;
 
@@ -44,7 +43,7 @@ public abstract class AttributeList extends Component {
                         if (value == null) throw new IllegalStateException("Missing attribute (" + attributeID + ") on type: " + type);
                         row.content(
                             TD().content(
-                                SPAN("attribute_list_span").title(name).content(
+                                SPAN("attribute_list_span").content(
                                     iconID != null ? IMG(Resource.ofIconID(iconID, context), null, 32).className("attribute_list_icon") : DIV("attribute_list_icon"),
                                     TEXT(name + ": "),
                                     context.sde.format_with_unit(value, attributeMap.get(attributeID).unitID)
@@ -57,7 +56,7 @@ public abstract class AttributeList extends Component {
                         double value = attributeValueMap.get(type.typeID).getOrDefault(attributeID, defaultValue);
                         row.content(
                             TD().content(
-                                SPAN("attribute_list_span").title(name).content(
+                                SPAN("attribute_list_span").content(
                                     iconID != null ? IMG(Resource.ofIconID(iconID, context), null, 32).className("attribute_list_icon") : DIV("attribute_list_icon"),
                                     TEXT(name + ": "),
                                     context.sde.format_with_unit(value, attributeMap.get(attributeID).unitID)
@@ -71,7 +70,7 @@ public abstract class AttributeList extends Component {
                         if (value != null) {
                             row.content(
                                 TD().content(
-                                    SPAN("attribute_list_span").title(name).content(
+                                    SPAN("attribute_list_span").content(
                                         iconID != null ? IMG(Resource.ofIconID(iconID, context), null, 32).className("attribute_list_icon") : DIV("attribute_list_icon"),
                                         TEXT(name + ": "),
                                         context.sde.format_with_unit(value, attributeMap.get(attributeID).unitID)
@@ -80,7 +79,7 @@ public abstract class AttributeList extends Component {
                             );
                         }
                     }
-                    case Entry.Custom(BiConsumer<Element, HtmlContext> render) -> render.accept(row, context);
+                    case Entry.Custom(CustomEntry customEntry) -> customEntry.render(type, table, row, context);
                 }
             }
             if (!row.isEmpty()) {
@@ -113,7 +112,7 @@ public abstract class AttributeList extends Component {
             
             .attribute_list_span {
                 display: flex;
-                flex-wrap: flex;
+                flex-wrap: no-wrap;
                 align-items: center;
                 gap: 0.25rem;
             }
@@ -125,10 +124,15 @@ public abstract class AttributeList extends Component {
             """;
     }
 
+    @FunctionalInterface
+    protected interface CustomEntry {
+        void render(Type type, Element table, Element row, HtmlContext context);
+    }
+
     public sealed interface Entry {
         record Attribute(String name, int attributeID) implements Entry {}
         record AttributeSkipIfAbsent(String name, int attributeID) implements Entry {}
         record AttributeWithDefault(String name, int attributeID, double defaultValue) implements Entry {}
-        record Custom(BiConsumer<Element, HtmlContext> render) implements Entry {}
+        record Custom(CustomEntry entry) implements Entry {}
     }
 }

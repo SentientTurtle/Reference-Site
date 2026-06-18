@@ -180,6 +180,11 @@ public class TypePage extends Page implements HasPersistentUrl {
                 mid.content(new ShipFitting(type));
             }
 
+            // Has a jump drive
+            if (typeAttributes.getOrDefault(861, 0.0) > 0.0) {
+                mid.content(new ShipJumpDrive(type));
+            }
+
             if (typeAttributes.getOrDefault(37, 0.0) > 0 && categoryID != 18 && categoryID != 22) // Max velocity > 0 && not a drone or deployable
                 mid.content(new ShipPropulsion(type));
 

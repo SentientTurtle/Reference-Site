@@ -1,5 +1,7 @@
 package net.sentientturtle.nee.components;
 
+import net.sentientturtle.html.Element;
+import net.sentientturtle.html.context.HtmlContext;
 import net.sentientturtle.nee.data.Resource;
 import net.sentientturtle.nee.data.datatypes.Type;
 
@@ -17,28 +19,33 @@ public class ShipPropulsion extends AttributeList {
             type,
             new Entry[][]{{
                 new Entry.Attribute("Maximum Velocity", 37),
-                new Entry.Custom((tr, context) -> {
-                    Map<Integer, Double> attributes = context.sde.getTypeAttributes().get(type.typeID);
-                    Double inertia = attributes.get(70);
-                    if (inertia == null || attributes.getOrDefault(600, 0.0) == 0.0) return;
-
-                    // Game ticks will always round up
-                    // algebraically identical to the official one https://developers.eveonline.com/docs/guides/useful-formulae/ TODO: Copy this to eve-math project
-                    double alignTime = Math.ceil(inertia * (type.mass / 1_000_000.0) * -Math.log(0.25));
-
-                    tr.content(
-                        TD().content(
-                            SPAN("attribute_list_span").title("Align time").content(
-                                IMG(Resource.ofIconID(1401, context), null, 32).className("attribute_list_icon"),
-                                TEXT("Align time: "),
-                                context.sde.format_with_unit(alignTime, 3)
-                            )
-                        )
-                    );
-                }),
+                new Entry.Custom(new AlignTimeEntry()),
             }, {
                 new Entry.AttributeSkipIfAbsent("Warp Speed", 600)
             }}
         );
+    }
+
+    private static class AlignTimeEntry implements CustomEntry {
+        @Override
+        public void render(Type type, Element table, Element row, HtmlContext context) {
+            Map<Integer, Double> attributes = context.sde.getTypeAttributes().get(type.typeID);
+            Double inertia = attributes.get(70);
+            if (inertia == null || attributes.getOrDefault(600, 0.0) == 0.0) return;
+
+            // Game ticks will always round up
+            // algebraically identical to the official one https://developers.eveonline.com/docs/guides/useful-formulae/ TODO: Copy this to eve-math project
+            double alignTime = Math.ceil(inertia * (type.mass / 1_000_000.0) * -Math.log(0.25));
+
+            row.content(
+                TD().content(
+                    SPAN("attribute_list_span").content(
+                        IMG(Resource.ofIconID(1401, context), null, 32).className("attribute_list_icon"),
+                        TEXT("Align time: "),
+                        context.sde.format_with_unit(alignTime, 3)
+                    )
+                )
+            );
+        }
     }
 }

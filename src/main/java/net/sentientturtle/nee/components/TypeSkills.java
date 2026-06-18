@@ -28,6 +28,9 @@ public class TypeSkills extends Component {
     @Override
     protected HTML[] getContent(HtmlContext context) {
         Boolean omegaRequired = context.sde.getItemOmegaMap().get(type.typeID);
+        if (context.sde.getGroups().get(type.groupID).categoryID == 16) {
+            omegaRequired = null;   // Don't display prerequisite's Omega requirement for skills, as they have their own omega requirement
+        }
 
         Element list = DIV("type_skills_list font_text");
         fetchSkills(type.typeID, context.sde, list, 1);

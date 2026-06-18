@@ -430,20 +430,26 @@ public abstract class SDEData {
         }
 
         itemOmegaMap = produceMap();
-        // Add alpha skills
-        for (Integer skillTypeID : getAlphaSkills().keySet()) {
-            itemOmegaMap.putIfAbsent(skillTypeID, false);
+        Map<Integer, Integer> alphaSkills = getAlphaSkills();
+        for (Group group : categoryGroupMap.get(16)) {
+            for (Type skill : groupTypeMap.get(group.groupID)) {
+                if (alphaSkills.containsKey(skill.typeID)) {
+                    itemOmegaMap.putIfAbsent(skill.typeID, false);
+                } else {
+                    itemOmegaMap.putIfAbsent(skill.typeID, true);
+                }
+            }
         }
-        // Add anything that only requires the alpha skills
         for (Map.Entry<Integer, Map<Integer, Integer>> entry : requiredSkillMap.entrySet()) {
             int typeID = entry.getKey();
+            if (itemOmegaMap.containsKey(typeID)) continue; // Skip anything with omega set above (skills)
             boolean isOmega = false;
 
             for (Map.Entry<Integer, Integer> skillEntry : entry.getValue().entrySet()) {
                 int skill = skillEntry.getKey();
                 int level = skillEntry.getValue();
 
-                Integer alphaLevel = getAlphaSkills().get(skill);
+                Integer alphaLevel = alphaSkills.get(skill);
                 isOmega |= alphaLevel == null || alphaLevel < level;
             }
 
@@ -509,6 +515,10 @@ public abstract class SDEData {
 
         return HTML.SPAN("no_break")
             .content(switch (unitID) {
+                case -9:    // "Ships"
+                    yield HTML.TEXT(decimalFormat.format(value) + " Ships");
+                case -8:    // Units per LY
+                    yield HTML.TEXT(decimalFormat.format(value) + " units/LY");
                 case -7:    // Skill points, "SP"
                     yield HTML.TEXT(decimalFormat.format(value) + " SP");
                 case -6:    // TypeList

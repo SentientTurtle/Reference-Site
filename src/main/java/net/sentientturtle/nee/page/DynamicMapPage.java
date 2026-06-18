@@ -368,32 +368,32 @@ public class DynamicMapPage extends Page {
                 context.addFileDependency(Resource.OUTPUT_RES_FOLDER.resolve("map/brackets/" + bracketName), Resource.fromSharedCache("res:/ui/texture/shared/brackets/" + bracketName, context).getData());
             }
 
-            record CelestialJson(double x, double y, double z, String name, String bracket){}
-            for (SolarSystem solarSystem : context.sde.getSolarSystems().values()) {
-                Set<Celestial> celestials = context.sde.getSystemCelestials().getOrDefault(solarSystem.solarSystemID, Set.of());
-                ArrayList<CelestialJson> celestialPositions = new ArrayList<>(celestials.size() + 1);
-
-                if (solarSystem.sunTypeID != null) {
-                    celestialPositions.add(new CelestialJson(0.0, 0.0, 0.0, solarSystem.solarSystemName + " - Sun", "sun"));
-                }
-
-                for (Celestial celestial : celestials) {
-                    if (celestial.position != null) {
-                        // TODO: Remove (Integer) cast once primitive patterns leave preview.
-                        String bracketName = switch ((Integer) context.sde.getTypes().get(celestial.typeID).groupID) {
-                            case 6, 995 -> "sun";
-                            case 7 -> "planet";
-                            case 8 -> "moon";
-                            case 9 -> "asteroidbelt";
-                            case Integer group -> throw new IllegalStateException("Unknown celestial group: " + group);
-                        };
-
-                        celestialPositions.add(new CelestialJson(celestial.position.x(), celestial.position.y(), celestial.position.z(), celestial.itemName, bracketName));
-                    }
-                }
-                byte[] celestialBytes = objectMapper.writeValueAsBytes(celestialPositions);
-                context.addFileDependency(Resource.OUTPUT_RES_FOLDER.resolve("map/celestials/" + solarSystem.solarSystemID + ".json"), _ -> celestialBytes);
-            }
+//            record CelestialJson(double x, double y, double z, String name, String bracket){}
+//            for (SolarSystem solarSystem : context.sde.getSolarSystems().values()) {
+//                Set<Celestial> celestials = context.sde.getSystemCelestials().getOrDefault(solarSystem.solarSystemID, Set.of());
+//                ArrayList<CelestialJson> celestialPositions = new ArrayList<>(celestials.size() + 1);
+//
+//                if (solarSystem.sunTypeID != null) {
+//                    celestialPositions.add(new CelestialJson(0.0, 0.0, 0.0, solarSystem.solarSystemName + " - Sun", "sun"));
+//                }
+//
+//                for (Celestial celestial : celestials) {
+//                    if (celestial.position != null) {
+//                        // TODO: Remove (Integer) cast once primitive patterns leave preview.
+//                        String bracketName = switch ((Integer) context.sde.getTypes().get(celestial.typeID).groupID) {
+//                            case 6, 995 -> "sun";
+//                            case 7 -> "planet";
+//                            case 8 -> "moon";
+//                            case 9 -> "asteroidbelt";
+//                            case Integer group -> throw new IllegalStateException("Unknown celestial group: " + group);
+//                        };
+//
+//                        celestialPositions.add(new CelestialJson(celestial.position.x(), celestial.position.y(), celestial.position.z(), celestial.itemName, bracketName));
+//                    }
+//                }
+//                byte[] celestialBytes = objectMapper.writeValueAsBytes(celestialPositions);
+//                context.addFileDependency(Resource.OUTPUT_RES_FOLDER.resolve("map/celestials/" + solarSystem.solarSystemID + ".json"), _ -> celestialBytes);
+//            }
         } catch (IOException | URISyntaxException e) {
             ExceptionUtil.sneakyThrow(e);
         }
